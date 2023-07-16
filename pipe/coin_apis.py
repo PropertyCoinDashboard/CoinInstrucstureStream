@@ -8,8 +8,7 @@ class CoinFullRequest(ABC):
     """
     Subject:
         - 공통 목록 추상클래스 [개발 순서 및 혼동 방지]
-        - 가독성 측면 [유지보수성 관리]
-
+        - 가독성 측면 [유지보수성 관리] \n
     Args:
         - market : 거래소 이름
         - symbol_collect : 코인 심볼 뽑아낼때 쓰는 URL
@@ -23,11 +22,9 @@ class CoinFullRequest(ABC):
     def coinsymbol_extraction(self) -> list[str]:
         """
         Subject:
-            - 코인 심볼 추출
-
+            - 코인 심볼 추출 \n
         Input:
-            - market API 형식
-
+            - market API 형식 \n
         Returns:
             - list[str]: ["BTC", "ETH" ....]
         """
