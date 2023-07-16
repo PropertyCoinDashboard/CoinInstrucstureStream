@@ -161,3 +161,5 @@ cython_debug/
 
 pipe/urls.conf
 .vscode
+poetry.lock
+pyproject.toml
