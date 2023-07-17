@@ -44,9 +44,11 @@ class CoinFullRequest(ABC):
         pass
 
     def __upperletter__(self) -> str:
+        """대문자 변환"""
         return self.coin_name.upper()
 
     def __lowletter__(self) -> str:
+        """소문자 변환"""
         return self.coin_name.lower()
 
 
