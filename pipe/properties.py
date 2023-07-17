@@ -21,7 +21,9 @@ def header_to_json(url: str) -> Any:
     if response.status_code == 200:
         return response.json()
 
-    raise Exception(f"API Request에 실패하였습니다 status code --> {response.status_code}")
+    raise requests.exceptions.RequestException(
+        f"API Request에 실패하였습니다 status code --> {response.status_code}"
+    )
 
 
 # 반복 호출 줄이기 위해..
