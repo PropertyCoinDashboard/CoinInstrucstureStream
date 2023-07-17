@@ -42,7 +42,7 @@ class CoinFullRequest(ABC):
 
 
 class UpBitCoinFullRequest(CoinFullRequest):
-    def __init__(self, coin_name) -> None:
+    def __init__(self, coin_name: str) -> None:
         super().__init__(coin_name=coin_name, market="upbit")
         self.upbit_coin_list: list[dict[str, str]] = header_to_json(
             url=f"{self.url}/market/all?isDetails=true"
@@ -87,7 +87,7 @@ class UpBitCoinFullRequest(CoinFullRequest):
 
 
 class BithumbCoinFullRequest(CoinFullRequest):
-    def __init__(self, coin_name) -> None:
+    def __init__(self, coin_name: str) -> None:
         super().__init__(coin_name=coin_name, market="bithum")
         self.bithum_coin_list: dict[str, Any] = header_to_json(
             url=f"{self.url}/ticker/ALL_KRW"
@@ -137,7 +137,7 @@ class BithumbCoinFullRequest(CoinFullRequest):
 
 
 class KorbitCoinFullRequest(CoinFullRequest):
-    def __init__(self, coin_name) -> None:
+    def __init__(self, coin_name: str) -> None:
         super().__init__(coin_name=coin_name, market="korbit")
         self.korbit_coin_list: dict[str, dict[str, Any]] = header_to_json(
             url=f"{self.url}/ticker/detailed/all"

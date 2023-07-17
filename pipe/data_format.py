@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 
 
 @dataclass(frozen=True)
@@ -12,7 +12,7 @@ class CoinPrice:
     prev_closing_price: float
     high_price: float
     low_price: float
-    trade_volume: float
+    volumne_24: float
 
 
 @dataclass(frozen=True)
