@@ -11,6 +11,8 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_SERVERS: zoo1:2888:3888;zoo2:2888:3888;zoo3:2888:3888
+    networks:
+      - coin-network
 
   zoo2:
     image: confluentinc/cp-zookeeper:7.3.2
@@ -22,6 +24,8 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2182
       ZOOKEEPER_SERVER_ID: 2
       ZOOKEEPER_SERVERS: zoo1:2888:3888;zoo2:2888:3888;zoo3:2888:3888
+    networks:
+      - coin-network
 
   zoo3:
     image: confluentinc/cp-zookeeper:7.3.2
@@ -33,6 +37,8 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2183
       ZOOKEEPER_SERVER_ID: 3
       ZOOKEEPER_SERVERS: zoo1:2888:3888;zoo2:2888:3888;zoo3:2888:3888
+    networks:
+      - coin-network
 
   kafka1:
     image: confluentinc/cp-kafka:7.3.2
@@ -54,6 +60,8 @@ services:
       - zoo1
       - zoo2
       - zoo3
+    networks:
+      - coin-network
 
   kafka2:
     image: confluentinc/cp-kafka:7.3.2
@@ -75,6 +83,8 @@ services:
       - zoo1
       - zoo2
       - zoo3
+    networks:
+      - coin-network
 
   kafka3:
     image: confluentinc/cp-kafka:7.3.2
@@ -83,6 +93,7 @@ services:
     ports:
       - "9094:9094"
       - "29094:29094"
+
     environment:
       KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka3:19094,EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9094,DOCKER://host.docker.internal:29094
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,DOCKER:PLAINTEXT
@@ -96,17 +107,23 @@ services:
       - zoo1
       - zoo2
       - zoo3
-  
+    networks:
+      - coin-network
+
   postgresql:
     extends:
       service: postgresql
       file: conduktor.yml
-  
+    networks:
+      - coin-network
+
   conduktor:
     extends:
       service: conduktor-platform
       file: conduktor.yml
-  
+    networks:
+      - coin-network
+      
 volumes:
   pg_data: {}
   conduktor_data: {}

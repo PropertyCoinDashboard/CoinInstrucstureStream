@@ -1,0 +1,38 @@
+version: "3"
+
+services:
+  sql:
+    container_name: coin-sql
+    image: mysql
+    ports:
+      - "3307:3306"
+    env_file:
+      - ./.env
+    environment:
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_USERNAME=${DB_USERNAME}
+      - TZ=Asia/Seoul
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --collation-server=utf8mb4_unicode_ci
+      - --character-set-server=utf8mb4
+      - --lower_case_table_names=1
+    volumes:
+      - .sqlVolume:/var/lib/mysql
+    # networks:
+    #   - coin-network
+
+  coin_fastapi:
+    image: fastapi
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8084 --reload
+    ports:
+      - 8084:8084
+    volumes:
+      - ./apps:/code/app  
+    # networks:
+    #   - coin-network
+    
