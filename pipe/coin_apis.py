@@ -14,7 +14,7 @@ class CoinFullRequest(ABC):
         - symbol_collect : 코인 심볼 뽑아낼때 쓰는 URL
     """
 
-    def __init__(self, market: str, coin_name: str | None) -> None:
+    def __init__(self, market: str, coin_name: str) -> None:
         self.coin_name = coin_name
         self.url: str = get_symbol_collect_url(market)
 

@@ -11,8 +11,8 @@ from typing import *
 """
 임시로 작성함 
 리팩토링 필수 (pydantic morden architecture 로 변경 완료) (O)
-1. 동시성 + 비동기 
-2. 중복되는 메서드 줄이기 
+1. 동시성 + 비동기  -> 진행하기
+2. 중복되는 메서드 줄이기  (O)
 3. 과도한 책임 줄이기
 """
 
@@ -20,9 +20,9 @@ from typing import *
 def coin_present_architecture(
     market: str,
     coin_symbol: str,
-    api: (dict[str, Any] | CoinFullRequest),
-    parameter: tuple[str],
-) -> "CoinMarketData":
+    api: Any,
+    parameter: tuple[str, str, str, str, str, str],
+) -> str:
     """coin_present_price 정형화
 
     Args:
@@ -35,14 +35,14 @@ def coin_present_architecture(
         CoinMarketData: pydantic in JSON transformation
     """
 
-    api: dict[str, Any] = api(coin_name=coin_symbol.upper()).get_coin_present_price()
+    api = api(coin_name=coin_symbol.upper()).get_coin_present_price()
 
     return CoinMarketData.from_api(
         market=market, coin_symbol=coin_symbol, api=api, parameter=parameter
     ).model_dump_json(indent=4)
 
 
-def upbit_present(coin_name: str) -> "CoinMarketData":
+def upbit_present(coin_name: str) -> str:
     parameter = (
         "trade_timestamp",
         "opening_price",
@@ -60,7 +60,7 @@ def upbit_present(coin_name: str) -> "CoinMarketData":
     )
 
 
-def bithum_present(coin_name: str) -> "CoinMarketData":
+def bithum_present(coin_name: str) -> str:
     parameter = (
         "date",
         "opening_price",
@@ -78,7 +78,7 @@ def bithum_present(coin_name: str) -> "CoinMarketData":
     )
 
 
-def korbit_present(coin_name: str) -> "CoinMarketData":
+def korbit_present(coin_name: str) -> str:
     parameter = ("timestamp", "open", "high", "low", "last", "volume")
 
     return coin_present_architecture(

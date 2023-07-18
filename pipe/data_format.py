@@ -42,15 +42,8 @@ class CoinMarketData(BaseModel):
         market: str,
         coin_symbol: str,
         api: Mapping[str, Any],
-        parameter: tuple[str],
+        parameter: tuple[str, str, str, str, str, str],
     ) -> "CoinMarketData":
-        price_data: dict[str, float] = {
-            parameter[0]: int(api[parameter[0]]),
-            parameter[1]: float(api[parameter[1]]),
-            parameter[2]: float(api[parameter[2]]),
-            parameter[3]: float(api[parameter[3]]),
-            parameter[4]: float(api[parameter[4]]),
-            parameter[5]: float(api[parameter[5]]),
-        }
+        price_data: dict[str, Any] = {key: api[key] for key in parameter}
 
         return cls(market=market, coin_symbol=coin_symbol, parameter=price_data)
