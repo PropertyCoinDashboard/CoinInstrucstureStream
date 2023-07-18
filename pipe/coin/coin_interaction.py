@@ -14,7 +14,7 @@ from typing import Any, Coroutine
 import asyncio
 from asyncio.exceptions import TimeoutError
 from concurrent.futures import ThreadPoolExecutor
-from concurrent.futures._base import Error as ThreadToolError
+from concurrent.futures._base import Error as ThreadPoolError
 
 
 logging = log()
@@ -125,7 +125,7 @@ class CoinPresentPriceMarketPlace:
                 ).model_dump_json()
 
                 return schema
-        except (ThreadToolError, TimeoutError) as e:
+        except (ThreadPoolError, TimeoutError) as e:
             logging.error(f"에러가 일어났습니다 --> \n{e}\n")
 
 
