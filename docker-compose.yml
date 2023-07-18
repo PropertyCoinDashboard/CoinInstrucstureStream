@@ -19,7 +19,7 @@ services:
       - --character-set-server=utf8mb4
       - --lower_case_table_names=1
     volumes:
-      - .sqlVolume:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
     # networks:
     #   - coin-network
 
@@ -36,3 +36,5 @@ services:
     # networks:
     #   - coin-network
     
+volumes:
+  mysql_data: {}
