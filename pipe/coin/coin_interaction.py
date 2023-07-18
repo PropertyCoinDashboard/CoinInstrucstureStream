@@ -16,13 +16,6 @@ from asyncio.exceptions import TimeoutError
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures._base import Error as ThreadToolError
 
-"""
-임시로 작성함 
-리팩토링 필수 (pydantic morden architecture 로 변경 완료) (O)
-1. 동시성 + 비동기  -> 진행하기 (O)
-2. 중복되는 메서드 줄이기  (O)
-3. 과도한 책임 줄이기
-"""
 
 logging = log()
 
