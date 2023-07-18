@@ -1,10 +1,8 @@
 from pydantic import BaseModel
-from dataclasses import dataclass
 from typing import Mapping, Any
 
 
-@dataclass(frozen=True)
-class CoinSymbol:
+class CoinSymbol(BaseModel):
     coin_symbol: str
 
 

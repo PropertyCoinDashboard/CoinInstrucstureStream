@@ -9,7 +9,7 @@ from typing import *
 
 """
 임시로 작성함 
-리팩토링 필수 
+리팩토링 필수 (pydantic morden architecture 로 변경 완료)
 1. 동시성 + 비동기 
 2. 중복되는 메서드 줄이기 
 3. 과도한 책임 줄이기
@@ -24,7 +24,7 @@ def coin_present_architecture(
     )
 
 
-def upbit_present(coin_name: str) -> dict[str, Any]:
+def upbit_present(coin_name: str) -> str:
     upbit_present: dict[str, Any] = UpBitCoinFullRequest(
         coin_name=coin_name
     ).get_coin_present_price()
@@ -41,7 +41,7 @@ def upbit_present(coin_name: str) -> dict[str, Any]:
             "prev_closing_price",
             "acc_trade_volume_24h",
         ),
-    )
+    ).model_dump_json(indent=4)
 
 
 def bithum_present(coin_name: str) -> dict[str, Any]:
@@ -81,9 +81,9 @@ def korbit_present(coin_name: str) -> dict[str, Any]:
 if __name__ == "__main__":
     coin_name = "BTC"
     a = upbit_present(coin_name)
-    b = bithum_present(coin_name)
-    c = korbit_present(coin_name)
+    # b = bithum_present(coin_name)
+    # c = korbit_present(coin_name)
 
     print(a)
-    print(b)
-    print(c)
+    # print(b)
+    # print(c)
