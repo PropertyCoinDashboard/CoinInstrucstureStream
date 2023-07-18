@@ -1,4 +1,6 @@
-from dataclasses import dataclass, asdict
+from pydantic import BaseModel
+from dataclasses import dataclass
+from typing import Mapping, Any
 
 
 @dataclass(frozen=True)
@@ -6,18 +8,27 @@ class CoinSymbol:
     coin_symbol: str
 
 
-@dataclass(frozen=True)
-class CoinPrice:
-    opening_price: float
-    prev_closing_price: float
-    high_price: float
-    low_price: float
-    volumne_24: float
-
-
-@dataclass(frozen=True)
-class CoinMarketData:
+class CoinMarketData(BaseModel):
     market: str
     time: int
     coin_symbol: str
-    data: CoinPrice
+    data: dict[str, Any]
+
+    @classmethod
+    def from_api(
+        cls,
+        market: str,
+        time: int,
+        coin_symbol: str,
+        api: Mapping[str, Any],
+        data: tuple[str],
+    ) -> "CoinMarketData":
+        price_data: dict[str, float] = {
+            data[0]: float(api[data[0]]),
+            data[1]: float(api[data[1]]),
+            data[2]: float(api[data[2]]),
+            data[3]: float(api[data[3]]),
+            data[4]: float(api[data[4]]),
+        }
+
+        return cls(market=market, time=time, coin_symbol=coin_symbol, data=price_data)
