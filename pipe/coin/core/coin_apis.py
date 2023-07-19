@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from typing import Any
 
-from schema.data_format import CoinSymbol
+from data_format import CoinSymbol
 from setting.util_func import header_to_json, get_symbol_collect_url
 
 
