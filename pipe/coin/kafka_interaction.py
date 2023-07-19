@@ -2,7 +2,7 @@ from typing import Any
 
 # from setting.create_log import log
 
-from confluent_kafka import Producer, KafkaError, KafkaException
+from confluent_kafka import Producer, KafkaException
 import json
 
 # logging = log()

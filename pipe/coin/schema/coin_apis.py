@@ -1,10 +1,11 @@
-from typing import Any
 from abc import ABCMeta, abstractmethod
+from typing import Any
+
 from schema.data_format import CoinSymbol
-from setting.properties import get_symbol_collect_url, header_to_json
+from setting.util_func import header_to_json, get_symbol_collect_url
 
 
-class CoinFullRequest(metaclass=ABCMeta):
+class __CoinFullRequest(metaclass=ABCMeta):
     """
     Subject:
         - 공통 목록 추상클래스 [개발 순서 및 혼동 방지]
@@ -44,7 +45,7 @@ class CoinFullRequest(metaclass=ABCMeta):
         raise NotImplementedError()
 
 
-class UpBitCoinFullRequest(CoinFullRequest):
+class UpBitCoinFullRequest(__CoinFullRequest):
     def __init__(self, coin_name: str) -> None:
         super().__init__(coin_name=coin_name, market="upbit")
         self.upbit_coin_list: list[dict[str, str]] = header_to_json(
@@ -89,7 +90,7 @@ class UpBitCoinFullRequest(CoinFullRequest):
         return self.upbit_coin_present_price[0]
 
 
-class BithumbCoinFullRequest(CoinFullRequest):
+class BithumbCoinFullRequest(__CoinFullRequest):
     def __init__(self, coin_name: str) -> None:
         super().__init__(coin_name=coin_name, market="bithum")
         self.bithum_coin_list: dict[str, Any] = header_to_json(
@@ -139,7 +140,7 @@ class BithumbCoinFullRequest(CoinFullRequest):
         return self.bithum_present_price["data"]
 
 
-class KorbitCoinFullRequest(CoinFullRequest):
+class KorbitCoinFullRequest(__CoinFullRequest):
     def __init__(self, coin_name: str) -> None:
         super().__init__(coin_name=coin_name, market="korbit")
         self.korbit_coin_list: dict[str, dict[str, Any]] = header_to_json(
