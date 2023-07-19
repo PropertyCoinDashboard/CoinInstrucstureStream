@@ -35,9 +35,9 @@ class CoinMarket(BaseModel):
         }
     """
 
-    upbit: str
-    bithum: str
-    korbit: str
+    upbit: dict[str, Any]
+    bithum: dict[str, Any]
+    korbit: dict[str, Any]
 
 
 class CoinMarketData(BaseModel):

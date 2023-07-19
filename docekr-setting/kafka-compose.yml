@@ -11,8 +11,8 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_SERVERS: zoo1:2888:3888;zoo2:2888:3888;zoo3:2888:3888
-    networks:
-      - coin-network
+    # networks:
+      # - coin-network
 
   zoo2:
     image: confluentinc/cp-zookeeper:7.3.2
@@ -24,8 +24,8 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2182
       ZOOKEEPER_SERVER_ID: 2
       ZOOKEEPER_SERVERS: zoo1:2888:3888;zoo2:2888:3888;zoo3:2888:3888
-    networks:
-      - coin-network
+    # networks:
+      # - coin-network
 
   zoo3:
     image: confluentinc/cp-zookeeper:7.3.2
@@ -37,8 +37,8 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2183
       ZOOKEEPER_SERVER_ID: 3
       ZOOKEEPER_SERVERS: zoo1:2888:3888;zoo2:2888:3888;zoo3:2888:3888
-    networks:
-      - coin-network
+    # networks:
+      # - coin-network
 
   kafka1:
     image: confluentinc/cp-kafka:7.3.2
@@ -60,8 +60,8 @@ services:
       - zoo1
       - zoo2
       - zoo3
-    networks:
-      - coin-network
+    # networks:
+      # - coin-network
 
   kafka2:
     image: confluentinc/cp-kafka:7.3.2
@@ -83,8 +83,8 @@ services:
       - zoo1
       - zoo2
       - zoo3
-    networks:
-      - coin-network
+    # networks:
+      # - coin-network
 
   kafka3:
     image: confluentinc/cp-kafka:7.3.2
@@ -107,22 +107,22 @@ services:
       - zoo1
       - zoo2
       - zoo3
-    networks:
-      - coin-network
+    # networks:
+      # - coin-network
 
   postgresql:
     extends:
       service: postgresql
       file: conduktor.yml
-    networks:
-      - coin-network
+    # networks:
+      # - coin-network
 
   conduktor:
     extends:
       service: conduktor-platform
       file: conduktor.yml
-    networks:
-      - coin-network
+    # networks:
+      # - coin-network
       
 volumes:
   pg_data: {}

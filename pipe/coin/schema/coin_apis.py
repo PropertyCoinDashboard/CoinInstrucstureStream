@@ -1,10 +1,10 @@
 from typing import Any
-from abc import ABC, abstractmethod
-from settings.data_format import CoinSymbol
-from settings.properties import get_symbol_collect_url, header_to_json
+from abc import ABCMeta, abstractmethod
+from schema.data_format import CoinSymbol
+from setting.properties import get_symbol_collect_url, header_to_json
 
 
-class CoinFullRequest(ABC):
+class CoinFullRequest(metaclass=ABCMeta):
     """
     Subject:
         - 공통 목록 추상클래스 [개발 순서 및 혼동 방지]
@@ -12,6 +12,9 @@ class CoinFullRequest(ABC):
     Args:
         - market : 거래소 이름
         - symbol_collect : 코인 심볼 뽑아낼때 쓰는 URL
+    Function:
+        - get_coinsymbol_extraction
+        - get_coin_present_price
     """
 
     def __init__(self, market: str, coin_name: str) -> None:
@@ -28,7 +31,7 @@ class CoinFullRequest(ABC):
         Returns:
             - list[str]: ["BTC", "ETH" ....]
         """
-        pass
+        raise NotImplementedError()
 
     @abstractmethod
     def get_coin_present_price(self) -> dict[str, Any]:
@@ -38,7 +41,7 @@ class CoinFullRequest(ABC):
         Returns:
             - market 형식
         """
-        pass
+        raise NotImplementedError()
 
 
 class UpBitCoinFullRequest(CoinFullRequest):

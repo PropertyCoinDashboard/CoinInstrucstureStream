@@ -3,7 +3,7 @@ import logging
 
 def log():
     # 로그 생성
-    logger = logging.getLogger()
+    logger = logging.getLogger(__name__)
 
     # 로그의 출력 기준 설정
     logger.setLevel(logging.INFO)
@@ -18,8 +18,8 @@ def log():
     stream_handler.setFormatter(formatter)
     logger.addHandler(stream_handler)
 
-    # log 를 파일에 출력
-    file_handler = logging.FileHandler(filename="coin_data.log")
+    # log를 파일에 출력
+    file_handler = logging.FileHandler(filename="log/coin.log")
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
 

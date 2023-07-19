@@ -2,22 +2,22 @@ import tracemalloc
 
 tracemalloc.start()
 
-from coin_apis import (
+from schema.coin_apis import (
     UpBitCoinFullRequest,
     BithumbCoinFullRequest,
     KorbitCoinFullRequest,
 )
-from settings.data_format import CoinMarketData, CoinMarket
-from settings.create_log import log
+from kafka_interaction import produce_sending
+from schema.data_format import CoinMarketData, CoinMarket
 from typing import Any, Coroutine
-
+from setting.create_log import log
 import asyncio
 from asyncio.exceptions import TimeoutError
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures._base import Error as ThreadPoolError
 
 
-logging = log()
+logger = log()
 
 
 async def coin_present_architecture(
@@ -48,7 +48,7 @@ async def coin_present_architecture(
         time=market_time,
         api=api_response,
         parameter=parameter,
-    ).model_dump_json(indent=4)
+    ).model_dump()
 
 
 class CoinPresentPriceMarketPlace:
@@ -108,7 +108,7 @@ class CoinPresentPriceMarketPlace:
         )
 
     @classmethod
-    async def total_full_request(cls, coin_symbol: str) -> str:
+    async def total_full_request(cls, coin_symbol: str) -> None:
         try:
             with ThreadPoolExecutor(max_workers=3) as executer:
                 tasks: list[Coroutine[Any, Any, dict[str, Any]]] = [
@@ -122,15 +122,8 @@ class CoinPresentPriceMarketPlace:
                 )
                 schema = CoinMarket(
                     upbit=upbit, bithum=bithumb, korbit=korbit
-                ).model_dump_json()
-
-                return schema
+                ).model_dump_json(indent=4)
+                logger.info(f"데이터 전송 --> \n{schema}\n")
+                produce_sending(topic="test", message=schema)
         except (ThreadPoolError, TimeoutError) as e:
-            logging.error(f"에러가 일어났습니다 --> \n{e}\n")
-
-
-def start():
-    return CoinPresentPriceMarketPlace().total_full_request("BTC")
-
-
-asyncio.run(start())
+            logger.error(f"에러가 일어났습니다 --> \n{e}\n")
