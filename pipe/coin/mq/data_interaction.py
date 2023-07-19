@@ -1,24 +1,28 @@
+"""
+KAFAK PRODUCE 
+"""
+
 from typing import Any
-
-# from setting.create_log import log
-
-from confluent_kafka import Producer, KafkaException
 import json
 
+# from setting.create_log import log
+from confluent_kafka import Producer, KafkaException
+
+
 # logging = log()
-
-
 def produce_sending(topic: Any, message: json) -> None:
-    # broker
+    """
+    kafka produce
+    """
     config: dict[str, str] = {
         "bootstrap.servers": "kafka1:9092, kafka2:9093, kafka3:9094"
     }
 
     def delivery_report(err, msg) -> None:
         if err is not None:
-            print("Message delivery failed: {}".format(err))
+            print(f"Message delivery failed: {err}")
         else:
-            print("Message delivered to {} [{}]".format(msg.topic(), msg.partition()))
+            print(f"Message delivered to {msg.topic()} [{msg.partition()}]")
 
     produce = Producer(config)
 
@@ -26,7 +30,7 @@ def produce_sending(topic: Any, message: json) -> None:
         produce.produce(
             topic, value=json.dumps(message).encode("utf-8"), callback=delivery_report
         )
-    except KafkaException as e:
-        print(e)
+    except KafkaException as error:
+        print("kafka error : %s ", error)
     finally:
         produce.flush()
