@@ -14,9 +14,7 @@ from schema.coin_apis import (
 )
 
 import asyncio
-from asyncio.exceptions import TimeoutError
-from concurrent.futures import ThreadPoolExecutor
-from concurrent.futures._base import Error as ThreadPoolError
+from asyncio.exceptions import TimeoutError, CancelledError
 
 
 logger = log()
@@ -70,17 +68,19 @@ async def coin_present_architecture(
     Returns:
         - CoinMarketData: pydantic in JSON transformation
     """
+    try:
+        api_response = api(coin_name=coin_symbol.upper()).get_coin_present_price()
+        market_time = api_response[time]
 
-    api_response = api(coin_name=coin_symbol.upper()).get_coin_present_price()
-    market_time = api_response[time]
-
-    return CoinMarketData.from_api(
-        market=market,
-        coin_symbol=coin_symbol,
-        time=market_time,
-        api=api_response,
-        parameter=parameter,
-    ).model_dump()
+        return CoinMarketData.from_api(
+            market=market,
+            coin_symbol=coin_symbol,
+            time=market_time,
+            api=api_response,
+            parameter=parameter,
+        ).model_dump()
+    except Exception as e:
+        logger.error(f"{e}")
 
 
 class CoinPresentPriceMarketPlace:
@@ -104,21 +104,20 @@ class CoinPresentPriceMarketPlace:
 
     @classmethod
     async def total_full_request(cls, coin_symbol: str) -> None:
-        try:
-            with ThreadPoolExecutor(max_workers=3) as executer:
-                tasks: list[Coroutine[Any, Any, dict[str, Any]]] = [
-                    cls.get_market_present_price(market=market, coin_symbol=coin_symbol)
-                    for market in MARKET
-                ]
+        while True:
+            await asyncio.sleep(1)
+            tasks: list[Coroutine[Any, Any, dict[str, Any]]] = [
+                cls.get_market_present_price(market=market, coin_symbol=coin_symbol)
+                for market in MARKET
+            ]
+            market_result = await asyncio.gather(*tasks, return_exceptions=True)
 
-                market_result = await asyncio.gather(*tasks, return_exceptions=True)
-                schema = CoinMarket(
-                    **{
-                        market: result
-                        for market, result in zip(MARKET.keys(), market_result)
-                    }
-                ).model_dump_json(indent=4)
-                logger.info(f"데이터 전송 --> \n{schema}\n")
-                produce_sending(topic="test", message=schema)
-        except (ThreadPoolError, TimeoutError) as e:
-            logger.error(f"에러가 일어났습니다 --> \n{e}\n")
+            schema = CoinMarket(
+                **{
+                    market: result
+                    for market, result in zip(MARKET.keys(), market_result)
+                    if result is not None
+                }
+            ).model_dump_json(indent=4)
+            logger.info(f"데이터 전송 --> \n{schema}\n")
+            produce_sending(topic="test", message=schema)

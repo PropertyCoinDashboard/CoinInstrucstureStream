@@ -3,15 +3,11 @@ import asyncio
 
 
 async def btc_present_start():
-    while True:
-        await CoinPresentPriceMarketPlace.total_full_request("BTC")
-        await asyncio.sleep(1)
+    await CoinPresentPriceMarketPlace.total_full_request("BTC")
 
 
 async def eth_present_start():
-    while True:
-        await CoinPresentPriceMarketPlace.total_full_request("ETC")
-        await asyncio.sleep(1)
+    await CoinPresentPriceMarketPlace.total_full_request("ETC")
 
 
 async def be_present_gether():
