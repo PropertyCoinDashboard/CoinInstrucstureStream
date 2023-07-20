@@ -5,8 +5,13 @@
 import asyncio
 
 from coin.core.coin_interaction import CoinPresentPriceMarketPlace
-from coin.core.config.properties import BTC_TOPIC_NAME, ETH_TOPIC_NAME
 from coin.core.data_mq.data_admin import new_topic_initalization
+from coin.core.config.properties import (
+    BTC_TOPIC_NAME,
+    ETH_TOPIC_NAME,
+    BTC_AVERAGE_TOPIC_NAME,
+    ETH_AVERAGE_TOPIC_NAME,
+)
 
 
 async def btc_present_start() -> None:
@@ -38,9 +43,14 @@ async def data_sending_start() -> None:
     """
     Topic create
     """
-    topic = [BTC_TOPIC_NAME, ETH_TOPIC_NAME]
-    partition = [2, 2]
-    replication = [2, 2]
+    topic = [
+        BTC_TOPIC_NAME,
+        ETH_TOPIC_NAME,
+        ETH_AVERAGE_TOPIC_NAME,
+        BTC_AVERAGE_TOPIC_NAME,
+    ]
+    partition = [2, 2, 2, 2]
+    replication = [2, 2, 2, 2]
 
     new_topic_initalization(
         topic=topic, partition=partition, replication_factor=replication
