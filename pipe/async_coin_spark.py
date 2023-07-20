@@ -14,10 +14,10 @@ from coin.core.config.properties import (
 def spark_in_start() -> None:
     with ThreadPoolExecutor(max_workers=3) as executor:
         executor.submit(
-            run_spark_streaming("BTC", BTC_TOPIC_NAME, BTC_AVERAGE_TOPIC_NAME)
+            run_spark_streaming, "BTC", BTC_TOPIC_NAME, BTC_AVERAGE_TOPIC_NAME
         )
         executor.submit(
-            run_spark_streaming("ETH", ETH_TOPIC_NAME, ETH_AVERAGE_TOPIC_NAME)
+            run_spark_streaming, "ETH", ETH_TOPIC_NAME, ETH_AVERAGE_TOPIC_NAME
         )
 
 

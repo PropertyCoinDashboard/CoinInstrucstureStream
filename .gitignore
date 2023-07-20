@@ -164,4 +164,4 @@ pipe/coin/urls.conf
 poetry.lock
 pyproject.toml
 kafka-docker/kafka/
-kafka-docker/zoopeeker/
+kafka-docker/zookeeper/
