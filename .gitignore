@@ -163,3 +163,5 @@ pipe/coin/urls.conf
 .vscode
 poetry.lock
 pyproject.toml
+kafka-docker/kafka/
+kafka-docker/zoopeeker/
