@@ -80,6 +80,7 @@ def run_spark_streaming(name: str, topics: str, retrieve_topic: str) -> None:
             "value.serializer",
             "org.apache.kafka.common.serialization.ByteArraySerializer",
         )
+        .foreach(print)
         .start()
     )
 
