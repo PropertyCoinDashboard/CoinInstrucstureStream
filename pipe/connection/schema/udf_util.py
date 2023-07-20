@@ -8,9 +8,9 @@ from typing import Any
 import datetime
 
 
-def get_utc_time() -> float:
+def get_utc_time() -> int:
     utc_now = datetime.datetime.utcnow()
-    return utc_now.timestamp()
+    return int(utc_now.timestamp())
 
 
 @dataclass

@@ -57,7 +57,7 @@ average_schema = StructType(
     StructType(
         [
             StructField("name", StringType()),
-            StructField("time", DoubleType()),
+            StructField("time", LongType()),
             StructField("data", data_schema),
         ]
     ),
