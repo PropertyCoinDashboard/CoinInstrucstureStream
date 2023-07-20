@@ -20,7 +20,7 @@ async def eth_present_start() -> None:
     """
     ethereum kafak stream
     """
-    await CoinPresentPriceMarketPlace.total_full_request("ETC", ETH_TOPIC_NAME)
+    await CoinPresentPriceMarketPlace.total_full_request("ETH", ETH_TOPIC_NAME)
 
 
 async def be_present_gether() -> None:
@@ -34,7 +34,7 @@ async def be_present_gether() -> None:
     await asyncio.gather(*tasks, return_exceptions=True)
 
 
-async def start() -> None:
+async def data_sending_start() -> None:
     """
     Topic create
     """
@@ -50,4 +50,5 @@ async def start() -> None:
     await be_present_gether()
 
 
-asyncio.run(start())
+if __name__ == "__main__":
+    asyncio.run(data_sending_start())
