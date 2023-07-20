@@ -66,7 +66,7 @@ class CoinMarketData(BaseModel):
     market: str
     time: int
     coin_symbol: str
-    parameter: dict[str, Any]
+    data: dict[str, Any]
 
     @classmethod
     def from_api(
@@ -95,12 +95,16 @@ class CoinMarketData(BaseModel):
             time (int): 거래 시간
             coin_symbol (str): 심볼
             api (Mapping[str, Any]): 거래소 API
-            parameter (tuple[str, str, str, str, str]): 사용할 파라미터 \n
+            data (tuple[str, str, str, str, str]): 사용할 파라미터 \n
         Returns:
             CoinMarketData: _description_
         """
-        price_data: dict[str, float] = {key: api[key] for key in data}
+        price_data: dict[str, float] = {
+            "opening_price": float(api[data[0]]),
+            "max_price": float(api[data[1]]),
+            "min_price": float(api[data[2]]),
+            "prev_closing_price": float(api[data[3]]),
+            "acc_trade_volume_24h": float(api[data[4]]),
+        }
 
-        return cls(
-            market=market, time=time, coin_symbol=coin_symbol, parameter=price_data
-        )
+        return cls(market=market, time=time, coin_symbol=coin_symbol, data=price_data)

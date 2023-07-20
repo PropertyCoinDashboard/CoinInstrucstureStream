@@ -1,5 +1,4 @@
 """
-
 Coin async present price kafka data streaming 
 """
 import asyncio
@@ -17,9 +16,9 @@ from coin.core.coin_apis import (
     KorbitCoinFullRequest,
 )
 
-from .config.create_log import log
-from .config.properties import market_setting
-from .data_mq.data_interaction import produce_sending
+from coin.core.config.create_log import log
+from coin.core.config.properties import market_setting
+from coin.core.data_mq.data_interaction import produce_sending
 
 
 # 기본 정보
@@ -56,7 +55,6 @@ async def coin_present_architecture(
     try:
         api_response = api(coin_name=coin_symbol.upper()).get_coin_present_price()
         market_time = api_response[time]
-
         return CoinMarketData.from_api(
             market=market,
             coin_symbol=coin_symbol,
@@ -110,6 +108,7 @@ class CoinPresentPriceMarketPlace:
                     cls.get_market_present_price(market=market, coin_symbol=coin_symbol)
                     for market in market_env
                 ]
+
                 market_result = await asyncio.gather(*tasks, return_exceptions=True)
                 schema: str = CoinMarket(
                     **{
@@ -118,6 +117,7 @@ class CoinPresentPriceMarketPlace:
                         if result is not None
                     }
                 ).model_dump_json(indent=4)
+
                 produce_sending(topic_name, message=schema)
             except (TimeoutError, CancelledError) as error:
                 logger.error("Data transmission failed: %s", error)
