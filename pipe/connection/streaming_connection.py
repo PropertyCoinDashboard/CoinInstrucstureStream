@@ -21,6 +21,13 @@ spark = (
 
 
 def stream_injection(topic: str) -> "DataFrame":
+    """spark streaming multithreading
+
+    Args:
+        - topic (str): topic \n
+    Returns:
+        - DataFrame: query
+    """
     average_udf = udf(streaming_preprocessing, average_schema)
 
     stream_df = (
@@ -56,6 +63,13 @@ def stream_injection(topic: str) -> "DataFrame":
 
 
 def run_spark_streaming(name: str, topics: str, retrieve_topic: str) -> None:
+    """KAFKA interaction TOPIC Sending data
+
+    Args:
+        name (str): coin_symbol
+        topics (str): topic
+        retrieve_topic (str): retrieve_topic
+    """
     data_df = stream_injection(topic=topics)
     query = (
         data_df.writeStream.format("kafka")
