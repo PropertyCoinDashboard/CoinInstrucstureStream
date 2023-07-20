@@ -1,11 +1,11 @@
 """
-코인 추상화
+코인 정보 추상화
 """
-
-from abc import ABCMeta, abstractmethod
 from typing import Any
-from setting.util_func import header_to_json, get_symbol_collect_url
-from .data_format import CoinSymbol
+from abc import ABCMeta, abstractmethod
+
+from coin.core.config.util_func import get_symbol_collect_url, header_to_json
+from coin.core.data_format import CoinSymbol
 
 
 class CoinFullRequest(metaclass=ABCMeta):
@@ -15,10 +15,12 @@ class CoinFullRequest(metaclass=ABCMeta):
         - 가독성 측면 [유지보수성 관리] \n
     Args:
         - market : 거래소 이름
-        - symbol_collect : 코인 심볼 뽑아낼때 쓰는 URL
+        - symbol_collect : 코인 심볼 뽑아낼때 쓰는 URL \n
     Function:
         - get_coinsymbol_extraction
+            - 코인 심볼 반환
         - get_coin_present_price
+            - 각 코인별 가격 반환
     """
 
     def __init__(self, market: str, coin_name: str) -> None:
@@ -52,15 +54,15 @@ class UpBitCoinFullRequest(CoinFullRequest):
     """UPBIT
 
     Args:
-        __CoinFullRequest (_type_): abstruct class
+        CoinFullRequest (_type_): abstruct class
     """
 
     def __init__(self, coin_name: str) -> None:
         super().__init__(coin_name=coin_name, market="upbit")
-        self.upbit_coin_list: list[dict[str, str]] = header_to_json(
+        self.__upbit_coin_list: list[dict[str, str]] = header_to_json(
             url=f"{self.url}/market/all?isDetails=true"
         )
-        self.upbit_coin_present_price = header_to_json(
+        self.__upbit_coin_present_price = header_to_json(
             url=f"{self.url}/ticker?markets=KRW-{self.coin_name.upper()}"
         )
 
@@ -80,7 +82,7 @@ class UpBitCoinFullRequest(CoinFullRequest):
         """
         return [
             CoinSymbol(coin_symbol=symbol["market"].split("-")[-1]).coin_symbol
-            for symbol in self.upbit_coin_list
+            for symbol in self.__upbit_coin_list
             if symbol["market"].startswith("KRW-")
         ]
 
@@ -96,14 +98,14 @@ class UpBitCoinFullRequest(CoinFullRequest):
                 ...
             }
         """
-        return self.upbit_coin_present_price[0]
+        return self.__upbit_coin_present_price[0]
 
 
 class BithumbCoinFullRequest(CoinFullRequest):
-    """UPBIT
+    """Bithumb
 
     Args:
-        __CoinFullRequest (_type_): abstruct class
+        CoinFullRequest (_type_): abstruct class
     """
 
     def __init__(self, coin_name: str) -> None:
@@ -156,18 +158,18 @@ class BithumbCoinFullRequest(CoinFullRequest):
 
 
 class KorbitCoinFullRequest(CoinFullRequest):
-    """UPBIT
+    """Korbit
 
     Args:
-        __CoinFullRequest (_type_): abstruct class
+        CoinFullRequest (_type_): abstruct class
     """
 
     def __init__(self, coin_name: str) -> None:
         super().__init__(coin_name=coin_name, market="korbit")
-        self.korbit_coin_list: dict[str, dict[str, Any]] = header_to_json(
+        self.__korbit_coin_list: dict[str, dict[str, Any]] = header_to_json(
             url=f"{self.url}/ticker/detailed/all"
         )
-        self.korbit_present_price = header_to_json(
+        self.__korbit_present_price = header_to_json(
             f"{self.url}/ticker/detailed?currency_pair={self.coin_name.lower()}_krw"
         )
 
@@ -189,7 +191,7 @@ class KorbitCoinFullRequest(CoinFullRequest):
         """
         return [
             CoinSymbol(coin_symbol=symbol.split("_")[0].upper()).coin_symbol
-            for symbol in self.korbit_coin_list
+            for symbol in self.__korbit_coin_list
         ]
 
     def get_coin_present_price(self) -> dict[str, Any]:
@@ -205,4 +207,4 @@ class KorbitCoinFullRequest(CoinFullRequest):
                 ...
             }
         """
-        return self.korbit_present_price
+        return self.__korbit_present_price

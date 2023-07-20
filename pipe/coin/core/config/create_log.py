@@ -1,3 +1,6 @@
+"""
+log
+"""
 import logging
 
 
@@ -19,7 +22,7 @@ def log():
     logger.addHandler(stream_handler)
 
     # log를 파일에 출력
-    file_handler = logging.FileHandler(filename="log/coin.log")
+    file_handler = logging.FileHandler(filename="coin/core/config/log/coin.log")
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
 

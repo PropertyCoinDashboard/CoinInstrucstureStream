@@ -4,28 +4,28 @@
 
 import asyncio
 
-from core.coin_interaction import CoinPresentPriceMarketPlace
-from mq.data_admin import new_topic_initalization
-from setting.properties import BIT_TOPIC_NAME, ETHER_TOPIC_NAME
+from coin.core.coin_interaction import CoinPresentPriceMarketPlace
+from coin.core.config.properties import BTC_TOPIC_NAME, ETH_TOPIC_NAME
+from coin.core.data_mq.data_admin import new_topic_initalization
 
 
 async def btc_present_start() -> None:
     """
-    kafak test
+    bitcoin kafak stream
     """
-    await CoinPresentPriceMarketPlace.total_full_request("BTC", BIT_TOPIC_NAME)
+    await CoinPresentPriceMarketPlace.total_full_request("BTC", BTC_TOPIC_NAME)
 
 
 async def eth_present_start() -> None:
     """
-    kafak test
+    ethereum kafak stream
     """
-    await CoinPresentPriceMarketPlace.total_full_request("ETC", ETHER_TOPIC_NAME)
+    await CoinPresentPriceMarketPlace.total_full_request("ETC", ETH_TOPIC_NAME)
 
 
 async def be_present_gether() -> None:
     """
-    kafak test
+    kafka async steam
     """
     tasks = [
         asyncio.create_task(btc_present_start()),
@@ -36,9 +36,9 @@ async def be_present_gether() -> None:
 
 async def start() -> None:
     """
-    Topic create test
+    Topic create
     """
-    topic = [BIT_TOPIC_NAME, ETHER_TOPIC_NAME]
+    topic = [BTC_TOPIC_NAME, ETH_TOPIC_NAME]
     partition = [2, 2]
     replication = [2, 2]
 

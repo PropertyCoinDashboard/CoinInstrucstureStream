@@ -1,12 +1,18 @@
-import requests
+"""
+유틸 함수
+"""
 from typing import Any
-from .properties import UPBIT_URL, BITHUMB_URL, KORBIT_URL
+import requests
+
+from coin.core.config.properties import UPBIT_URL, BITHUMB_URL, KORBIT_URL
 
 
-# JSON response
 def header_to_json(url: str) -> Any:
+    """
+    json
+    """
     headers: dict[str, str] = {"accept": "application/json"}
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, timeout=60)
 
     if response.status_code == 200:
         return response.json()

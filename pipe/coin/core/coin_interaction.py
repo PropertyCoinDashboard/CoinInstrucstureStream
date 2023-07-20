@@ -7,50 +7,31 @@ import tracemalloc
 from asyncio.exceptions import CancelledError
 from typing import Any, Coroutine
 
-from mq.data_interaction import produce_sending
-from setting.create_log import log
 from pydantic.errors import PydanticUserError
 
-from core.data_format import CoinMarketData, CoinMarket
-from core.coin_apis import (
+
+from coin.core.data_format import CoinMarket, CoinMarketData
+from coin.core.coin_apis import (
     UpBitCoinFullRequest,
     BithumbCoinFullRequest,
     KorbitCoinFullRequest,
 )
 
+from .config.create_log import log
+from .config.properties import market_setting
+from .data_mq.data_interaction import produce_sending
 
+
+# 기본 정보
 tracemalloc.start()
 logger = log()
+
 # market 정보
-MARKET: dict[str, dict[str, Any]] = {
-    "upbit": {
-        "api": UpBitCoinFullRequest,
-        "timestamp": "trade_timestamp",
-        "parameter": (
-            "opening_price",
-            "high_price",
-            "low_price",
-            "prev_closing_price",
-            "acc_trade_volume_24h",
-        ),
-    },
-    "bithum": {
-        "api": BithumbCoinFullRequest,
-        "timestamp": "date",
-        "parameter": (
-            "opening_price",
-            "max_price",
-            "min_price",
-            "prev_closing_price",
-            "units_traded_24H",
-        ),
-    },
-    "korbit": {
-        "api": KorbitCoinFullRequest,
-        "timestamp": "timestamp",
-        "parameter": ("open", "high", "low", "last", "volume"),
-    },
-}
+market_env: dict[str, dict[str, Any]] = market_setting(
+    upbit=UpBitCoinFullRequest,
+    bithumb=BithumbCoinFullRequest,
+    korbit=KorbitCoinFullRequest,
+)
 
 
 async def coin_present_architecture(
@@ -58,7 +39,7 @@ async def coin_present_architecture(
     time: str,
     coin_symbol: str,
     api: Any,
-    parameter: tuple[str, str, str, str, str],
+    data: tuple[str, str, str, str, str],
 ) -> str:
     """
     Coin present price architecture
@@ -81,7 +62,7 @@ async def coin_present_architecture(
             coin_symbol=coin_symbol,
             time=market_time,
             api=api_response,
-            parameter=parameter,
+            data=data,
         ).model_dump()
     except PydanticUserError as error:
         logger.error("Exception occurred: %s", error)
@@ -104,13 +85,13 @@ class CoinPresentPriceMarketPlace:
         Returns:
             str: market data as a string
         """
-        market_info = MARKET[market]
+        market_info = market_env[market]
         return await coin_present_architecture(
             market=f"{market}-{coin_symbol.upper()}",
             coin_symbol=coin_symbol,
             time=market_info["timestamp"],
             api=market_info["api"],
-            parameter=market_info["parameter"],
+            data=market_info["parameter"],
         )
 
     @classmethod
@@ -127,14 +108,13 @@ class CoinPresentPriceMarketPlace:
             try:
                 tasks: list[Coroutine[Any, Any, dict[str, Any]]] = [
                     cls.get_market_present_price(market=market, coin_symbol=coin_symbol)
-                    for market in MARKET
+                    for market in market_env
                 ]
                 market_result = await asyncio.gather(*tasks, return_exceptions=True)
-
-                schema = CoinMarket(
+                schema: str = CoinMarket(
                     **{
                         market: result
-                        for market, result in zip(MARKET.keys(), market_result)
+                        for market, result in zip(market_env.keys(), market_result)
                         if result is not None
                     }
                 ).model_dump_json(indent=4)
