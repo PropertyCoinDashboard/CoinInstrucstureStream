@@ -18,7 +18,7 @@ def new_topic_initalization(
         partition (int): kafka partition
         replication_factor (int): replication in kafak partition
     """
-    conf = {"bootstrap.servers": "kafka1:9092, kafka2:9093, kafka3:9094"}
+    conf = {"bootstrap.servers": "kafka1:19092, kafka2:29092, kafka3:39092"}
     admin_clinet = AdminClient(conf=conf)
 
     new_topics = [

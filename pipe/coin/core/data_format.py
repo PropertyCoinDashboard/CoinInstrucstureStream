@@ -65,7 +65,6 @@ class CoinMarketData(BaseModel):
 
     market: str
     time: int
-    coin_symbol: str
     data: dict[str, Any]
 
     @classmethod
@@ -73,7 +72,6 @@ class CoinMarketData(BaseModel):
         cls,
         market: str,
         time: int,
-        coin_symbol: str,
         api: Mapping[str, Any],
         data: tuple[str, str, str, str, str],
     ) -> "CoinMarketData":
@@ -107,4 +105,4 @@ class CoinMarketData(BaseModel):
             "acc_trade_volume_24h": float(api[data[4]]),
         }
 
-        return cls(market=market, time=time, coin_symbol=coin_symbol, data=price_data)
+        return cls(market=market, time=time, data=price_data)

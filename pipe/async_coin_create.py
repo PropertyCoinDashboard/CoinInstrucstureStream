@@ -50,5 +50,4 @@ async def start() -> None:
     await be_present_gether()
 
 
-asyncio.run(btc_present_start())
-# print(btc_present_start())
+asyncio.run(start())

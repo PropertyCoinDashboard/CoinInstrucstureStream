@@ -55,9 +55,9 @@ async def coin_present_architecture(
     try:
         api_response = api(coin_name=coin_symbol.upper()).get_coin_present_price()
         market_time = api_response[time]
+
         return CoinMarketData.from_api(
             market=market,
-            coin_symbol=coin_symbol,
             time=market_time,
             api=api_response,
             data=data,
@@ -108,7 +108,6 @@ class CoinPresentPriceMarketPlace:
                     cls.get_market_present_price(market=market, coin_symbol=coin_symbol)
                     for market in market_env
                 ]
-
                 market_result = await asyncio.gather(*tasks, return_exceptions=True)
                 schema: str = CoinMarket(
                     **{
@@ -116,8 +115,7 @@ class CoinPresentPriceMarketPlace:
                         for market, result in zip(market_env.keys(), market_result)
                         if result is not None
                     }
-                ).model_dump_json(indent=4)
-
+                ).model_dump()
                 produce_sending(topic_name, message=schema)
             except (TimeoutError, CancelledError) as error:
                 logger.error("Data transmission failed: %s", error)

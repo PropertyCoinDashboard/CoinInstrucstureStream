@@ -15,7 +15,7 @@ def produce_sending(topic: Any, message: json) -> None:
     kafka produce
     """
     config: dict[str, str] = {
-        "bootstrap.servers": "kafka1:9092, kafka2:9093, kafka3:9094"
+        "bootstrap.servers": "kafka1:19092, kafka2:29092, kafka3:39092"
     }
 
     def delivery_report(err, msg) -> None:
