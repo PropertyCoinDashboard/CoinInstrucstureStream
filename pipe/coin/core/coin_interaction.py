@@ -33,7 +33,7 @@ market_env: dict[str, dict[str, Any]] = market_setting(
 )
 
 
-async def coin_present_architecture(
+async def __coin_present_architecture(
     market: str,
     time: str,
     coin_symbol: str,
@@ -72,7 +72,7 @@ class CoinPresentPriceMarketPlace:
     """
 
     @classmethod
-    async def get_market_present_price(cls, market: str, coin_symbol: str) -> str:
+    async def __get_market_present_price(cls, market: str, coin_symbol: str) -> str:
         """
         Get market present price
 
@@ -84,7 +84,7 @@ class CoinPresentPriceMarketPlace:
             str: market data as a string
         """
         market_info = market_env[market]
-        return await coin_present_architecture(
+        return await __coin_present_architecture(
             market=f"{market}-{coin_symbol.upper()}",
             coin_symbol=coin_symbol,
             time=market_info["timestamp"],
@@ -105,7 +105,9 @@ class CoinPresentPriceMarketPlace:
             await asyncio.sleep(1)
             try:
                 tasks: list[Coroutine[Any, Any, dict[str, Any]]] = [
-                    cls.get_market_present_price(market=market, coin_symbol=coin_symbol)
+                    cls.__get_market_present_price(
+                        market=market, coin_symbol=coin_symbol
+                    )
                     for market in market_env
                 ]
                 market_result = await asyncio.gather(*tasks, return_exceptions=True)
