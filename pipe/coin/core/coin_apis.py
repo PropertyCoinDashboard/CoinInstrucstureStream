@@ -154,7 +154,7 @@ class BithumbCoinFullRequest(CoinFullRequest):
                 ...
             }
         """
-        return self.bithum_present_price["data"]
+        return __self.bithum_present_price["data"]
 
 
 class KorbitCoinFullRequest(CoinFullRequest):
