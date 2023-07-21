@@ -7,7 +7,6 @@ import json
 
 # from setting.create_log import log
 from confluent_kafka import Producer, KafkaException
-from aiokafka import AIOKafkaConsumer
 
 
 # logging = log()
@@ -23,12 +22,9 @@ def produce_sending(topic: Any, message: json) -> None:
         if err is not None:
             print(f"Message delivery failed: {err}")
         else:
-            print(
-                f"Message delivered to {msg.topic()} [{msg.partition()}] --> [{msg.value()}]"
-            )
+            print(f"Message delivered to {msg.topic()} --> [{msg.value()}]")
 
     produce = Producer(config)
-
     try:
         produce.produce(
             topic, value=json.dumps(message).encode("utf-8"), callback=delivery_report

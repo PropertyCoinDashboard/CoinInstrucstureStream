@@ -5,7 +5,7 @@
 import asyncio
 
 from coin.core.coin_interaction import CoinPresentPriceMarketPlace
-from coin.core.data_mq.data_admin import new_topic_initalization
+from coin.core.data_mq.data_admin import new_topic_initialization
 from coin.core.config.properties import (
     BTC_TOPIC_NAME,
     ETH_TOPIC_NAME,
@@ -52,11 +52,9 @@ async def data_sending_start() -> None:
     partition = [2, 2, 2, 2]
     replication = [2, 2, 2, 2]
 
-    new_topic_initalization(
+    new_topic_initialization(
         topic=topic, partition=partition, replication_factor=replication
     )
-
-    asyncio.sleep(1)
     await be_present_gether()
 
 

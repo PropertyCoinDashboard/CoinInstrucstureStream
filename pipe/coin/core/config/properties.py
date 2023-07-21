@@ -32,6 +32,7 @@ def market_setting(**kwargs) -> dict[str, dict[str, Any]]:
             "timestamp": "trade_timestamp",
             "parameter": (
                 "opening_price",
+                "trade_price",
                 "high_price",
                 "low_price",
                 "prev_closing_price",
@@ -43,6 +44,7 @@ def market_setting(**kwargs) -> dict[str, dict[str, Any]]:
             "timestamp": "date",
             "parameter": (
                 "opening_price",
+                "closing_price",
                 "max_price",
                 "min_price",
                 "prev_closing_price",
@@ -52,7 +54,7 @@ def market_setting(**kwargs) -> dict[str, dict[str, Any]]:
         "korbit": {
             "api": kwargs["korbit"],
             "timestamp": "timestamp",
-            "parameter": ("open", "high", "low", "last", "volume"),
+            "parameter": ("open", "last", "high", "low", "last", "volume"),
         },
     }
     return market

@@ -8,7 +8,7 @@ from coin.core.config.create_log import log
 logger = log()
 
 
-def new_topic_initalization(
+def new_topic_initialization(
     topic: str, partition: int, replication_factor: int
 ) -> None:
     """new topic create

@@ -29,6 +29,7 @@ from pyspark.sql.types import (
 data_schema = StructType(
     [
         StructField("opening_price", DoubleType(), True),
+        StructField("trade_price", DoubleType(), True),
         StructField("max_price", DoubleType(), True),
         StructField("min_price", DoubleType(), True),
         StructField("prev_closing_price", DoubleType(), True),

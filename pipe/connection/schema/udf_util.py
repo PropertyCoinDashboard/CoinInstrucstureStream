@@ -17,6 +17,7 @@ def get_utc_time() -> int:
 @dataclass
 class CoinPrice:
     opening_price: float
+    closing_price: float
     max_price: float
     min_price: float
     prev_closing_price: float
@@ -43,6 +44,7 @@ def streaming_preprocessing(name: str, *data: tuple) -> dict[str, Any]:
                 "data": {
                     "opening_price": 2455000.0,
                     "closing_price": 2439000.0,
+                    "trade_price": 38100000.0,
                     "max_price": 2462000.0,
                     "min_price": 2431000.0,
                     "prev_closing_price": 2455000.0,
@@ -57,10 +59,11 @@ def streaming_preprocessing(name: str, *data: tuple) -> dict[str, Any]:
 
     data_dict = CoinPrice(
         opening_price=float(average[0]),
-        max_price=float(average[1]),
-        min_price=float(average[2]),
-        prev_closing_price=float(average[3]),
-        acc_trade_volume_24h=float(average[4]),
+        closing_price=float(average[1]),
+        max_price=float(average[2]),
+        min_price=float(average[3]),
+        prev_closing_price=float(average[4]),
+        acc_trade_volume_24h=float(average[5]),
     )
 
     streaming_data = StreamingData(name=name, time=get_utc_time(), data=data_dict)

@@ -33,12 +33,12 @@ market_env: dict[str, dict[str, Any]] = market_setting(
 )
 
 
-async def __coin_present_architecture(
+async def coin_present_architecture(
     market: str,
     time: str,
     coin_symbol: str,
     api: Any,
-    data: tuple[str, str, str, str, str],
+    data: tuple[str, str, str, str, str, str],
 ) -> str:
     """
     Coin present price architecture
@@ -84,7 +84,7 @@ class CoinPresentPriceMarketPlace:
             str: market data as a string
         """
         market_info = market_env[market]
-        return await __coin_present_architecture(
+        return await coin_present_architecture(
             market=f"{market}-{coin_symbol.upper()}",
             coin_symbol=coin_symbol,
             time=market_info["timestamp"],

@@ -138,7 +138,7 @@ class BithumbCoinFullRequest(CoinFullRequest):
         """
         return [
             CoinSymbol(coin_symbol=symbol).coin_symbol
-            for symbol in self.bithum_coin_list["data"]
+            for symbol in self.__bithum_coin_list["data"]
         ][:-1]
 
     def get_coin_present_price(self) -> dict[str, Any]:
@@ -154,7 +154,7 @@ class BithumbCoinFullRequest(CoinFullRequest):
                 ...
             }
         """
-        return __self.bithum_present_price["data"]
+        return self.__bithum_present_price["data"]
 
 
 class KorbitCoinFullRequest(CoinFullRequest):
