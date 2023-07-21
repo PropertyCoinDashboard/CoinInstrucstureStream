@@ -110,10 +110,10 @@ class BithumbCoinFullRequest(CoinFullRequest):
 
     def __init__(self, coin_name: str) -> None:
         super().__init__(coin_name=coin_name, market="bithum")
-        self.bithum_coin_list: dict[str, Any] = header_to_json(
+        self.__bithum_coin_list: dict[str, Any] = header_to_json(
             url=f"{self.url}/ticker/ALL_KRW"
         )
-        self.bithum_present_price = header_to_json(
+        self.__bithum_present_price = header_to_json(
             url=f"{self.url}/ticker/{self.coin_name.upper()}_KRW"
         )
 
