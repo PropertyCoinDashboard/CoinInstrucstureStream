@@ -213,8 +213,8 @@ class CoinNameAndSymbolMatching:
         self.__bithumb = BithumbCoinFullRequest()
         self.__korbit = KorbitCoinFullRequest()
 
-        self.all_coin_symbols = self.__get_all_coin_symbols()
-        self.duplication_coinsymbols = self.__get_duplication_coinsymbols()
+        self.__all_coin_symbols = self.__get_all_coin_symbols()
+        self.__duplication_coinsymbols = self.__get_duplication_coinsymbols()
 
     def __get_all_coin_symbols(self) -> list[str]:
         """
@@ -236,7 +236,7 @@ class CoinNameAndSymbolMatching:
         Returns:
             >>> list[str]: ["BTC"...]
         """
-        results: list[tuple[str, int]] = Counter(self.all_coin_symbols).most_common()
+        results: list[tuple[str, int]] = Counter(self.__all_coin_symbols).most_common()
         symbol_count: list[str] = [index for index, data in results if data == 3]
 
         return symbol_count
@@ -255,7 +255,7 @@ class CoinNameAndSymbolMatching:
                 korean_name=upbit_s["korean_name"],
             ).model_dump()
             for upbit_s in upbit_symbol
-            if upbit_s["market"].split("KRW-")[-1] in self.duplication_coinsymbols
+            if upbit_s["market"].split("KRW-")[-1] in self.__duplication_coinsymbols
         ]
 
         return symbol_name
