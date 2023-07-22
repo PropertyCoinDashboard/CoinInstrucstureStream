@@ -17,6 +17,18 @@ class CoinSymbol(BaseModel):
     coin_symbol: str
 
 
+class CoinNameAndSymbol(CoinSymbol):
+    """
+    Subject:
+        - coin_symbol and Name
+    Returns:
+        - {"BTC": "비트코인"}
+
+    """
+
+    korean_name: str
+
+
 class CoinMarket(BaseModel):
     """
     Subject:
