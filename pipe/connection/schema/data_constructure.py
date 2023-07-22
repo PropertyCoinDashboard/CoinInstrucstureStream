@@ -16,7 +16,7 @@ pyspark data schema
 }
 
 """
-
+from pydantic import BaseModel
 from pyspark.sql.types import (
     StructField,
     StructType,
@@ -49,6 +49,7 @@ final_schema = StructType(
     [
         StructField("upbit", market_schema),
         StructField("bithumb", market_schema),
+        StructField("coinone", market_schema),
         StructField("korbit", market_schema),
     ]
 )
@@ -63,3 +64,18 @@ average_schema = StructType(
         ]
     ),
 )
+
+
+class CoinPrice(BaseModel):
+    opening_price: float
+    closing_price: float
+    max_price: float
+    min_price: float
+    prev_closing_price: float
+    acc_trade_volume_24h: float
+
+
+class StreamingData(BaseModel):
+    name: str
+    time: int
+    data: CoinPrice

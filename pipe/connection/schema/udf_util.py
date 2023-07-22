@@ -1,11 +1,10 @@
 """
 pyspark udf 
 """
-
-import numpy as np
-from dataclasses import dataclass, asdict
-from typing import Any
 import datetime
+
+from connection.schema.data_constructure import CoinPrice, StreamingData
+import numpy as np
 
 
 def get_utc_time() -> int:
@@ -13,25 +12,7 @@ def get_utc_time() -> int:
     return int(utc_now.timestamp())
 
 
-# 데이터 규격
-@dataclass
-class CoinPrice:
-    opening_price: float
-    closing_price: float
-    max_price: float
-    min_price: float
-    prev_closing_price: float
-    acc_trade_volume_24h: float
-
-
-@dataclass
-class StreamingData:
-    name: str
-    time: int
-    data: CoinPrice
-
-
-def streaming_preprocessing(name: str, *data: tuple) -> dict[str, Any]:
+def streaming_preprocessing(name: str, *data: tuple) -> str:
     """average coin price normalization in spark python udf
 
     Args:
@@ -58,13 +39,13 @@ def streaming_preprocessing(name: str, *data: tuple) -> dict[str, Any]:
     average: list = np.mean(value, axis=1).tolist()
 
     data_dict = CoinPrice(
-        opening_price=float(average[0]),
-        closing_price=float(average[1]),
-        max_price=float(average[2]),
-        min_price=float(average[3]),
-        prev_closing_price=float(average[4]),
-        acc_trade_volume_24h=float(average[5]),
+        opening_price=average[0],
+        closing_price=average[1],
+        max_price=average[2],
+        min_price=average[3],
+        prev_closing_price=average[4],
+        acc_trade_volume_24h=average[5],
     )
 
     streaming_data = StreamingData(name=name, time=get_utc_time(), data=data_dict)
-    return asdict(streaming_data)
+    return streaming_data.model_dump()

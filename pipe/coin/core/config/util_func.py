@@ -4,7 +4,7 @@
 from typing import Any
 import requests
 
-from coin.core.config.properties import UPBIT_URL, BITHUMB_URL, KORBIT_URL
+from coin.core.config.properties import UPBIT_URL, BITHUMB_URL, KORBIT_URL, COINONE
 
 
 def header_to_json(url: str) -> Any:
@@ -42,5 +42,7 @@ def get_symbol_collect_url(market: str) -> str:
             return BITHUMB_URL
         case "korbit":
             return KORBIT_URL
+        case "coinone":
+            return COINONE
         case _:
             raise ValueError("Not Found market")

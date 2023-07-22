@@ -53,6 +53,7 @@ class CoinMarket(BaseModel):
 
     upbit: dict[str, Any]
     bithumb: dict[str, Any]
+    coinone: dict[str, Any]
     korbit: dict[str, Any]
 
 

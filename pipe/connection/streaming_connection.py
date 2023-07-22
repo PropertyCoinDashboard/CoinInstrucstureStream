@@ -45,6 +45,7 @@ def stream_injection(topic: str) -> "DataFrame":
             "split(crypto.upbit.market, '-')[1] as name",
             "crypto.upbit.data as upbit_price",
             "crypto.bithumb.data as bithumb_price",
+            "crypto.coinone.data as coinone_price",
             "crypto.korbit.data as korbit_price",
         )
         .withColumn(
@@ -53,6 +54,7 @@ def stream_injection(topic: str) -> "DataFrame":
                 col("name"),
                 col("upbit_price"),
                 col("bithumb_price"),
+                col("coinone_price"),
                 col("korbit_price"),
             ).alias("average_price"),
         )

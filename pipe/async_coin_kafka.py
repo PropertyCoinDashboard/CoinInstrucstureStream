@@ -55,6 +55,7 @@ async def data_sending_start() -> None:
     new_topic_initialization(
         topic=topic, partition=partition, replication_factor=replication
     )
+    asyncio.sleep(1)
     await be_present_gether()
 
 

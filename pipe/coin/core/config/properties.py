@@ -11,6 +11,7 @@ parser.read("coin/urls.conf")
 UPBIT_URL: str = parser.get("APIURL", "UPBIT")
 BITHUMB_URL: str = parser.get("APIURL", "BITHUMB")
 KORBIT_URL: str = parser.get("APIURL", "KORBIT")
+COINONE: str = parser.get("APIURL", "COINONE")
 
 BTC_TOPIC_NAME: str = parser.get("TOPICNAME", "BTC_TOPIC_NAME")
 ETH_TOPIC_NAME: str = parser.get("TOPICNAME", "ETHER_TOPIC_NAME")
@@ -51,10 +52,23 @@ def market_setting(**kwargs) -> dict[str, dict[str, Any]]:
                 "units_traded_24H",
             ),
         },
+        "coinone": {
+            "api": kwargs["coinone"],
+            "timestamp": "timestamp",
+            "parameter": (
+                "first",
+                "last",
+                "high",
+                "low",
+                "yesterday_last",
+                "target_volume",
+            ),
+        },
         "korbit": {
             "api": kwargs["korbit"],
             "timestamp": "timestamp",
             "parameter": ("open", "last", "high", "low", "last", "volume"),
         },
     }
+
     return market

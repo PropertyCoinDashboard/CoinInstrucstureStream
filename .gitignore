@@ -160,6 +160,9 @@ cython_debug/
 #.idea/
 
 pipe/coin/urls.conf
+pipe/coin/.checkpoint_ETH
+pipe/coin/.checkpoint_BTC
+
 .vscode
 poetry.lock
 pyproject.toml

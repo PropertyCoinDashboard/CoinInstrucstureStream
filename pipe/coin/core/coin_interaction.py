@@ -11,9 +11,10 @@ from pydantic.errors import PydanticUserError
 
 from coin.core.data_format import CoinMarket, CoinMarketData
 from coin.core.coin_apis import (
-    UpBitCoinFullRequest,
+    UpbitCoinFullRequest,
     BithumbCoinFullRequest,
     KorbitCoinFullRequest,
+    CoinoneCoinFullRequest,
 )
 
 from coin.core.config.create_log import log
@@ -27,8 +28,9 @@ logger = log()
 
 # market 정보
 market_env: dict[str, dict[str, Any]] = market_setting(
-    upbit=UpBitCoinFullRequest,
+    upbit=UpbitCoinFullRequest,
     bithumb=BithumbCoinFullRequest,
+    coinone=CoinoneCoinFullRequest,
     korbit=KorbitCoinFullRequest,
 )
 
@@ -53,7 +55,7 @@ async def coin_present_architecture(
         CoinMarketData: pydantic in JSON transformation
     """
     try:
-        api_response = api(coin_name=coin_symbol.upper()).get_coin_present_price()
+        api_response = api().get_coin_present_price(coin_name=coin_symbol.upper())
         market_time = api_response[time]
 
         return CoinMarketData.from_api(
@@ -118,6 +120,7 @@ class CoinPresentPriceMarketPlace:
                         if result is not None
                     }
                 ).model_dump()
+                print(schema)
                 produce_sending(topic_name, message=schema)
             except (TimeoutError, CancelledError) as error:
                 logger.error("Data transmission failed: %s", error)
