@@ -120,7 +120,6 @@ class CoinPresentPriceMarketPlace:
                         if result is not None
                     }
                 ).model_dump()
-                print(schema)
                 produce_sending(topic_name, message=schema)
             except (TimeoutError, CancelledError) as error:
                 logger.error("Data transmission failed: %s", error)

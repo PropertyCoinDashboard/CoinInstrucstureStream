@@ -156,6 +156,52 @@ class BithumbCoinFullRequest(CoinFullRequest):
         return header_to_json(f"{self.url}/ticker/{coin_name.upper()}_KRW")["data"]
 
 
+class CoinoneCoinFullRequest(CoinFullRequest):
+    def __init__(self) -> None:
+        super().__init__(market="coinone")
+        self.__coinone_coin_list = header_to_json(url=f"{self.url}/currencies")
+
+    def get_coinsymbol_extraction(self) -> list[str]:
+        """
+        Subject:
+            - 코인 심볼 추출 \n
+        Input:
+           >>> {
+                "name": "Bitcoin",
+                "symbol": "BTC",
+                "deposit_status": "normal",
+                "withdraw_status": "normal"
+                ...
+            }
+        Returns:
+            >>> list[str]: ["BTC", "ETH" ....]
+        """
+        return [
+            CoinSymbol(coin_symbol=symbol["symbol"]).coin_symbol
+            for symbol in self.__coinone_coin_list["currencies"][0]
+        ]
+
+    def get_coin_present_price(self, coin_name: str) -> dict[str, Any]:
+        """
+        Subject:
+            - coinone 코인 현재가 추출\n
+        Parameter:
+            - coin_name (str) : 코인이름\n
+        Returns:
+            >>> {
+                "quote_currency": "KRW",
+                "target_currency": "BTC",
+                "timestamp": 1499341142000,
+                "high": "3845000.0",
+                "low": "3819000.0",
+                ...
+            }
+        """
+        return header_to_json(
+            f"{self.url}/ticker_new/KRW/{coin_name.upper()}?additional_data=true"
+        )["tickers"][0]
+
+
 class KorbitCoinFullRequest(CoinFullRequest):
     """Korbit
 
@@ -208,52 +254,6 @@ class KorbitCoinFullRequest(CoinFullRequest):
         return header_to_json(
             f"{self.url}/ticker/detailed?currency_pair={coin_name.lower()}_krw"
         )
-
-
-class CoinoneCoinFullRequest(CoinFullRequest):
-    def __init__(self) -> None:
-        super().__init__(market="coinone")
-        self.__coinone_coin_list = header_to_json(url=f"{self.url}/currencies")
-
-    def get_coinsymbol_extraction(self) -> list[str]:
-        """
-        Subject:
-            - 코인 심볼 추출 \n
-        Input:
-           >>> {
-                "name": "Bitcoin",
-                "symbol": "BTC",
-                "deposit_status": "normal",
-                "withdraw_status": "normal"
-                ...
-            }
-        Returns:
-            >>> list[str]: ["BTC", "ETH" ....]
-        """
-        return [
-            CoinSymbol(coin_symbol=symbol["symbol"]).coin_symbol
-            for symbol in self.__coinone_coin_list["currencies"][0]
-        ]
-
-    def get_coin_present_price(self, coin_name: str) -> dict[str, Any]:
-        """
-        Subject:
-            - coinone 코인 현재가 추출\n
-        Parameter:
-            - coin_name (str) : 코인이름\n
-        Returns:
-            >>> {
-                "quote_currency": "KRW",
-                "target_currency": "BTC",
-                "timestamp": 1499341142000,
-                "high": "3845000.0",
-                "low": "3819000.0",
-                ...
-            }
-        """
-        return header_to_json(
-            f"{self.url}/ticker_new/KRW/{coin_name.upper()}?additional_data=true"
-        )["tickers"][0]
 
 
 class CoinNameAndSymbolMatching:
