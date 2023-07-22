@@ -9,7 +9,7 @@ from coin.core.config.util_func import get_symbol_collect_url, header_to_json
 from coin.core.data_format import CoinSymbol, CoinNameAndSymbol
 
 
-class CoinFullRequest(metaclass=ABCMeta):
+class CoinPullRequest(metaclass=ABCMeta):
     """
     Subject:
         - 공통 목록 추상클래스 [개발 순서 및 혼동 방지]
@@ -51,11 +51,11 @@ class CoinFullRequest(metaclass=ABCMeta):
         raise NotImplementedError()
 
 
-class UpbitCoinFullRequest(CoinFullRequest):
+class UpbitCoinPullRequest(CoinPullRequest):
     """UPBIT
 
     Args:
-        CoinFullRequest (_type_): abstruct class
+        CoinPullRequest (_type_): abstruct class
     """
 
     def __init__(self) -> None:
@@ -101,11 +101,11 @@ class UpbitCoinFullRequest(CoinFullRequest):
         return header_to_json(f"{self.url}/ticker?markets=KRW-{coin_name.upper()}")[0]
 
 
-class BithumbCoinFullRequest(CoinFullRequest):
+class BithumbCoinPullRequest(CoinPullRequest):
     """Bithumb
 
     Args:
-        CoinFullRequest (_type_): abstruct class
+        CoinPullRequest (_type_): abstruct class
     """
 
     def __init__(self) -> None:
@@ -156,7 +156,7 @@ class BithumbCoinFullRequest(CoinFullRequest):
         return header_to_json(f"{self.url}/ticker/{coin_name.upper()}_KRW")["data"]
 
 
-class CoinoneCoinFullRequest(CoinFullRequest):
+class CoinoneCoinPullRequest(CoinPullRequest):
     def __init__(self) -> None:
         super().__init__(market="coinone")
         self.__coinone_coin_list = header_to_json(url=f"{self.url}/currencies")
@@ -202,11 +202,11 @@ class CoinoneCoinFullRequest(CoinFullRequest):
         )["tickers"][0]
 
 
-class KorbitCoinFullRequest(CoinFullRequest):
+class KorbitCoinPullRequest(CoinPullRequest):
     """Korbit
 
     Args:
-        CoinFullRequest (_type_): abstruct class
+        CoinPullRequest (_type_): abstruct class
     """
 
     def __init__(self) -> None:
@@ -263,10 +263,10 @@ class CoinNameAndSymbolMatching:
     """
 
     def __init__(self) -> None:
-        self.__upbit = UpbitCoinFullRequest()
-        self.__bithumb = BithumbCoinFullRequest()
-        self.__korbit = KorbitCoinFullRequest()
-        self.__coinone = CoinoneCoinFullRequest()
+        self.__upbit = UpbitCoinPullRequest()
+        self.__bithumb = BithumbCoinPullRequest()
+        self.__korbit = KorbitCoinPullRequest()
+        self.__coinone = CoinoneCoinPullRequest()
 
         self.__all_coin_symbols = self.__get_all_coin_symbols()
         self.__duplication_coinsymbols = self.__get_duplication_coinsymbols()

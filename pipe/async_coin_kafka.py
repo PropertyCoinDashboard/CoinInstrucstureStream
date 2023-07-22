@@ -6,7 +6,7 @@ import asyncio
 
 from coin.core.coin_interaction import CoinPresentPriceMarketPlace
 from coin.core.data_mq.data_admin import new_topic_initialization
-from coin.core.config.properties import (
+from connection.properties import (
     BTC_TOPIC_NAME,
     ETH_TOPIC_NAME,
     BTC_AVERAGE_TOPIC_NAME,
@@ -18,14 +18,14 @@ async def btc_present_start() -> None:
     """
     bitcoin kafak stream
     """
-    await CoinPresentPriceMarketPlace.total_full_request("BTC", BTC_TOPIC_NAME)
+    await CoinPresentPriceMarketPlace.total_pull_request("BTC", BTC_TOPIC_NAME)
 
 
 async def eth_present_start() -> None:
     """
     ethereum kafak stream
     """
-    await CoinPresentPriceMarketPlace.total_full_request("ETH", ETH_TOPIC_NAME)
+    await CoinPresentPriceMarketPlace.total_pull_request("ETH", ETH_TOPIC_NAME)
 
 
 async def be_present_gether() -> None:

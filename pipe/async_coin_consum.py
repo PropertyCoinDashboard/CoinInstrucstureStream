@@ -1,7 +1,7 @@
 import asyncio
 from aiokafka import AIOKafkaConsumer
 from coin.core.data_mq.data_interaction import consume_messages
-from coin.core.config.properties import (
+from connection.properties import (
     BTC_AVERAGE_TOPIC_NAME,
     ETH_AVERAGE_TOPIC_NAME,
 )

@@ -11,10 +11,10 @@ from pydantic.errors import PydanticUserError
 
 from coin.core.data_format import CoinMarket, CoinMarketData
 from coin.core.coin_apis import (
-    UpbitCoinFullRequest,
-    BithumbCoinFullRequest,
-    KorbitCoinFullRequest,
-    CoinoneCoinFullRequest,
+    UpbitCoinPullRequest,
+    BithumbCoinPullRequest,
+    KorbitCoinPullRequest,
+    CoinoneCoinPullRequest,
 )
 
 from coin.core.config.create_log import log
@@ -28,10 +28,10 @@ logger = log()
 
 # market 정보
 market_env: dict[str, dict[str, Any]] = market_setting(
-    upbit=UpbitCoinFullRequest,
-    bithumb=BithumbCoinFullRequest,
-    coinone=CoinoneCoinFullRequest,
-    korbit=KorbitCoinFullRequest,
+    upbit=UpbitCoinPullRequest,
+    bithumb=BithumbCoinPullRequest,
+    coinone=CoinoneCoinPullRequest,
+    korbit=KorbitCoinPullRequest,
 )
 
 
@@ -95,9 +95,9 @@ class CoinPresentPriceMarketPlace:
         )
 
     @classmethod
-    async def total_full_request(cls, coin_symbol: str, topic_name: str) -> None:
+    async def total_pull_request(cls, coin_symbol: str, topic_name: str) -> None:
         """
-        Total full request
+        Total Pull request
 
         Args:
             coin_symbol (str): coin symbol

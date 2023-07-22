@@ -3,7 +3,7 @@ spark
 """
 from concurrent.futures import ThreadPoolExecutor
 from connection.streaming_connection import run_spark_streaming
-from coin.core.config.properties import (
+from connection.properties import (
     BTC_TOPIC_NAME,
     ETH_TOPIC_NAME,
     BTC_AVERAGE_TOPIC_NAME,

@@ -47,7 +47,8 @@ class CoinMarket(BaseModel):
                         "prev_closing_price": 2455000.0,
                         "acc_trade_volume_24h": 11447.92825886,
                     }
-                }
+                },
+                ....
             }
     """
 
