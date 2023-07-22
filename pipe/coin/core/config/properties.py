@@ -6,7 +6,7 @@ from typing import Any
 
 
 parser = configparser.ConfigParser()
-parser.read("coin/urls.conf")
+parser.read("/urls.conf")
 
 UPBIT_URL: str = parser.get("APIURL", "UPBIT")
 BITHUMB_URL: str = parser.get("APIURL", "BITHUMB")

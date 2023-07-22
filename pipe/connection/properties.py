@@ -1,7 +1,7 @@
 import configparser
 
 parser = configparser.ConfigParser()
-parser.read("coin/urls.conf")
+parser.read("/urls.conf")
 
 BTC_TOPIC_NAME: str = parser.get("TOPICNAME", "BTC_TOPIC_NAME")
 ETH_TOPIC_NAME: str = parser.get("TOPICNAME", "ETHER_TOPIC_NAME")
