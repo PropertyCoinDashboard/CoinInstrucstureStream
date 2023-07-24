@@ -6,10 +6,10 @@ from typing import Any
 from pathlib import Path
 
 from coin.core.market.coin_apis import (
-    UpbitCoinPullRequest,
-    BithumbCoinPullRequest,
-    CoinoneCoinPullRequest,
-    KorbitCoinPullRequest,
+    UpbitSocketAndPullRequest,
+    BithumbSocketAndPullRequest,
+    CoinoneSocketAndPullRequest,
+    KorbitSocketAndPullRequest,
 )
 
 path = Path(__file__).parent.parent
@@ -26,10 +26,10 @@ class MarketAPIFactory:
     """
 
     _create: dict[str, Any] = {
-        "upbit": UpbitCoinPullRequest,
-        "bithumb": BithumbCoinPullRequest,
-        "coinone": CoinoneCoinPullRequest,
-        "korbit": KorbitCoinPullRequest,
+        "upbit": UpbitSocketAndPullRequest,
+        "bithumb": BithumbSocketAndPullRequest,
+        "coinone": CoinoneSocketAndPullRequest,
+        "korbit": KorbitSocketAndPullRequest,
     }
 
     @classmethod
@@ -45,13 +45,13 @@ class MarketAPIFactory:
         return creator(*args, **kwargs)
 
 
-def market_setting() -> dict[str, dict[str, Any]]:
-    """_summary_
-
-    Returns:
-        dict[str, dict[str, Any]]: market env setting 관리 포인트
+def load_json(conn_type: str):
     """
-    with open(file=f"{path}/config/market.json", mode="r", encoding="utf-8") as file:
+    파일 열기..
+    """
+    with open(
+        file=f"{path}/config/market_{conn_type}.json", mode="r", encoding="utf-8"
+    ) as file:
         market_info = json.load(file)
 
     market_info = {
@@ -60,3 +60,18 @@ def market_setting() -> dict[str, dict[str, Any]]:
     }
 
     return market_info
+
+
+def market_setting(conn_type: str) -> dict[str, dict[str, Any]]:
+    """_summary_
+
+    Returns:
+        dict[str, dict[str, Any]]: market env setting 관리 포인트
+    """
+    match conn_type:
+        case "rest":
+            return load_json("rest")
+        case "socket":
+            return load_json("socket")
+        case _:
+            raise ValueError("해당 포맷은 존재하지 않습니다")

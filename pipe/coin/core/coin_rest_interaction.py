@@ -7,6 +7,7 @@ from asyncio.exceptions import CancelledError
 from typing import Any, Coroutine
 
 from pydantic.errors import PydanticUserError
+from pydantic_core._pydantic_core import ValidationError
 
 
 from coin.core.market.data_format import CoinMarket, CoinMarketData
@@ -24,7 +25,7 @@ class CoinPresentPriceMarketPlace:
     def __init__(self) -> None:
         tracemalloc.start()
         self.logger = log()
-        self.market_env: dict[str, dict[str, Any]] = market_setting()
+        self.market_env: dict[str, dict[str, Any]] = market_setting("rest")
 
     async def __coin_present_architecture(
         self,
@@ -56,7 +57,7 @@ class CoinPresentPriceMarketPlace:
                 api=api_response,
                 data=data,
             ).model_dump()
-        except PydanticUserError as error:
+        except (PydanticUserError, ValidationError) as error:
             self.logger.error("Exception occurred: %s", error)
 
     async def __get_market_present_price(
@@ -103,6 +104,7 @@ class CoinPresentPriceMarketPlace:
                 schema: dict[str, dict[str, Any]] = CoinMarket(
                     **dict(zip(self.market_env.keys(), market_result))
                 ).model_dump()
+                print(schema)
                 produce_sending(topic_name, message=schema)
-            except (TimeoutError, CancelledError) as error:
+            except (TimeoutError, CancelledError, ValidationError) as error:
                 self.logger.error("Data transmission failed: %s", error)
