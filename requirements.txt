@@ -10,3 +10,5 @@ pydantic
 websocket
 websocket-client
 aiokafka
+jinja2
+uvicorn[standard]

@@ -104,7 +104,6 @@ class CoinPresentPriceMarketPlace:
                 schema: dict[str, dict[str, Any]] = CoinMarket(
                     **dict(zip(self.market_env.keys(), market_result))
                 ).model_dump()
-                print(schema)
                 produce_sending(topic_name, message=schema)
             except (TimeoutError, CancelledError, ValidationError) as error:
                 self.logger.error("Data transmission failed: %s", error)

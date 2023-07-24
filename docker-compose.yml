@@ -20,8 +20,8 @@ services:
       - --lower_case_table_names=1
     volumes:
       - mysql_data:/var/lib/mysql
-    # networks:
-    #   - coin-network
+    networks:
+      - kafka-network
 
   coin_fastapi:
     image: fastapi
@@ -33,8 +33,11 @@ services:
       - 8084:8084
     volumes:
       - ./apps:/code/app  
-    # networks:
-    #   - coin-network
-    
+    networks:
+      - kafka-network
+
+networks:
+  kafka-network:
+
 volumes:
   mysql_data: {}
