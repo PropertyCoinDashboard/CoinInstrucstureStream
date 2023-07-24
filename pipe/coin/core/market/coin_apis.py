@@ -5,8 +5,8 @@ from typing import Any
 from abc import ABCMeta, abstractmethod
 from collections import Counter
 
-from coin.core.config.util_func import get_symbol_collect_url, header_to_json
-from coin.core.data_format import CoinSymbol, CoinNameAndSymbol
+from coin.core.market.util_func import get_symbol_collect_url, header_to_json
+from coin.core.market.data_format import CoinSymbol, CoinNameAndSymbol
 
 
 class CoinPullRequest(metaclass=ABCMeta):
@@ -157,6 +157,12 @@ class BithumbCoinPullRequest(CoinPullRequest):
 
 
 class CoinoneCoinPullRequest(CoinPullRequest):
+    """Coinone
+
+    Args:
+        CoinPullRequest (_type_): abstruct class
+    """
+
     def __init__(self) -> None:
         super().__init__(market="coinone")
         self.__coinone_coin_list = header_to_json(url=f"{self.url}/currencies")
@@ -263,13 +269,10 @@ class CoinNameAndSymbolMatching:
     """
 
     def __init__(self) -> None:
-        self.__upbit = UpbitCoinPullRequest()
-        self.__bithumb = BithumbCoinPullRequest()
-        self.__korbit = KorbitCoinPullRequest()
-        self.__coinone = CoinoneCoinPullRequest()
-
-        self.__all_coin_symbols = self.__get_all_coin_symbols()
-        self.__duplication_coinsymbols = self.__get_duplication_coinsymbols()
+        self.upbit = UpbitCoinPullRequest()
+        self.bithumb = BithumbCoinPullRequest()
+        self.korbit = KorbitCoinPullRequest()
+        self.coinone = CoinoneCoinPullRequest()
 
     def __get_all_coin_symbols(self) -> list[str]:
         """
@@ -278,21 +281,23 @@ class CoinNameAndSymbolMatching:
         Returns:
             >>> list[str]: ["BTC"...]
         """
-        data = self.__upbit.get_coinsymbol_extraction()
-        data.extend(self.__bithumb.get_coinsymbol_extraction())
-        data.extend(self.__korbit.get_coinsymbol_extraction())
-        data.extend(self.__coinone.get_coinsymbol_extraction())
+        data = self.upbit.get_coinsymbol_extraction()
+        data.extend(self.bithumb.get_coinsymbol_extraction())
+        data.extend(self.korbit.get_coinsymbol_extraction())
+        data.extend(self.coinone.get_coinsymbol_extraction())
 
         return data
 
-    def __get_duplication_coinsymbols(self) -> list[str]:
+    def get_duplication_coinsymbols(self) -> list[str]:
         """
         Subject:
             - 중복 코인 추출\n
         Returns:
             >>> list[str]: ["BTC"...]
         """
-        results: list[tuple[str, int]] = Counter(self.__all_coin_symbols).most_common()
+        results: list[tuple[str, int]] = Counter(
+            self.__get_all_coin_symbols()
+        ).most_common()
         symbol_count: list[str] = [index for index, data in results if data == 4]
 
         return symbol_count
@@ -304,14 +309,14 @@ class CoinNameAndSymbolMatching:
         Returns:
             >>> list[dict[str, str]]: [{"BTC": "비트코인"}]
         """
-        upbit_symbol: list[dict[str, str]] = self.__upbit.upbit_coin_list
+        upbit_symbol: list[dict[str, str]] = self.upbit.upbit_coin_list
         symbol_name = [
             CoinNameAndSymbol(
                 coin_symbol=upbit_s["market"].split("KRW-")[-1],
                 korean_name=upbit_s["korean_name"],
             ).model_dump()
             for upbit_s in upbit_symbol
-            if upbit_s["market"].split("KRW-")[-1] in self.__duplication_coinsymbols
+            if upbit_s["market"].split("KRW-")[-1] in self.get_duplication_coinsymbols()
         ]
 
         return symbol_name

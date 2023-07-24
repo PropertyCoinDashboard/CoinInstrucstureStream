@@ -3,7 +3,7 @@ KAKFA NEW TOPIC CREATE
 """
 from confluent_kafka.admin import AdminClient, NewTopic
 from confluent_kafka.error import KafkaError, KafkaException, ProduceError
-from coin.core.config.create_log import log
+from coin.core.settings.create_log import log
 
 logger = log()
 

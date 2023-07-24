@@ -1,10 +1,21 @@
 """
 유틸 함수
 """
+from pathlib import Path
 from typing import Any
+import configparser
+
 import requests
 
-from coin.core.config.properties import UPBIT_URL, BITHUMB_URL, KORBIT_URL, COINONE
+
+path = Path(__file__).parent.parent
+parser = configparser.ConfigParser()
+parser.read(f"{path}/config/urls.conf")
+
+UPBIT_URL: str = parser.get("APIURL", "UPBIT")
+BITHUMB_URL: str = parser.get("APIURL", "BITHUMB")
+KORBIT_URL: str = parser.get("APIURL", "KORBIT")
+COINONE: str = parser.get("APIURL", "COINONE")
 
 
 def header_to_json(url: str) -> Any:

@@ -18,19 +18,19 @@ async def btc_present_start() -> None:
     """
     bitcoin kafak stream
     """
-    await CoinPresentPriceMarketPlace.total_pull_request("BTC", BTC_TOPIC_NAME)
+    await CoinPresentPriceMarketPlace().total_pull_request("BTC", BTC_TOPIC_NAME)
 
 
 async def eth_present_start() -> None:
     """
     ethereum kafak stream
     """
-    await CoinPresentPriceMarketPlace.total_pull_request("ETH", ETH_TOPIC_NAME)
+    await CoinPresentPriceMarketPlace().total_pull_request("ETH", ETH_TOPIC_NAME)
 
 
 async def be_present_gether() -> None:
     """
-    kafka async steam
+    kafka async stream
     """
     tasks = [
         asyncio.create_task(btc_present_start()),
@@ -60,4 +60,4 @@ async def data_sending_start() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(data_sending_start())
+    asyncio.run(btc_present_start())

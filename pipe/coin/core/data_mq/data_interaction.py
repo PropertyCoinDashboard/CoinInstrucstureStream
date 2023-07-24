@@ -5,11 +5,13 @@ KAFAK PRODUCE
 from typing import Any
 import json
 
-# from setting.create_log import log
+from coin.core.settings.create_log import log
 from confluent_kafka import Producer, KafkaException
 
 
-# logging = log()
+logging = log()
+
+
 def produce_sending(topic: Any, message: json) -> None:
     """
     kafka produce
@@ -20,9 +22,9 @@ def produce_sending(topic: Any, message: json) -> None:
 
     def delivery_report(err, msg) -> None:
         if err is not None:
-            print(f"Message delivery failed: {err}")
+            logging.info("Message delivery failed : %s", err)
         else:
-            print(f"Message delivered to {msg.topic()} --> [{msg.value()}]")
+            logging.info("Message delivered to : %s --> %s", msg.topic(), msg.value())
 
     produce = Producer(config)
     try:
@@ -30,12 +32,19 @@ def produce_sending(topic: Any, message: json) -> None:
             topic, value=json.dumps(message).encode("utf-8"), callback=delivery_report
         )
     except KafkaException as error:
-        print("kafka error : %s ", error)
+        logging.error("kafka error : %s ", error)
     finally:
         produce.flush()
 
 
 async def consume_messages(consumer, topic):
+    """
+    kafka messageing consumer
+
+    Args:
+        consumer (_type_): 컨슈머
+        topic (_type_): 받아오는 토픽
+    """
     await consumer.start()
     try:
         async for msg in consumer:

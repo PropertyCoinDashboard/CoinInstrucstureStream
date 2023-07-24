@@ -1,0 +1,46 @@
+{
+    "upbit": {
+        "timestamp": "trade_timestamp",
+        "parameter": [
+            "opening_price",
+            "trade_price",
+            "high_price",
+            "low_price",
+            "prev_closing_price",
+            "acc_trade_volume_24h"
+        ]
+    },
+    "bithumb": {
+        "timestamp": "date",
+        "parameter": [
+            "opening_price",
+            "closing_price",
+            "max_price",
+            "min_price",
+            "prev_closing_price",
+            "units_traded_24H"
+        ]
+    },
+    "coinone": {
+        "timestamp": "timestamp",
+        "parameter": [
+            "first",
+            "last",
+            "high",
+            "low",
+            "yesterday_last",
+            "target_volume"
+        ]
+    },
+    "korbit": {
+        "timestamp": "timestamp",
+        "parameter": [
+            "open",
+            "last",
+            "high",
+            "low",
+            "last",
+            "volume"
+        ]
+    }
+}
