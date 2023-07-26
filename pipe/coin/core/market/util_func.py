@@ -66,10 +66,13 @@ async def websocket_to_json(
             except json.JSONDecodeError:
                 logger.info(f"Failed to parse message as JSON: {message}")
 
-            if data.get("resmsg") == "Connected Successfully":
-                logger.info(f"Connected to {uri}, {data}")
-            elif data.get("event") == "korbit:connected":
-                logger.info(f"Connected to {uri}, {data}")
+            match data:
+                case {"resmsg": "Connected Successfully"}:
+                    logger.info(f"Connected to {uri}, {data}")
+                case {"event": "korbit:connected"}:
+                    logger.info(f"Connected to {uri}, {data}")
+                case _:
+                    logger.error("Not Found Market Connected")
 
             await handle_message(websocket, uri, queue)
         except asyncio.TimeoutError as e:
@@ -83,12 +86,13 @@ def header_to_json(url: str) -> Any:
     headers: dict[str, str] = {"accept": "application/json"}
     response = requests.get(url, headers=headers, timeout=60)
 
-    if response.status_code == 200:
-        return response.json()
-
-    raise requests.exceptions.RequestException(
-        f"API Request에 실패하였습니다 status code --> {response.status_code}"
-    )
+    match response.status_code:
+        case 200:
+            return response.json()
+        case _:
+            raise requests.exceptions.RequestException(
+                f"API Request에 실패하였습니다 status code --> {response.status_code}"
+            )
 
 
 # 반복 호출 줄이기 위해..
