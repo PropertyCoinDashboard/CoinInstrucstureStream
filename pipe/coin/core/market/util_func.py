@@ -13,9 +13,9 @@ import requests
 import websockets
 
 
-path = Path(__file__).parent.parent
+path = Path(__file__).parent
 parser = configparser.ConfigParser()
-parser.read(f"{path}/config/urls.conf")
+parser.read(f"{path.parent}/config/urls.conf")
 
 UPBIT_URL: str = parser.get("APIURL", "UPBIT")
 BITHUMB_URL: str = parser.get("APIURL", "BITHUMB")
@@ -32,7 +32,7 @@ async def handle_message(websocket: Any, url: str, queue: asyncio.Queue):
         queue (asyncio.Queue): 큐
     """
     log_name: str = url.split("//")[1].split(".")[1]
-    logger = log(f"{log_name}.log", log_name)
+    logger = log(f"{path.parent.parent}/streaming/log/{log_name}.log", log_name)
     while True:
         try:
             message = await asyncio.wait_for(websocket.recv(), timeout=30.0)
@@ -54,7 +54,7 @@ async def websocket_to_json(
         queue (asyncio.Queue): 큐
     """
     log_name: str = uri.split("//")[1].split(".")[1]
-    logger = log(f"{log_name}.log", log_name)
+    logger = log(f"{path.parent.parent}/streaming/log/{log_name}.log", log_name)
     async with websockets.connect(uri) as websocket:
         try:
             subscribe_data: str = json.dumps(subscribe_fmt)
@@ -65,7 +65,6 @@ async def websocket_to_json(
                 data = json.loads(message)
             except json.JSONDecodeError:
                 logger.info(f"Failed to parse message as JSON: {message}")
-                return
 
             if data.get("resmsg") == "Connected Successfully":
                 logger.info(f"Connected to {uri}, {data}")
@@ -75,19 +74,6 @@ async def websocket_to_json(
             await handle_message(websocket, uri, queue)
         except asyncio.TimeoutError as e:
             logger.error(f"Timeout while connecting to {uri}, Error: {e}")
-
-
-async def worker(input_queue: asyncio.Queue) -> None:
-    """빼는곳
-
-    Args:
-        queue (asyncio.Queue): 큐
-    """
-    logger = log(f"worker.log", "worker")
-    while True:
-        url, message = await input_queue.get()
-        logger.info(f"Message from {url}: {message}")
-        input_queue.task_done()
 
 
 def header_to_json(url: str) -> Any:
