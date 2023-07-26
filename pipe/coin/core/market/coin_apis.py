@@ -152,7 +152,7 @@ class CoinoneSocketAndPullRequest(CoinSocketAndPullRequest):
     def __init__(self) -> None:
         super().__init__(market="coinone")
         self.__coinone_coin_list = header_to_json(url=f"{self.url}/currencies")
-        self.__socket_parameter: list = None
+        self.__socket_parameter = None
 
     async def get_present_websocket(self, uri: str, subscribe_fmt: list[dict]):
         # 아직 미지원

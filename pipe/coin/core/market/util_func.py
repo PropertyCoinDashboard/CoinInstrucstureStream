@@ -4,13 +4,14 @@
 import json
 import asyncio
 import configparser
-from typing import Any, Coroutine
+from typing import Any
 from pathlib import Path
-from asyncio.exceptions import TimeoutError
+
+from coin.core.settings.create_log import log
 
 import requests
 import websockets
-import logging
+
 
 path = Path(__file__).parent.parent
 parser = configparser.ConfigParser()
@@ -22,21 +23,16 @@ KORBIT_URL: str = parser.get("APIURL", "KORBIT")
 COINONE: str = parser.get("APIURL", "COINONE")
 
 
-def setup_logger(name, log_file, level=logging.INFO):
-    handler = logging.FileHandler(log_file)
-    formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
-    handler.setFormatter(formatter)
-
-    logger = logging.getLogger(str(name))
-    logger.setLevel(level)
-    logger.addHandler(handler)
-
-    return logger
-
-
 async def handle_message(websocket: Any, url: str, queue: asyncio.Queue):
+    """비동기 큐 삽입구
+
+    Args:
+        websocket (Any): 소켓 입력값
+        url (str): 소켓 주소
+        queue (asyncio.Queue): 큐
+    """
     log_name: str = url.split("//")[1].split(".")[1]
-    logger = setup_logger(log_name, f"{log_name}.log")
+    logger = log(f"{log_name}.log", log_name)
     while True:
         try:
             message = await asyncio.wait_for(websocket.recv(), timeout=30.0)
@@ -50,8 +46,15 @@ async def handle_message(websocket: Any, url: str, queue: asyncio.Queue):
 async def websocket_to_json(
     uri: str, subscribe_fmt: list[dict], queue: asyncio.Queue
 ) -> None:
+    """비동기 요청
+
+    Args:
+        uri (str): 소켓 주소
+        subscribe_fmt (list[dict]): 소켓에 필요한 설정
+        queue (asyncio.Queue): 큐
+    """
     log_name: str = uri.split("//")[1].split(".")[1]
-    logger = setup_logger(log_name, f"{log_name}.log")
+    logger = log(f"{log_name}.log", log_name)
     async with websockets.connect(uri) as websocket:
         try:
             subscribe_data: str = json.dumps(subscribe_fmt)
@@ -74,12 +77,17 @@ async def websocket_to_json(
             logger.error(f"Timeout while connecting to {uri}, Error: {e}")
 
 
-async def worker(queue: asyncio.Queue) -> None:
-    logger = setup_logger("worker", f"worker.log")
+async def worker(input_queue: asyncio.Queue) -> None:
+    """빼는곳
+
+    Args:
+        queue (asyncio.Queue): 큐
+    """
+    logger = log(f"worker.log", "worker")
     while True:
-        url, message = await queue.get()
+        url, message = await input_queue.get()
         logger.info(f"Message from {url}: {message}")
-        queue.task_done()
+        input_queue.task_done()
 
 
 def header_to_json(url: str) -> Any:
