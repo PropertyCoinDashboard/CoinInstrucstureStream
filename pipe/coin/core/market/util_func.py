@@ -23,23 +23,23 @@ KORBIT_URL: str = parser.get("APIURL", "KORBIT")
 COINONE: str = parser.get("APIURL", "COINONE")
 
 
-async def handle_message(websocket: Any, url: str, queue: asyncio.Queue):
+async def handle_message(websocket: Any, uri: str, queue: asyncio.Queue):
     """비동기 큐 삽입구
 
     Args:
         websocket (Any): 소켓 입력값
-        url (str): 소켓 주소
+        uri (str): 소켓 주소
         queue (asyncio.Queue): 큐
     """
-    log_name: str = url.split("//")[1].split(".")[1]
+    log_name: str = uri.split("//")[1].split(".")[1]
     logger = log(f"{path.parent.parent}/streaming/log/{log_name}.log", log_name)
     while True:
         try:
             message = await asyncio.wait_for(websocket.recv(), timeout=30.0)
             logger.info(f"{message}")
-            await queue.put((url, message))  # put message into the queue
+            await queue.put((uri, message))  # put message into the queue
         except asyncio.TimeoutError:
-            logger.error(f"Timeout while receiving from {url}")
+            logger.error(f"Timeout while receiving from {uri}")
             break
 
 
