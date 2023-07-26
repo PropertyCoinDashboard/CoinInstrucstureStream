@@ -2,7 +2,6 @@
 Coin async present price kafka data streaming 
 """
 import asyncio
-import tracemalloc
 from asyncio.exceptions import CancelledError
 from typing import Any, Coroutine
 
@@ -11,23 +10,20 @@ from pydantic_core._pydantic_core import ValidationError
 
 
 from coin.core.market.data_format import CoinMarket, CoinMarketData
-from coin.core.settings.create_log import log
-
+from coin.core.market.coin_abstract_class import CoinPresentPriceMarketPlace
 from coin.core.settings.properties import market_setting
 from coin.core.data_mq.data_interaction import produce_sending
 
 
-class CoinPresentPriceMarketPlace:
+class CoinPresentPriceReponseAPI(CoinPresentPriceMarketPlace):
     """
     Coin present price market place
     """
 
     def __init__(self) -> None:
-        tracemalloc.start()
-        self.logger = log()
-        self.market_env: dict[str, dict[str, Any]] = market_setting("rest")
+        self.market_env = market_setting("rest")
 
-    async def __coin_present_architecture(
+    async def coin_present_architecture(
         self,
         market: str,
         time: str,
@@ -74,7 +70,7 @@ class CoinPresentPriceMarketPlace:
             str: market data as a string
         """
         market_info = self.market_env[market]
-        return await self.__coin_present_architecture(
+        return await self.coin_present_architecture(
             market=f"{market}-{coin_symbol.upper()}",
             coin_symbol=coin_symbol,
             time=market_info["timestamp"],

@@ -15,7 +15,7 @@ from coin.core.market.coin_apis import (
 path = Path(__file__).parent.parent
 
 
-class MarketAPIFactory:
+class __MarketAPIFactory:
     """factory market API
 
     Raises:
@@ -55,7 +55,7 @@ def load_json(conn_type: str):
         market_info = json.load(file)
 
     market_info = {
-        market: {**info, "api": MarketAPIFactory.market_load(market)}
+        market: {**info, "api": __MarketAPIFactory.market_load(market)}
         for market, info in market_info.items()
     }
 
@@ -64,6 +64,10 @@ def load_json(conn_type: str):
 
 def market_setting(conn_type: str) -> dict[str, dict[str, Any]]:
     """_summary_
+    Args:
+        - conn_ type (str)
+            - rest
+            - socket
 
     Returns:
         dict[str, dict[str, Any]]: market env setting 관리 포인트
