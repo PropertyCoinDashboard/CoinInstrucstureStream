@@ -1,9 +1,11 @@
 import tracemalloc
 from typing import Any
+from pathlib import Path
 
 from abc import ABCMeta, abstractmethod
 from coin.core.market.util_func import get_symbol_collect_url
-from coin.core.settings.create_log import log
+
+present_path = Path(__file__).parent.parent
 
 
 class CoinSocketAndPullRequest(metaclass=ABCMeta):
@@ -63,8 +65,7 @@ class CoinSocketAndPullRequest(metaclass=ABCMeta):
 class CoinPresentPriceMarketPlace(metaclass=ABCMeta):
     def __init__(self) -> None:
         tracemalloc.start()
-        self.logger = log()
 
     @abstractmethod
     async def coin_present_architecture(self):
-        pass
+        raise NotImplementedError()

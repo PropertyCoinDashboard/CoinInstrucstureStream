@@ -1,7 +1,7 @@
 """
 KAFAK PRODUCE 
 """
-
+from pathlib import Path
 from typing import Any
 import json
 
@@ -9,7 +9,10 @@ from coin.core.settings.create_log import log
 from confluent_kafka import Producer, KafkaException
 
 
-logging = log()
+present_path = Path(__file__).parent.parent
+logging = log(
+    log_location=f"{present_path}/log/kafka_message.log", name="messge_sending"
+)
 
 
 def produce_sending(topic: Any, message: json) -> None:

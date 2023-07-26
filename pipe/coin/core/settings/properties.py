@@ -62,7 +62,7 @@ def load_json(conn_type: str):
     return market_info
 
 
-def market_setting(conn_type: str) -> dict[str, dict[str, Any]]:
+def market_setting(conn_type: str) -> Any:
     """_summary_
     Args:
         - conn_ type (str)
@@ -70,8 +70,8 @@ def market_setting(conn_type: str) -> dict[str, dict[str, Any]]:
             - socket
 
     Returns:
-        dict[str, dict[str, Any]]: market env setting 관리 포인트
-    """
+        - rest : dict[str, dict[str, Any]]
+        - socket : Any"""
     match conn_type:
         case "rest":
             return load_json("rest")

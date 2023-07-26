@@ -4,7 +4,7 @@
 
 import asyncio
 
-from coin.core.coin_rest_interaction import CoinPresentPriceReponseAPI
+from coin.streaming.coin_rest_interaction import CoinPresentPriceReponseAPI
 from coin.core.data_mq.data_admin import new_topic_initialization
 from connection.properties import (
     BTC_TOPIC_NAME,
@@ -60,4 +60,4 @@ async def data_sending_start() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(btc_present_start())
+    asyncio.run(data_sending_start())

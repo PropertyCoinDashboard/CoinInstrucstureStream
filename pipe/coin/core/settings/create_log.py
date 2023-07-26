@@ -4,9 +4,10 @@ log
 import logging
 
 
-def log():
+def log(log_location: str, name: str):
     # 로그 생성
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger(name=name)
+    logger.propagate = False
 
     # 로그의 출력 기준 설정
     logger.setLevel(logging.INFO)
@@ -22,7 +23,7 @@ def log():
     logger.addHandler(stream_handler)
 
     # log를 파일에 출력
-    file_handler = logging.FileHandler(filename="coin/core/log/coin.log")
+    file_handler = logging.FileHandler(filename=log_location)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
 

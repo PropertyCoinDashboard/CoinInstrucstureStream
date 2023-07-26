@@ -1,6 +1,8 @@
 """
 코인 정보 추상화
 """
+import uuid
+import asyncio
 from typing import Any
 from collections import Counter
 from datetime import datetime, timezone
@@ -24,13 +26,15 @@ class UpbitSocketAndPullRequest(CoinSocketAndPullRequest):
         )
         self.__upbit_websocket = "wss://api.upbit.com/websocket/v1"
         self.__socket_parameter: list[dict[str, Any]] = [
-            {"ticket": "UNIQUE_TICKET"},
+            {"ticket": str(uuid.uuid4())},
             {"type": "ticker", "codes": ["KRW-BTC"], "isOnlyRealtime": True},
         ]
 
-    async def get_present_websocket(self):
+    async def get_present_websocket(self, queue) -> None:
         return await websocket_to_json(
-            uri=self.__upbit_websocket, subscribe_fmt=self.__socket_parameter
+            uri=self.__upbit_websocket,
+            subscribe_fmt=self.__socket_parameter,
+            queue=queue,
         )
 
     def get_coin_present_price(self, coin_name: str) -> dict[str, Any]:
@@ -89,9 +93,11 @@ class BithumbSocketAndPullRequest(CoinSocketAndPullRequest):
             "tickTypes": ["MID"],
         }
 
-    async def get_present_websocket(self):
+    async def get_present_websocket(self, queue):
         return await websocket_to_json(
-            uri=self.__bithumb_websocket, subscribe_fmt=self.__socket_parameter
+            uri=self.__bithumb_websocket,
+            subscribe_fmt=self.__socket_parameter,
+            queue=queue,
         )
 
     def get_coin_present_price(self, coin_name: str) -> dict[str, Any]:
@@ -208,14 +214,16 @@ class KorbitSocketAndPullRequest(CoinSocketAndPullRequest):
         self.__korbit_websocket = "wss://ws.korbit.co.kr/v1/user/push"
         self.__socket_parameter: dict[str, Any] = {
             "accessToken": None,
-            "timestamp": datetime.now(timezone.utc),
+            "timestamp": int(datetime.now(timezone.utc).timestamp()),
             "event": "korbit:subscribe",
             "data": {"channels": ["ticker:btc_krw"]},
         }
 
-    async def get_present_websocket(self):
+    async def get_present_websocket(self, queue):
         return await websocket_to_json(
-            uri=self.__korbit_websocket, subscribe_fmt=self.__socket_parameter
+            uri=self.__korbit_websocket,
+            subscribe_fmt=self.__socket_parameter,
+            queue=queue,
         )
 
     def get_coin_present_price(self, coin_name: str) -> dict[str, Any]:

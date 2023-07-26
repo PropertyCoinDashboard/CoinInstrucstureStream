@@ -1,11 +1,15 @@
 """
 KAKFA NEW TOPIC CREATE
 """
+from pathlib import Path
 from confluent_kafka.admin import AdminClient, NewTopic
 from confluent_kafka.error import KafkaError, KafkaException, ProduceError
 from coin.core.settings.create_log import log
 
-logger = log()
+present_path = Path(__file__).parent.parent
+logger = log(
+    log_location=f"{present_path}/log/kafka_topic_create.log", name="topic_create"
+)
 
 
 def new_topic_initialization(
@@ -30,7 +34,7 @@ def new_topic_initialization(
     for topic, f in create_topic.items():
         try:
             f.result()
-            print(f"Topic create -> {topic}")
+            logger.info(f"Topic create -> {topic}")
         except (KafkaException, KafkaError, ProduceError) as error:
             if error.args[0].code() != KafkaError.TOPIC_ALREADY_EXISTS:
                 logger.error("Failed to create topic --> %s: %s", topic, error)
