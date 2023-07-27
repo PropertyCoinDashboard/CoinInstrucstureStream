@@ -4,8 +4,8 @@
 import json
 import asyncio
 import configparser
-from typing import Any
 from pathlib import Path
+from typing import Any, Coroutine
 
 from coin.core.settings.create_log import log
 
@@ -20,10 +20,12 @@ parser.read(f"{path.parent}/config/urls.conf")
 UPBIT_URL: str = parser.get("APIURL", "UPBIT")
 BITHUMB_URL: str = parser.get("APIURL", "BITHUMB")
 KORBIT_URL: str = parser.get("APIURL", "KORBIT")
-COINONE: str = parser.get("APIURL", "COINONE")
+COINONE_URL: str = parser.get("APIURL", "COINONE")
 
 
-async def handle_message(websocket: Any, uri: str, queue: asyncio.Queue):
+async def handle_message(
+    websocket: Any, uri: str, queue: asyncio.Queue
+) -> Coroutine[Any, Any, None]:
     """비동기 큐 삽입구
 
     Args:
@@ -45,7 +47,7 @@ async def handle_message(websocket: Any, uri: str, queue: asyncio.Queue):
 
 async def websocket_to_json(
     uri: str, subscribe_fmt: list[dict], queue: asyncio.Queue
-) -> None:
+) -> Coroutine[Any, Any, None]:
     """비동기 요청
 
     Args:
@@ -53,12 +55,15 @@ async def websocket_to_json(
         subscribe_fmt (list[dict]): 소켓에 필요한 설정
         queue (asyncio.Queue): 큐
     """
+    # log setting
     log_name: str = uri.split("//")[1].split(".")[1]
     logger = log(f"{path.parent.parent}/streaming/log/{log_name}.log", log_name)
+
     async with websockets.connect(uri) as websocket:
         try:
             subscribe_data: str = json.dumps(subscribe_fmt)
             await websocket.send(subscribe_data)
+            asyncio.sleep(1)
 
             message: str = await asyncio.wait_for(websocket.recv(), timeout=30.0)
             try:
@@ -66,6 +71,7 @@ async def websocket_to_json(
             except json.JSONDecodeError:
                 logger.info(f"Failed to parse message as JSON: {message}")
 
+            # match 표현식
             match data:
                 case {"resmsg": "Connected Successfully"}:
                     logger.info(f"Connected to {uri}, {data}")
@@ -116,6 +122,6 @@ def get_symbol_collect_url(market: str) -> str:
         case "korbit":
             return KORBIT_URL
         case "coinone":
-            return COINONE
+            return COINONE_URL
         case _:
             raise ValueError("Not Found market")
