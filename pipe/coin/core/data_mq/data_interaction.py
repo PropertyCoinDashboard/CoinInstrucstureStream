@@ -30,7 +30,7 @@ async def produce_sending(topic: Any, message: json):
 
     try:
         await producer.send_and_wait(topic, json.dumps(message).encode("utf-8"))
-        logging.info(f"Message delivered to: {topic}")
+        logging.info(f"Message delivered to: {topic} --> {message}")
     except Exception as error:
         logging.error(f"kafka error: {error}")
     finally:

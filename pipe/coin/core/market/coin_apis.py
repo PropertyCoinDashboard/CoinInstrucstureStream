@@ -7,7 +7,7 @@ from typing import Any
 from collections import Counter
 from datetime import datetime, timezone
 
-from coin.core.market.util_func import header_to_json, websocket_to_json
+from coin.core.market.util_func import header_to_json, MarketPresentPriceWebsocket
 from coin.core.market.coin_abstract_class import CoinSocketAndPullRequest
 from coin.core.market.data_format import CoinSymbol, CoinNameAndSymbol
 
@@ -31,7 +31,7 @@ class UpbitSocketAndPullRequest(CoinSocketAndPullRequest):
         ]
 
     async def get_present_websocket(self, queue) -> None:
-        return await websocket_to_json(
+        return await MarketPresentPriceWebsocket().websocket_to_json(
             uri=self.__upbit_websocket,
             subscribe_fmt=self.__socket_parameter,
             queue=queue,
@@ -94,7 +94,7 @@ class BithumbSocketAndPullRequest(CoinSocketAndPullRequest):
         }
 
     async def get_present_websocket(self, queue):
-        return await websocket_to_json(
+        return await MarketPresentPriceWebsocket().websocket_to_json(
             uri=self.__bithumb_websocket,
             subscribe_fmt=self.__socket_parameter,
             queue=queue,
@@ -220,7 +220,7 @@ class KorbitSocketAndPullRequest(CoinSocketAndPullRequest):
         }
 
     async def get_present_websocket(self, queue):
-        return await websocket_to_json(
+        return await MarketPresentPriceWebsocket().websocket_to_json(
             uri=self.__korbit_websocket,
             subscribe_fmt=self.__socket_parameter,
             queue=queue,
