@@ -6,8 +6,7 @@ from typing import Any
 import json
 
 from coin.core.settings.create_log import log
-from confluent_kafka import Producer, KafkaException
-
+from aiokafka import AIOKafkaProducer
 
 present_path = Path(__file__).parent.parent
 logging = log(
@@ -15,29 +14,27 @@ logging = log(
 )
 
 
-def produce_sending(topic: Any, message: json) -> None:
+async def produce_sending(topic: Any, message: json):
     """
-    kafka produce
+    kafka produce using aiokafka
     """
     config: dict[str, str] = {
-        "bootstrap.servers": "kafka1:19092, kafka2:29092, kafka3:39092"
+        "bootstrap_servers": "kafka1:19092, kafka2:29092, kafka3:39092"
     }
 
-    def delivery_report(err, msg) -> None:
-        if err is not None:
-            logging.info("Message delivery failed : %s", err)
-        else:
-            logging.info("Message delivered to : %s --> %s", msg.topic(), msg.value())
+    producer = AIOKafkaProducer(**config)
 
-    produce = Producer(config)
+    await producer.start()
+    if isinstance(message, bytes):
+        message = message.decode("utf-8")
+
     try:
-        produce.produce(
-            topic, value=json.dumps(message).encode("utf-8"), callback=delivery_report
-        )
-    except KafkaException as error:
-        logging.error("kafka error : %s ", error)
+        await producer.send_and_wait(topic, json.dumps(message).encode("utf-8"))
+        logging.info(f"Message delivered to: {topic}")
+    except Exception as error:
+        logging.error(f"kafka error: {error}")
     finally:
-        produce.flush()
+        await producer.stop()
 
 
 async def consume_messages(consumer, topic):

@@ -8,9 +8,9 @@ from pathlib import Path
 from typing import Any, Coroutine
 
 from coin.core.settings.create_log import log
+from coin.core.data_mq.data_interaction import produce_sending
 
 import requests
-import aiohttp
 import websockets
 
 
@@ -40,10 +40,12 @@ async def handle_message(
         try:
             message = await asyncio.wait_for(websocket.recv(), timeout=30.0)
             logger.info(f"{message}")
+
+            await produce_sending(topic=f"{log_name}_socket", message=message)
             await queue.put((uri, message))  # put message into the queue
         except asyncio.TimeoutError:
             logger.error(f"Timeout while receiving from {uri}")
-            break
+            await produce_sending(topic=f"{log_name}_timeout", message={"timeout": uri})
 
 
 async def websocket_to_json(
@@ -58,7 +60,9 @@ async def websocket_to_json(
     """
     # log setting
     log_name: str = uri.split("//")[1].split(".")[1]
-    logger = log(f"{path.parent.parent}/streaming/log/{log_name}.log", log_name)
+    logger = log(
+        f"{path.parent.parent}/streaming/log/{log_name}_connection.log", log_name
+    )
 
     async with websockets.connect(uri) as websocket:
         try:
