@@ -1,17 +1,11 @@
 """
 유틸 함수
 """
-import json
-import asyncio
 import configparser
 from pathlib import Path
-from typing import Any, Coroutine
-
-from coin.core.settings.create_log import log
-from coin.core.data_mq.data_interaction import produce_sending
+from typing import Any
 
 import requests
-import websockets
 
 
 path = Path(__file__).parent
@@ -22,72 +16,6 @@ UPBIT_URL: str = parser.get("APIURL", "UPBIT")
 BITHUMB_URL: str = parser.get("APIURL", "BITHUMB")
 KORBIT_URL: str = parser.get("APIURL", "KORBIT")
 COINONE_URL: str = parser.get("APIURL", "COINONE")
-
-
-async def handle_message(
-    websocket: Any, uri: str, queue: asyncio.Queue
-) -> Coroutine[Any, Any, None]:
-    """비동기 큐 삽입구
-
-    Args:
-        websocket (Any): 소켓 입력값
-        uri (str): 소켓 주소
-        queue (asyncio.Queue): 큐
-    """
-    log_name: str = uri.split("//")[1].split(".")[1]
-    logger = log(f"{path.parent.parent}/streaming/log/{log_name}.log", log_name)
-    while True:
-        try:
-            message = await asyncio.wait_for(websocket.recv(), timeout=30.0)
-            logger.info(f"{message}")
-
-            await produce_sending(topic=f"{log_name}_socket", message=message)
-            await queue.put((uri, message))  # put message into the queue
-        except asyncio.TimeoutError:
-            logger.error(f"Timeout while receiving from {uri}")
-            await produce_sending(topic=f"{log_name}_timeout", message={"timeout": uri})
-
-
-async def websocket_to_json(
-    uri: str, subscribe_fmt: list[dict], queue: asyncio.Queue
-) -> Coroutine[Any, Any, None]:
-    """비동기 요청
-
-    Args:
-        uri (str): 소켓 주소
-        subscribe_fmt (list[dict]): 소켓에 필요한 설정
-        queue (asyncio.Queue): 큐
-    """
-    # log setting
-    log_name: str = uri.split("//")[1].split(".")[1]
-    logger = log(
-        f"{path.parent.parent}/streaming/log/{log_name}_connection.log", log_name
-    )
-
-    async with websockets.connect(uri) as websocket:
-        try:
-            subscribe_data: str = json.dumps(subscribe_fmt)
-            await websocket.send(subscribe_data)
-            asyncio.sleep(1)
-
-            message: str = await asyncio.wait_for(websocket.recv(), timeout=30.0)
-            try:
-                data = json.loads(message)
-            except json.JSONDecodeError:
-                logger.info(f"Failed to parse message as JSON: {message}")
-
-            # match 표현식
-            match data:
-                case {"resmsg": "Connected Successfully"}:
-                    logger.info(f"Connected to {uri}, {data}")
-                case {"event": "korbit:connected"}:
-                    logger.info(f"Connected to {uri}, {data}")
-                case _:
-                    logger.error("Not Found Market Connected")
-
-            await handle_message(websocket, uri, queue)
-        except asyncio.TimeoutError as e:
-            logger.error(f"Timeout while connecting to {uri}, Error: {e}")
 
 
 def header_to_json(url: str) -> Any:
