@@ -2,6 +2,7 @@
 Coin async present price kafka data streaming 
 """
 import asyncio
+from pathlib import Path
 from asyncio.exceptions import CancelledError
 from typing import Any, Coroutine
 
@@ -12,7 +13,10 @@ from pydantic_core._pydantic_core import ValidationError
 from coin.core.market.data_format import CoinMarket, CoinMarketData
 from coin.core.market.coin_abstract_class import CoinPresentPriceMarketPlace
 from coin.core.settings.properties import market_setting
+from coin.core.settings.create_log import log
 from coin.core.data_mq.data_interaction import produce_sending
+
+present_path = Path(__file__).parent
 
 
 class CoinPresentPriceReponseAPI(CoinPresentPriceMarketPlace):
@@ -22,6 +26,7 @@ class CoinPresentPriceReponseAPI(CoinPresentPriceMarketPlace):
 
     def __init__(self) -> None:
         self.market_env = market_setting("rest")
+        self.logger = log(f"{present_path}/log/error.log", "error")
 
     async def coin_present_architecture(
         self,
@@ -30,7 +35,7 @@ class CoinPresentPriceReponseAPI(CoinPresentPriceMarketPlace):
         coin_symbol: str,
         api: Any,
         data: tuple[str, str, str, str, str, str],
-    ) -> (dict[str, Any] | None):
+    ) -> Coroutine[Any, Any, dict[str, Any] | None]:
         """
         Coin present price architecture
 
@@ -44,8 +49,10 @@ class CoinPresentPriceReponseAPI(CoinPresentPriceMarketPlace):
             CoinMarketData: pydantic in JSON transformation
         """
         try:
-            api_response = api.get_coin_present_price(coin_name=coin_symbol.upper())
-            market_time = api_response[time]
+            api_response = await api.get_coin_present_price(
+                coin_name=coin_symbol.upper()
+            )
+            market_time: int = api_response[time]
 
             return CoinMarketData.from_api(
                 market=market,
@@ -58,7 +65,7 @@ class CoinPresentPriceReponseAPI(CoinPresentPriceMarketPlace):
 
     async def __get_market_present_price(
         self, market: str, coin_symbol: str
-    ) -> (dict[str, Any] | None):
+    ) -> Coroutine[Any, Any, dict[str, Any] | None]:
         """
         Get market present price
 

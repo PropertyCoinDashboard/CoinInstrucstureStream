@@ -10,6 +10,7 @@ from typing import Any, Coroutine
 from coin.core.settings.create_log import log
 
 import requests
+import aiohttp
 import websockets
 
 
@@ -101,7 +102,6 @@ def header_to_json(url: str) -> Any:
             )
 
 
-# 반복 호출 줄이기 위해..
 def get_symbol_collect_url(market: str) -> str:
     """URL matting
 
