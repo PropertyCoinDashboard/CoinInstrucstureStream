@@ -25,15 +25,21 @@ class UpbitSocketAndPullRequest(CoinSocketAndPullRequest):
             url=f"{self.url}/market/all?isDetails=true"
         )
         self.__upbit_websocket = "wss://api.upbit.com/websocket/v1"
-        self.__socket_parameter: list[dict[str, Any]] = [
+
+    def get_socket_parameter(self, symbol: str) -> list[dict[str, Any]]:
+        return [
             {"ticket": str(uuid.uuid4())},
-            {"type": "ticker", "codes": ["KRW-BTC"], "isOnlyRealtime": True},
+            {
+                "type": "ticker",
+                "codes": [f"KRW-{symbol.upper()}"],
+                "isOnlyRealtime": True,
+            },
         ]
 
-    async def get_present_websocket(self, queue) -> None:
+    async def get_present_websocket(self, queue: asyncio.Queue, symbol: str) -> None:
         return await MarketPresentPriceWebsocket().websocket_to_json(
             uri=self.__upbit_websocket,
-            subscribe_fmt=self.__socket_parameter,
+            subscribe_fmt=self.get_socket_parameter(symbol=symbol),
             queue=queue,
         )
 
@@ -87,16 +93,18 @@ class BithumbSocketAndPullRequest(CoinSocketAndPullRequest):
             url=f"{self.url}/ticker/ALL_KRW"
         )
         self.__bithumb_websocket = "wss://pubwss.bithumb.com/pub/ws"
-        self.__socket_parameter: dict[str, Any] = {
+
+    def get_socket_parameter(self, symbol: str) -> dict[str, Any]:
+        return {
             "type": "ticker",
-            "symbols": ["BTC_KRW"],
+            "symbols": [f"{symbol.upper()}_KRW"],
             "tickTypes": ["MID"],
         }
 
-    async def get_present_websocket(self, queue):
+    async def get_present_websocket(self, queue: asyncio.Queue, symbol: str) -> None:
         return await MarketPresentPriceWebsocket().websocket_to_json(
             uri=self.__bithumb_websocket,
-            subscribe_fmt=self.__socket_parameter,
+            subscribe_fmt=self.get_socket_parameter(symbol=symbol),
             queue=queue,
         )
 
@@ -212,17 +220,19 @@ class KorbitSocketAndPullRequest(CoinSocketAndPullRequest):
             url=f"{self.url}/ticker/detailed/all"
         )
         self.__korbit_websocket = "wss://ws.korbit.co.kr/v1/user/push"
-        self.__socket_parameter: dict[str, Any] = {
+
+    def get_socket_parameter(self, symbol: str) -> dict[str, Any]:
+        return {
             "accessToken": None,
             "timestamp": int(datetime.now(timezone.utc).timestamp()),
             "event": "korbit:subscribe",
-            "data": {"channels": ["ticker:btc_krw"]},
+            "data": {"channels": [f"ticker:{symbol.lower()}_krw"]},
         }
 
-    async def get_present_websocket(self, queue):
+    async def get_present_websocket(self, queue: asyncio.Queue, symbol: str) -> None:
         return await MarketPresentPriceWebsocket().websocket_to_json(
             uri=self.__korbit_websocket,
-            subscribe_fmt=self.__socket_parameter,
+            subscribe_fmt=self.get_socket_parameter(symbol=symbol),
             queue=queue,
         )
 

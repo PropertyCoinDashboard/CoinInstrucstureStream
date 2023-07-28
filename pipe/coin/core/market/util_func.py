@@ -64,7 +64,7 @@ def get_symbol_collect_url(market: str) -> str:
             raise ValueError("Not Found market")
 
 
-def parse_uri(uri: str):
+def parse_uri(uri: str) -> str:
     """
     주어진 URI를 파싱해서 로그 이름을 반환하는 함수.
 
@@ -82,10 +82,7 @@ class MarketPresentPriceWebsocket:
     Coin Stream
     """
 
-    def __init__(self) -> None:
-        self.logger = log(f"{path.parent}/log/worker.log", "worker")
-
-    def create_logger(self, log_name: str, exchange_name: str):
+    def create_logger(self, log_name: str, exchange_name: str, log_type: str):
         """
         주어진 이름으로 로거를 생성하는 함수.
 
@@ -96,10 +93,30 @@ class MarketPresentPriceWebsocket:
         Returns:
             logger: 주어진 이름으로 설정된 로거를 반환.
         """
-        return log(
-            f"{path.parent.parent}/streaming/log/{exchange_name}.log",
-            log_name,
+        try:
+            logger = log(
+                f"{path.parent.parent}/streaming/log/{exchange_name}/{exchange_name}_{log_type}.log",
+                log_name,
+            )
+            return logger
+        except (FileNotFoundError, FileExistsError):
+            a = path.parent.parent / "streaming" / "log" / exchange_name
+            a.mkdir()
+
+    async def get_register_connection(self, message: bytes | str, uri: str):
+        """
+        market websocket register
+
+        Args:
+            message (_type_): register message
+        """
+        log_name = parse_uri(uri)
+        logger = self.create_logger(
+            log_name=log_name + "-register",
+            exchange_name=log_name,
+            log_type="register",
         )
+        logger.info(message)
 
     async def put_message_to_queue(
         self, message: str, uri: str, queue: asyncio.Queue
@@ -112,12 +129,26 @@ class MarketPresentPriceWebsocket:
             uri (str): 메시지와 연관된 URI.
             queue (asyncio.Queue): 메시지를 넣을 큐.
         """
-        log_name = parse_uri(uri)
-        logger = self.create_logger(log_name=log_name, exchange_name=log_name)
+        register_message = [
+            "Filter Registered Successfully",
+            "korbit:subscribe",
+        ]
+        # filter
+        matches_all = any(ignore in str(message) for ignore in register_message)
 
-        logger.info(f"{message}")
-        await produce_sending(topic=f"{log_name}_socket", message=message)
-        await queue.put((uri, message))
+        if matches_all:
+            # register log만
+            await self.get_register_connection(str(message), uri=uri)
+        else:
+            log_name = parse_uri(uri)
+            logger = self.create_logger(
+                log_name=log_name + "-data", exchange_name=log_name, log_type="_data"
+            )
+            logger.info(message)
+            await queue.put((uri, message))
+            await produce_sending(
+                topic=f"{log_name}_socket", message=json.loads(message)
+            )
 
     async def handle_message(
         self, websocket: Any, uri: str, queue: asyncio.Queue
@@ -131,7 +162,9 @@ class MarketPresentPriceWebsocket:
             queue (asyncio.Queue): 메시지를 넣을 큐.
         """
         log_name = parse_uri(uri)
-        logger = self.create_logger(log_name=log_name, exchange_name=log_name)
+        logger = self.create_logger(
+            log_name=log_name + "not", exchange_name=log_name, log_type="not_connection"
+        )
 
         while True:
             try:
@@ -152,7 +185,7 @@ class MarketPresentPriceWebsocket:
         """
         subscribe_data: str = json.dumps(subscribe_fmt)
         await websocket.send(subscribe_data)
-        asyncio.sleep(1)
+        asyncio.sleep(2)
 
     async def handle_connection(
         self, websocket: Any, uri: str
@@ -170,7 +203,9 @@ class MarketPresentPriceWebsocket:
         message: str = await asyncio.wait_for(websocket.recv(), timeout=30.0)
         data = json.loads(message)
         log_name = parse_uri(uri)
-        logger = self.create_logger(log_name=log_name, exchange_name=log_name)
+        logger = self.create_logger(
+            log_name=log_name + "connect", exchange_name=log_name, log_type="connect"
+        )
 
         match data:
             case {"resmsg": "Connected Successfully"}:
@@ -178,7 +213,7 @@ class MarketPresentPriceWebsocket:
             case {"event": "korbit:connected"}:
                 logger.info(f"Connected to {uri}, {data}")
             case _:
-                logger.error("Not Found Market Connected")
+                logger.info(f"Connected to {uri}, {data}")
 
     async def websocket_to_json(
         self, uri: str, subscribe_fmt: list[dict], queue: asyncio.Queue
@@ -192,7 +227,9 @@ class MarketPresentPriceWebsocket:
             queue (asyncio.Queue): 받은 메시지를 넣을 큐.
         """
         log_name = parse_uri(uri)
-        logger = self.create_logger(log_name=log_name, exchange_name=log_name)
+        logger = self.create_logger(
+            log_name=log_name + "start", exchange_name=log_name, log_type="socket_start"
+        )
 
         async with websockets.connect(uri) as websocket:
             try:
