@@ -49,9 +49,7 @@ class CoinPresentPriceReponseAPI(CoinPresentPriceMarketPlace):
             CoinMarketData: pydantic in JSON transformation
         """
         try:
-            api_response = await api.get_coin_present_price(
-                coin_name=coin_symbol.upper()
-            )
+            api_response = api.get_coin_present_price(coin_name=coin_symbol.upper())
             market_time: int = api_response[time]
 
             return CoinMarketData.from_api(

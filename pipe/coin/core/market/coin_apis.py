@@ -41,6 +41,7 @@ class UpbitSocketAndPullRequest(CoinSocketAndPullRequest):
             uri=self.__upbit_websocket,
             subscribe_fmt=self.get_socket_parameter(symbol=symbol),
             queue=queue,
+            symbol=symbol,
         )
 
     def get_coin_present_price(self, coin_name: str) -> dict[str, Any]:
@@ -106,6 +107,7 @@ class BithumbSocketAndPullRequest(CoinSocketAndPullRequest):
             uri=self.__bithumb_websocket,
             subscribe_fmt=self.get_socket_parameter(symbol=symbol),
             queue=queue,
+            symbol=symbol,
         )
 
     def get_coin_present_price(self, coin_name: str) -> dict[str, Any]:
@@ -161,6 +163,9 @@ class CoinoneSocketAndPullRequest(CoinSocketAndPullRequest):
         super().__init__(market="coinone")
         self.__coinone_coin_list = header_to_json(url=f"{self.url}/currencies")
         self.__socket_parameter = None
+
+    def get_socket_parameter(self) -> list[dict[str, Any]]:
+        pass
 
     async def get_present_websocket(self, uri: str, subscribe_fmt: list[dict]):
         # 아직 미지원
@@ -234,6 +239,7 @@ class KorbitSocketAndPullRequest(CoinSocketAndPullRequest):
             uri=self.__korbit_websocket,
             subscribe_fmt=self.get_socket_parameter(symbol=symbol),
             queue=queue,
+            symbol=symbol,
         )
 
     def get_coin_present_price(self, coin_name: str) -> dict[str, Any]:

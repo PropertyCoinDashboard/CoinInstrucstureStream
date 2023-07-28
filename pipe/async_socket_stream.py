@@ -6,7 +6,7 @@ from coin.streaming.coin_socket_interaction import CoinPresentPriceWebsocket
 async def coin_price_streaming() -> Coroutine[Any, Any, NoReturn]:
     coin_present_price_websocket = CoinPresentPriceWebsocket()
     while True:
-        await coin_present_price_websocket.coin_present_architecture()
+        await coin_present_price_websocket.coin_present_architecture("BTC")
 
 
 if __name__ == "__main__":

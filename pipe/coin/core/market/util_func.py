@@ -119,12 +119,13 @@ class MarketPresentPriceWebsocket:
         logger.info(message)
 
     async def put_message_to_queue(
-        self, message: str, uri: str, queue: asyncio.Queue
+        self, message: str, uri: str, queue: asyncio.Queue, symbol: str
     ) -> Coroutine[Any, Any, None]:
         """
         메시지를 로깅하고 큐에 넣는 함수.
 
         Args:
+            symbol (str): 심볼 메시지
             message (str): 큐에 넣을 메시지.
             uri (str): 메시지와 연관된 URI.
             queue (asyncio.Queue): 메시지를 넣을 큐.
@@ -146,12 +147,13 @@ class MarketPresentPriceWebsocket:
             )
             logger.info(message)
             await queue.put((uri, message))
+
             await produce_sending(
-                topic=f"{log_name}_socket", message=json.loads(message)
+                topic=f"{log_name}{symbol}socket", message=json.loads(message)
             )
 
     async def handle_message(
-        self, websocket: Any, uri: str, queue: asyncio.Queue
+        self, websocket: Any, uri: str, queue: asyncio.Queue, symbol: str
     ) -> Coroutine[Any, Any, None]:
         """
         웹소켓에서 메시지를 지속적으로 받아 큐에 넣는 함수.
@@ -169,7 +171,7 @@ class MarketPresentPriceWebsocket:
         while True:
             try:
                 message = await asyncio.wait_for(websocket.recv(), timeout=30.0)
-                await self.put_message_to_queue(message, uri, queue)
+                await self.put_message_to_queue(message, uri, queue, symbol=symbol)
             except asyncio.TimeoutError:
                 logger.error(f"Timeout while receiving from {uri}")
 
@@ -177,7 +179,7 @@ class MarketPresentPriceWebsocket:
         self, websocket: Any, subscribe_fmt: list[dict]
     ) -> Coroutine[Any, Any, None]:
         """
-        데이터 보내기
+        소켓 인증하기 위한 절차 보내기
 
         Args:
             websocket (Any): 웹소켓
@@ -216,7 +218,7 @@ class MarketPresentPriceWebsocket:
                 logger.info(f"Connected to {uri}, {data}")
 
     async def websocket_to_json(
-        self, uri: str, subscribe_fmt: list[dict], queue: asyncio.Queue
+        self, uri: str, subscribe_fmt: list[dict], queue: asyncio.Queue, symbol: str
     ) -> Coroutine[Any, Any, None]:
         """
         웹소켓에 연결하고, 구독 데이터를 전송하고, 받은 메시지를 처리하는 함수.
@@ -235,6 +237,6 @@ class MarketPresentPriceWebsocket:
             try:
                 await self.send_data(websocket, subscribe_fmt)
                 await self.handle_connection(websocket, uri)
-                await self.handle_message(websocket, uri, queue)
+                await self.handle_message(websocket, uri, queue, symbol=symbol)
             except asyncio.TimeoutError as e:
                 logger.error(f"Timeout while connecting to {uri}, Error: {e}")
