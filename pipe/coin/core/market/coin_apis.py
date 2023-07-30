@@ -36,11 +36,10 @@ class UpbitSocketAndPullRequest(CoinSocketAndPullRequest):
             },
         ]
 
-    async def get_present_websocket(self, queue: asyncio.Queue, symbol: str) -> None:
+    async def get_present_websocket(self, symbol: str) -> None:
         return await MarketPresentPriceWebsocket().websocket_to_json(
             uri=self.__upbit_websocket,
             subscribe_fmt=self.get_socket_parameter(symbol=symbol),
-            queue=queue,
             symbol=symbol,
         )
 
@@ -102,11 +101,10 @@ class BithumbSocketAndPullRequest(CoinSocketAndPullRequest):
             "tickTypes": ["MID"],
         }
 
-    async def get_present_websocket(self, queue: asyncio.Queue, symbol: str) -> None:
+    async def get_present_websocket(self, symbol: str) -> None:
         return await MarketPresentPriceWebsocket().websocket_to_json(
             uri=self.__bithumb_websocket,
             subscribe_fmt=self.get_socket_parameter(symbol=symbol),
-            queue=queue,
             symbol=symbol,
         )
 
@@ -234,11 +232,10 @@ class KorbitSocketAndPullRequest(CoinSocketAndPullRequest):
             "data": {"channels": [f"ticker:{symbol.lower()}_krw"]},
         }
 
-    async def get_present_websocket(self, queue: asyncio.Queue, symbol: str) -> None:
+    async def get_present_websocket(self, symbol: str) -> None:
         return await MarketPresentPriceWebsocket().websocket_to_json(
             uri=self.__korbit_websocket,
             subscribe_fmt=self.get_socket_parameter(symbol=symbol),
-            queue=queue,
             symbol=symbol,
         )
 

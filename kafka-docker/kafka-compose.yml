@@ -127,6 +127,29 @@ services:
       - 8080:8080
     networks:
       - kafka-network
+  
+  fluentd:
+    image: fluent/fluentd:v1.13-1
+    build: 
+      context: .
+      dockerfile: ./fluentd/Dockerfile    
+    volumes:
+      - ./fluentd/fluentd.conf:/fluentd/etc/fluent.conf
+      - ./logs:/fluentd/log 
+      - /Users/imhaneul/Documents/project/CoinPresentStreaming/pipe/coin/streaming/log/bithumb/bithumb__data_BTC.log:/fluentd/etc/bithumb__data_BTC.log
+      - /Users/imhaneul/Documents/project/CoinPresentStreaming/pipe/coin/streaming/log/korbit/korbit__data_BTC.log:/fluentd/etc/korbit__data_BTC.log
+      - /Users/imhaneul/Documents/project/CoinPresentStreaming/pipe/coin/streaming/log/upbit/upbit__data_BTC.log:/fluentd/etc/upbit__data_BTC.log
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3    
+
+    networks:
+      - kafka-network
+
 
 networks:
   kafka-network:

@@ -10,7 +10,6 @@ from typing import Any, Coroutine
 import requests
 import websockets
 from coin.core.settings.create_log import log
-from coin.core.data_mq.data_interaction import produce_sending
 
 
 path = Path(__file__).parent
@@ -117,8 +116,8 @@ class MarketPresentPriceWebsocket:
         )
         logger.info(message)
 
-    async def put_message_to_queue(
-        self, message: str, uri: str, queue: asyncio.Queue, symbol: str
+    async def put_message_to_logging(
+        self, message: str, uri: str, symbol: str
     ) -> Coroutine[Any, Any, None]:
         """
         메시지를 로깅하고 큐에 넣는 함수.
@@ -134,27 +133,23 @@ class MarketPresentPriceWebsocket:
             "korbit:subscribe",
         ]
         # filter
-        matches_all = any(ignore in message for ignore in register_message)
+        matches_all: bool = any(ignore in str(message) for ignore in register_message)
 
         if matches_all:
             # register log만
             await self.get_register_connection(message, uri=uri)
         else:
             log_name = parse_uri(uri)
-            logger = self.create_logger(
+            conn_logger = self.create_logger(
                 log_name=f"{log_name}-data",
                 exchange_name=log_name,
-                log_type="_data",
+                log_type=f"_data_{symbol}",
             )
-            logger.info(message)
-            await queue.put((uri, message))
-
-            await produce_sending(
-                topic=f"{log_name}{symbol}socket", message=json.loads(message)
-            )
+            asyncio.sleep(2)
+            conn_logger.info(message)
 
     async def handle_message(
-        self, websocket: Any, uri: str, queue: asyncio.Queue, symbol: str
+        self, websocket: Any, uri: str, symbol: str
     ) -> Coroutine[Any, Any, None]:
         """
         웹소켓에서 메시지를 지속적으로 받아 큐에 넣는 함수.
@@ -174,7 +169,8 @@ class MarketPresentPriceWebsocket:
         while True:
             try:
                 message = await asyncio.wait_for(websocket.recv(), timeout=30.0)
-                await self.put_message_to_queue(message, uri, queue, symbol=symbol)
+                asyncio.sleep(100.0)
+                await self.put_message_to_logging(message, uri, symbol=symbol)
             except asyncio.TimeoutError:
                 logger.error(f"Timeout while receiving from {uri}")
 
@@ -220,10 +216,10 @@ class MarketPresentPriceWebsocket:
             case {"event": "korbit:connected"}:
                 logger.info(f"Connected to {uri}, {data}")
             case _:
-                logger.info(f"Connected to {uri}, {data}")
+                logger.info(f"Connected to {uri}")
 
     async def websocket_to_json(
-        self, uri: str, subscribe_fmt: list[dict], queue: asyncio.Queue, symbol: str
+        self, uri: str, subscribe_fmt: list[dict], symbol: str
     ) -> Coroutine[Any, Any, None]:
         """
         웹소켓에 연결하고, 구독 데이터를 전송하고, 받은 메시지를 처리하는 함수.
@@ -244,6 +240,6 @@ class MarketPresentPriceWebsocket:
             try:
                 await self.send_data(websocket, subscribe_fmt)
                 await self.handle_connection(websocket, uri)
-                await self.handle_message(websocket, uri, queue, symbol=symbol)
+                await self.handle_message(websocket, uri, symbol=symbol)
             except asyncio.TimeoutError as e:
                 logger.error(f"Timeout while connecting to {uri}, Error: {e}")
