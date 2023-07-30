@@ -331,7 +331,7 @@ class CoinNameAndSymbolMatching:
             >>> list[dict[str, str]]: [{"BTC": "비트코인"}]
         """
         upbit_symbol: list[dict[str, str]] = self.upbit.upbit_coin_list
-        symbol_name = [
+        return [
             CoinNameAndSymbol(
                 coin_symbol=upbit_s["market"].split("KRW-")[-1],
                 korean_name=upbit_s["korean_name"],
@@ -339,5 +339,3 @@ class CoinNameAndSymbolMatching:
             for upbit_s in upbit_symbol
             if upbit_s["market"].split("KRW-")[-1] in self.get_duplication_coinsymbols()
         ]
-
-        return symbol_name
