@@ -98,7 +98,7 @@ class MarketPresentPriceWebsocket:
                 log_name,
             )
         except (FileNotFoundError, FileExistsError):
-            a = path.parent.parent / "streaming" / "log" / exchange_name
+            a: Path = path.parent.parent / "streaming" / "log" / exchange_name
             a.mkdir()
 
     async def get_register_connection(self, message: bytes | str, uri: str):
@@ -128,6 +128,10 @@ class MarketPresentPriceWebsocket:
             uri (str): 메시지와 연관된 URI.
             queue (asyncio.Queue): 메시지를 넣을 큐.
         """
+        from coin.core.settings.properties import market_setting
+        from coin.core.market.data_format import CoinMarketData
+
+        market: json = market_setting("socket")
         register_message = [
             "Filter Registered Successfully",
             "korbit:subscribe",
@@ -139,14 +143,33 @@ class MarketPresentPriceWebsocket:
             # register log만
             await self.get_register_connection(message, uri=uri)
         else:
-            log_name = parse_uri(uri)
-            conn_logger = self.create_logger(
-                log_name=f"{log_name}-data",
-                exchange_name=log_name,
-                log_type=f"_data_{symbol}",
-            )
-            asyncio.sleep(2)
-            conn_logger.info(message)
+            try:
+                log_name = parse_uri(uri)
+                message = json.loads(message)
+                conn_logger = self.create_logger(
+                    log_name=f"{log_name}-data",
+                    exchange_name=log_name,
+                    log_type=f"_data_{symbol}",
+                )
+                # conn_logger.info(message)
+
+                # bithumb, korbit 등 특정 거래소에 대한 추가 처리
+                if log_name == "bithumb":
+                    message = message["content"]
+                elif log_name == "korbit":
+                    message = message["data"]
+
+                time = message[market[log_name]["timestamp"]]
+                market_schema = CoinMarketData(
+                    market=log_name,
+                    time=time,
+                    data={key: message[key] for key in market[log_name]["parameter"]},
+                ).model_dump()
+
+                # 변환된 메시지 로깅
+                conn_logger.info(market_schema)
+            except Exception as e:
+                print(e)
 
     async def handle_message(
         self, websocket: Any, uri: str, symbol: str

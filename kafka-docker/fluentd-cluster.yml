@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  fluentd1: &fluentd
+      image: fluent/fluentd:v1.13-1
+      build: 
+        context: .
+        dockerfile: ./fluentd/Dockerfile    
+      volumes:
+        - ./fluentd/fluentd.conf:/fluentd/etc/fluent.conf
+        - ./logs:/fluentd/log
+        - /Users/imhaneul/Documents/project/CoinPresentStreaming/pipe/coin/streaming/log/bithumb/bithumb__data_BTC.log:/fluentd/etc/bithumb__data_BTC.log
+        - /Users/imhaneul/Documents/project/CoinPresentStreaming/pipe/coin/streaming/log/upbit/upbit__data_BTC.log:/fluentd/etc/upbit__data_BTC.log
+        - /Users/imhaneul/Documents/project/CoinPresentStreaming/pipe/coin/streaming/log/korbit/korbit__data_BTC.log
+      ports:
+        - "24225:24224"
+      networks:
+        - kafka-network
+
+  fluentd2:
+    <<: *fluentd
+    ports:
+      - "24226:24224"
+    networks:
+      - kafka-network
+
+  fluentd3:
+    <<: *fluentd
+    ports:
+      - "24227:24224"
+    networks:
+      - kafka-network
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "24230:24230"
+    networks:
+      - kafka-network
+    depends_on:
+      - fluentd1
+      - fluentd2
+      - fluentd3
+
+
+networks:
+  kafka-network:
+    driver: bridge

@@ -3,18 +3,15 @@ COIN Streaming socket initialiation
 """
 import asyncio
 from pathlib import Path
-from typing import Any, Coroutine, NoReturn
+from typing import Any, Coroutine
 from asyncio.exceptions import TimeoutError, CancelledError
 
 from coin.core.market.coin_abstract_class import CoinPresentPriceMarketPlace
 from coin.core.settings.properties import market_setting
 from coin.core.settings.create_log import log
-from coin.core.market.data_format import CoinMarket
-from coin.core.data_mq.data_interaction import produce_sending
 
 
 present_path = Path(__file__).parent
-logger = log(f"{present_path}/log/worker.log", "worker")
 
 
 class CoinPresentPriceWebsocket(CoinPresentPriceMarketPlace):

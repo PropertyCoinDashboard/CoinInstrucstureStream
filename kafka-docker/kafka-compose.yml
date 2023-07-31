@@ -7,14 +7,14 @@ services:
     environment:
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_CLIENT_PORT: 12181
-      ZOOKEEPER_DATA_DIR: /zookeeper/data
+      ZOOKEEPER_DATA_DIR: kafkalogging/zookeeper/data
       ZOOKEEPER_SERVERS: zookeeper1:22888:23888;zookeeper2:32888:33888;zookeeper3:42888:43888
     ports:
       - 12181:12181
       - 22888:22888
       - 23888:23888
     volumes:
-      - ./zookeeper/data/1:/zookeeper/data
+      - .kafkalogging/zookeeper/data/1:/zookeeper/data
     networks:
       - kafka-network
 
@@ -24,14 +24,14 @@ services:
     environment:
       ZOOKEEPER_SERVER_ID: 2
       ZOOKEEPER_CLIENT_PORT: 22181
-      ZOOKEEPER_DATA_DIR: /zookeeper/data
+      ZOOKEEPER_DATA_DIR: kafkalogging/zookeeper/data
       ZOOKEEPER_SERVERS: zookeeper1:22888:23888;zookeeper2:32888:33888;zookeeper3:42888:43888
     ports:
       - 22181:22181
       - 32888:32888
       - 33888:33888
     volumes:
-      - ./zookeeper/data/2:/zookeeper/data
+      - .kafkalogging/zookeeper/data/2:/zookeeper/data
     networks:
       - kafka-network
 
@@ -41,14 +41,14 @@ services:
     environment:
       ZOOKEEPER_SERVER_ID: 3
       ZOOKEEPER_CLIENT_PORT: 32181
-      ZOOKEEPER_DATA_DIR: /zookeeper/data
+      ZOOKEEPER_DATA_DIR: kafkalogging/zookeeper/data
       ZOOKEEPER_SERVERS: zookeeper1:22888:23888;zookeeper2:32888:33888;zookeeper3:42888:43888
     ports:
       - 32181:32181
       - 42888:42888
       - 43888:43888
     volumes:
-      - ./zookeeper/data/3:/zookeeper/data
+      - .kafkalogging/zookeeper/data/3:/zookeeper/data
     networks:
       - kafka-network
 
@@ -63,11 +63,11 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper1:12181,zookeeper2:22181,zookeeper3:32181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:19092
-      KAFKA_LOG_DIRS: /kafka
+      KAFKA_LOG_DIRS: kafkalogging/kafka
     ports:
       - 19092:19092
     volumes:
-      - ./kafka/logs/1:/kafka
+      - .kafkalogging/kafka/logs/1:/kafka
     networks:
       - kafka-network
 
@@ -82,11 +82,11 @@ services:
       KAFKA_BROKER_ID: 2
       KAFKA_ZOOKEEPER_CONNECT: zookeeper1:12181,zookeeper2:22181,zookeeper3:32181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:29092
-      KAFKA_LOG_DIRS: /kafka
+      KAFKA_LOG_DIRS: kafkalogging/kafka
     ports:
       - 29092:29092
     volumes:
-      - ./kafka/logs/2:/kafka
+      - .kafkalogging/kafka/logs/2:/kafka
     networks:
       - kafka-network
 
@@ -101,11 +101,11 @@ services:
       KAFKA_BROKER_ID: 3
       KAFKA_ZOOKEEPER_CONNECT: zookeeper1:12181,zookeeper2:22181,zookeeper3:32181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:39092
-      KAFKA_LOG_DIRS: /kafka
+      KAFKA_LOG_DIRS: kafkalogging/kafka
     ports:
       - 39092:39092
     volumes:
-      - ./kafka/logs/3:/kafka
+      - .kafkalogging/kafka/logs/3:/kafka
     networks:
       - kafka-network
 
@@ -128,28 +128,41 @@ services:
     networks:
       - kafka-network
   
-  fluentd:
-    image: fluent/fluentd:v1.13-1
-    build: 
-      context: .
-      dockerfile: ./fluentd/Dockerfile    
-    volumes:
-      - ./fluentd/fluentd.conf:/fluentd/etc/fluent.conf
-      - ./logs:/fluentd/log 
-      - /Users/imhaneul/Documents/project/CoinPresentStreaming/pipe/coin/streaming/log/bithumb/bithumb__data_BTC.log:/fluentd/etc/bithumb__data_BTC.log
-      - /Users/imhaneul/Documents/project/CoinPresentStreaming/pipe/coin/streaming/log/korbit/korbit__data_BTC.log:/fluentd/etc/korbit__data_BTC.log
-      - /Users/imhaneul/Documents/project/CoinPresentStreaming/pipe/coin/streaming/log/upbit/upbit__data_BTC.log:/fluentd/etc/upbit__data_BTC.log
-    ports:
-      - "24224:24224"
-      - "24224:24224/udp"
+  fluentd1:
+    extends:
+      service: fluentd1
+      file: fluentd-cluster.yml 
     depends_on:
       - kafka-1
       - kafka-2
-      - kafka-3    
+      - kafka-3
 
-    networks:
-      - kafka-network
+  fluentd2:
+    extends:
+      service: fluentd2
+      file: fluentd-cluster.yml 
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
 
+  fluentd3:
+    extends:
+      service: fluentd3
+      file: fluentd-cluster.yml 
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+  
+  nginx:
+    extends:
+      service: nginx
+      file: fluentd-cluster.yml 
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
 
 networks:
   kafka-network:
