@@ -1,15 +1,18 @@
 """
 유틸 함수
 """
+import sys
 import json
 import asyncio
 import configparser
 from pathlib import Path
 from typing import Any, Coroutine
+from collections import defaultdict
 
 import requests
 import websockets
 from coin.core.settings.create_log import log
+from coin.core.data_mq.data_interaction import produce_sending
 
 
 path = Path(__file__).parent
@@ -20,6 +23,7 @@ UPBIT_URL: str = parser.get("APIURL", "UPBIT")
 BITHUMB_URL: str = parser.get("APIURL", "BITHUMB")
 KORBIT_URL: str = parser.get("APIURL", "KORBIT")
 COINONE_URL: str = parser.get("APIURL", "COINONE")
+MAXLISTSIZE: int = 85
 
 
 def header_to_json(url: str) -> Any:
@@ -80,6 +84,19 @@ class MarketPresentPriceWebsocket:
     """
     Coin Stream
     """
+
+    def __init__(self) -> None:
+        self.conn_logger = self.create_logger(
+            log_name="price-data",
+            exchange_name="total",
+            log_type="price_data_counting",
+        )
+        self.error_logger = self.create_logger(
+            log_name="error-logger",
+            exchange_name="total",
+            log_type="error_data_counting",
+        )
+        self.message_by_data = defaultdict(list)
 
     def create_logger(self, log_name: str, exchange_name: str, log_type: str):
         """
@@ -146,12 +163,6 @@ class MarketPresentPriceWebsocket:
             try:
                 log_name = parse_uri(uri)
                 message = json.loads(message)
-                conn_logger = self.create_logger(
-                    log_name=f"{log_name}-data",
-                    exchange_name=log_name,
-                    log_type=f"_data_{symbol}",
-                )
-                # conn_logger.info(message)
 
                 # bithumb, korbit 등 특정 거래소에 대한 추가 처리
                 if log_name == "bithumb":
@@ -166,10 +177,22 @@ class MarketPresentPriceWebsocket:
                     data={key: message[key] for key in market[log_name]["parameter"]},
                 ).model_dump()
 
-                # 변환된 메시지 로깅
-                conn_logger.info(market_schema)
-            except Exception as e:
-                print(e)
+                self.message_by_data[log_name].append(market_schema)
+                await self.message_kafka_sending(name=log_name, symbol=symbol)
+
+                self.conn_logger.info(market_schema)
+            except Exception as error:
+                self.error_logger.error("Price Scoket Connection Error --> %s", error)
+
+    async def message_kafka_sending(
+        self, name: str, symbol: str
+    ) -> Coroutine[Any, Any, None]:
+        if len(self.message_by_data[name]) >= MAXLISTSIZE:
+            await produce_sending(
+                topic=f"{symbol.lower()}SocketDataIn{name.replace(name[0], name[0].upper(), 1)}",
+                message=self.message_by_data[name],
+            )
+            self.message_by_data[name]
 
     async def handle_message(
         self, websocket: Any, uri: str, symbol: str
@@ -252,17 +275,13 @@ class MarketPresentPriceWebsocket:
             subscribe_fmt (list[dict]): 연결 후 전송할 데이터.
             queue (asyncio.Queue): 받은 메시지를 넣을 큐.
         """
-        log_name = parse_uri(uri)
-        logger = self.create_logger(
-            log_name=f"{log_name}start",
-            exchange_name=log_name,
-            log_type="socket_start",
-        )
 
         async with websockets.connect(uri) as websocket:
             try:
                 await self.send_data(websocket, subscribe_fmt)
                 await self.handle_connection(websocket, uri)
                 await self.handle_message(websocket, uri, symbol=symbol)
-            except asyncio.TimeoutError as e:
-                logger.error(f"Timeout while connecting to {uri}, Error: {e}")
+            except asyncio.TimeoutError as error:
+                self.error_logger.error(
+                    "Timeout while connecting to %s, Error: %s", uri, error
+                )

@@ -128,41 +128,54 @@ services:
     networks:
       - kafka-network
   
-  fluentd1:
-    extends:
-      service: fluentd1
-      file: fluentd-cluster.yml 
-    depends_on:
-      - kafka-1
-      - kafka-2
-      - kafka-3
+  # fluentd1:
+  #   extends:
+  #     service: fluentd1
+  #     file: fluentd-cluster.yml 
+  #   depends_on:
+  #     - kafka-1
+  #     - kafka-2
+  #     - kafka-3
+  #     - zookeeper-1
+  #     - zookeeper-2
+  #     - zookeeper-3
 
-  fluentd2:
-    extends:
-      service: fluentd2
-      file: fluentd-cluster.yml 
-    depends_on:
-      - kafka-1
-      - kafka-2
-      - kafka-3
+  # fluentd2:
+  #   extends:
+  #     service: fluentd2
+  #     file: fluentd-cluster.yml 
+  #   depends_on:
+  #     - kafka-1
+  #     - kafka-2
+  #     - kafka-3
+  #     - zookeeper-1
+  #     - zookeeper-2
+  #     - zookeeper-3
 
-  fluentd3:
-    extends:
-      service: fluentd3
-      file: fluentd-cluster.yml 
-    depends_on:
-      - kafka-1
-      - kafka-2
-      - kafka-3
+  # fluentd3:
+  #   extends:
+  #     service: fluentd3
+  #     file: fluentd-cluster.yml 
+  #   depends_on:
+  #     - kafka-1
+  #     - kafka-2
+  #     - kafka-3
+  #     - zookeeper-1
+  #     - zookeeper-2
+  #     - zookeeper-3
   
-  nginx:
-    extends:
-      service: nginx
-      file: fluentd-cluster.yml 
-    depends_on:
-      - kafka-1
-      - kafka-2
-      - kafka-3
+  # nginx:
+  #   extends:
+  #     service: nginx
+  #     file: fluentd-cluster.yml 
+  #   depends_on:
+  #     - kafka-1
+  #     - kafka-2
+  #     - kafka-3
+  #     - zookeeper-1
+  #     - zookeeper-2
+  #     - zookeeper-3
+
 
 networks:
   kafka-network:

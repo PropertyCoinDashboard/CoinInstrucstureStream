@@ -19,7 +19,9 @@ async def produce_sending(topic: Any, message: json):
     kafka produce using aiokafka
     """
     config: dict[str, str] = {
-        "bootstrap_servers": "kafka1:19092, kafka2:29092, kafka3:39092"
+        "bootstrap_servers": "kafka1:19092, kafka2:29092, kafka3:39092",
+        "security_protocol": "PLAINTEXT",
+        "max_batch_size": 32768,
     }
 
     producer = AIOKafkaProducer(**config)
