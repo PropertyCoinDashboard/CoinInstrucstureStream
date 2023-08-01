@@ -148,23 +148,22 @@ class MarketPresentPriceWebsocket:
         from coin.core.settings.properties import market_setting
         from coin.core.market.data_format import CoinMarketData
 
+        log_name = parse_uri(uri)
+        message = json.loads(message)
         market: json = market_setting("socket")
         register_message = [
             "Filter Registered Successfully",
             "korbit:subscribe",
         ]
         # filter
-        matches_all: bool = any(ignore in str(message) for ignore in register_message)
+        matches_all: bool = any(ignore in message for ignore in register_message)
 
         if matches_all:
             # register log만
             await self.get_register_connection(message, uri=uri)
         else:
             try:
-                log_name = parse_uri(uri)
-                message = json.loads(message)
-
-                # bithumb, korbit 등 특정 거래소에 대한 추가 처리
+                # bithumb, korbit 특정 거래소에 대한 추가 처리
                 if log_name == "bithumb":
                     message = message["content"]
                 elif log_name == "korbit":
@@ -192,7 +191,7 @@ class MarketPresentPriceWebsocket:
                 topic=f"{symbol.lower()}SocketDataIn{name.replace(name[0], name[0].upper(), 1)}",
                 message=self.message_by_data[name],
             )
-            self.message_by_data[name]
+            self.message_by_data[name] = []
 
     async def handle_message(
         self, websocket: Any, uri: str, symbol: str

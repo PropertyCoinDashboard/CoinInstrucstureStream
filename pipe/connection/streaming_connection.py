@@ -38,7 +38,7 @@ def stream_injection(topic: str) -> "DataFrame":
         .load()
     )
 
-    data_df = (
+    return (
         stream_df.selectExpr("CAST(value AS STRING)")
         .select(from_json("value", schema=final_schema).alias("crypto"))
         .selectExpr(
@@ -60,8 +60,6 @@ def stream_injection(topic: str) -> "DataFrame":
         )
         .select(to_json(struct(col("average_price"))).alias("value"))
     )
-
-    return data_df
 
 
 def run_spark_streaming(name: str, topics: str, retrieve_topic: str) -> None:

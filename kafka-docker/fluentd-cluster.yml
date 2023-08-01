@@ -9,9 +9,9 @@ services:
       volumes:
         - ./fluentd/fluentd.conf:/fluentd/etc/fluent.conf
         - ./logs:/fluentd/log
-        - /Users/imhaneul/Documents/project/CoinPresentStreaming/pipe/coin/streaming/log/upbit/upbit__data_BTC.log:/fluentd/etc/upbit__data_BTC.log
-        - /Users/imhaneul/Documents/project/CoinPresentStreaming/pipe/coin/streaming/log/bithumb/bithumb__data_BTC.log:/fluentd/etc/bithumb__data_BTC.log
-        - /Users/imhaneul/Documents/project/CoinPresentStreaming/pipe/coin/streaming/log/korbit/korbit__data_BTC.log:/fluentd/etc/korbit__data_BTC.log
+        - LOG_DIR/
+        - LOG_DIR/
+        - LOG_DIR/
       ports:
         - "24225:24224"
       networks:
@@ -48,3 +48,7 @@ services:
 networks:
   kafka-network:
     driver: bridge
+
+# 환경 변수 정의
+environment:
+  - LOG_DIR=/Users/imhaneul/Documents/project/CoinPresentStreaming/pipe/coin/streaming/log

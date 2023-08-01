@@ -32,9 +32,11 @@ async def produce_sending(topic: Any, message: json):
 
     try:
         await producer.send_and_wait(topic, json.dumps(message).encode("utf-8"))
-        logging.info(f"Message delivered to: {topic} --> {message}")
+        logging.info(
+            "Message delivered to: %s --> counting --> %s", topic, len(message)
+        )
     except Exception as error:
-        logging.error(f"kafka error: {error}")
+        logging.error("kafka error: %s", error)
     finally:
         await producer.stop()
 
