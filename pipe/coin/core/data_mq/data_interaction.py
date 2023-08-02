@@ -1,12 +1,15 @@
 """
 KAFAK PRODUCE 
 """
+from collections import defaultdict
 from pathlib import Path
 from typing import Any
 import json
+import sys
 
 from coin.core.settings.create_log import log
 from aiokafka import AIOKafkaProducer
+from aiokafka.errors import NoBrokersAvailable, KafkaProtocolError
 
 present_path = Path(__file__).parent.parent
 logging = log(
@@ -14,16 +17,18 @@ logging = log(
 )
 
 
+except_list = defaultdict(list)
+
+
 async def produce_sending(topic: Any, message: json):
-    """
-    kafka produce using aiokafka
-    """
-    config: dict[str, str] = {
+    config = {
         "bootstrap_servers": "kafka1:19092, kafka2:29092, kafka3:39092",
         "security_protocol": "PLAINTEXT",
-        "max_batch_size": 32768,
+        "max_batch_size": 16384,
+        "max_request_size": 7000,
+        "enable_idempotence": False,
+        "acks": "all",
     }
-
     producer = AIOKafkaProducer(**config)
 
     await producer.start()
@@ -31,12 +36,24 @@ async def produce_sending(topic: Any, message: json):
         message = message.decode("utf-8")
 
     try:
-        await producer.send_and_wait(topic, json.dumps(message).encode("utf-8"))
+        encoded_message = json.dumps(message).encode("utf-8")
+        await producer.send_and_wait(topic, encoded_message)
+        size: int = sys.getsizeof(encoded_message)
         logging.info(
-            "Message delivered to: %s --> counting --> %s", topic, len(message)
+            "Message delivered to: %s --> counting --> %s size --> %s",
+            topic,
+            len(message),
+            size,
         )
-    except Exception as error:
-        logging.error("kafka error: %s", error)
+
+        # 불능 상태에서 저장된 메시지가 있는 경우 함께 전송
+        while except_list[topic]:
+            stored_message = except_list[topic].pop(0)
+            await producer.send_and_wait(topic, stored_message)
+
+    except (NoBrokersAvailable, KafkaProtocolError) as error:
+        logging.error("Kafka error로 인해 임시 저장합니다 : %s, message: %s", error, message)
+        except_list[topic].append(json.dumps(message).encode("utf-8"))
     finally:
         await producer.stop()
 

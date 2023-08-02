@@ -10,7 +10,7 @@ from collections import defaultdict
 
 import requests
 import websockets
-from coin.core.settings.create_log import log, SocketLogCustomer
+from coin.core.settings.create_log import SocketLogCustomer
 from coin.core.data_mq.data_interaction import produce_sending
 
 
@@ -177,6 +177,17 @@ class MarketPresentPriceWebsocket:
     async def message_kafka_sending(
         self, market_name: str, symbol: str
     ) -> Coroutine[Any, Any, None]:
+        """카프카 메시지 전송
+
+        Args:
+            market_name (str): 마켓이름
+            symbol (str): 심볼이름
+
+        Returns:
+            Coroutine[Any, Any, None]: 코루틴으로 yield가 지속적으로 생성되니 어떠한 값이 들어올 줄 몰라 Any
+        """
+
+        # MAXLISTSIZE = 10
         if len(self.message_by_data[market_name]) >= MAXLISTSIZE:
             await produce_sending(
                 topic=f"{symbol.lower()}SocketDataIn{market_name.replace(market_name[0], market_name[0].upper(), 1)}",
@@ -188,12 +199,10 @@ class MarketPresentPriceWebsocket:
         self, websocket: Any, uri: str, symbol: str
     ) -> Coroutine[Any, Any, None]:
         """
-        웹소켓에서 메시지를 지속적으로 받아 큐에 넣는 함수.
-
         Args:
             websocket (Any): 메시지를 받을 웹소켓.
             uri (str): 웹소켓과 연관된 URI.
-            queue (asyncio.Queue): 메시지를 넣을 큐.
+            symbol (str): coin_symbol
         """
         log_name = parse_uri(uri)
         logger = self.p.create_logger(
@@ -205,7 +214,7 @@ class MarketPresentPriceWebsocket:
         while True:
             try:
                 message = await asyncio.wait_for(websocket.recv(), timeout=30.0)
-                asyncio.sleep(100.0)
+                await asyncio.sleep(1.0)
                 await self.put_message_to_logging(message, uri, symbol=symbol)
             except asyncio.TimeoutError:
                 logger.error(f"Timeout while receiving from {uri}")
@@ -222,7 +231,7 @@ class MarketPresentPriceWebsocket:
         """
         subscribe_data: str = json.dumps(subscribe_fmt)
         await websocket.send(subscribe_data)
-        asyncio.sleep(2)
+        await asyncio.sleep(2)
 
     async def handle_connection(
         self, websocket: Any, uri: str
@@ -275,3 +284,33 @@ class MarketPresentPriceWebsocket:
                 self.error_logger.error(
                     "Timeout while connecting to %s, Error: %s", uri, error
                 )
+
+
+"""
+리팩토링 준비 
+1. 기능 분리 
+2. 로깅 분리 
+3. 정형화 
+
+class ConnectionManager:
+    async def send_data(self, websocket, subscribe_fmt):
+        # ...
+
+    async def handle_connection(self, websocket, uri):
+        # ...
+
+class MessageHandler:
+    async def handle_message(self, websocket, uri, symbol):
+        # ...
+
+    async def put_message_to_logging(self, message, uri, symbol):
+        # ...
+
+class MarketPresentPriceWebsocket:
+    # ...
+
+    def __init__(self):
+        self.connection_manager = ConnectionManager()
+        self.message_handler = MessageHandler()
+
+"""
