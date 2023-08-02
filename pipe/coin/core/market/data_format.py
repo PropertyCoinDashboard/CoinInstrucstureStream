@@ -1,9 +1,20 @@
 """
 Coin present data format architecture
 """
-
+from dataclasses import dataclass
 from typing import Mapping, Any
+from decimal import Decimal
 from pydantic import BaseModel
+
+
+@dataclass
+class PriceData:
+    opening_price: float
+    trade_price: float
+    max_price: float
+    min_price: float
+    prev_closing_price: float
+    acc_trade_volume_24h: float
 
 
 class CoinSymbol(BaseModel):
@@ -80,15 +91,30 @@ class CoinMarketData(BaseModel):
 
     market: str
     time: int
-    data: dict[str, Any]
+    data: PriceData
+
+    @classmethod
+    def _create_price_data(cls, api: Mapping[str, str], data: list) -> "PriceData":
+        try:
+            return PriceData(
+                opening_price=float(api[data[0]]),
+                trade_price=float(api[data[1]]),
+                max_price=float(api[data[2]]),
+                min_price=float(api[data[3]]),
+                prev_closing_price=float(api[data[4]]),
+                acc_trade_volume_24h=float(api[data[5]]),
+            )
+        except KeyError as e:
+            raise KeyError(f"Key {e} not found in API response") from e
 
     @classmethod
     def from_api(
         cls,
         market: str,
         time: int,
+        coin_symbol: str,
         api: Mapping[str, Any],
-        data: tuple[str, str, str, str, str, str],
+        data: list,
     ) -> "CoinMarketData":
         """다음과 같은 dictionary를 만들기 위한 pydantic json model architecture
         >>>  {
@@ -113,13 +139,5 @@ class CoinMarketData(BaseModel):
         Returns:
             CoinMarketData: _description_
         """
-        price_data: dict[str, float] = {
-            "opening_price": float(api[data[0]]),
-            "trade_price": float(api[data[1]]),
-            "max_price": float(api[data[2]]),
-            "min_price": float(api[data[3]]),
-            "prev_closing_price": float(api[data[4]]),
-            "acc_trade_volume_24h": float(api[data[5]]),
-        }
-
-        return cls(market=market, time=time, data=price_data)
+        price_data = cls._create_price_data(api=api, data=data)
+        return cls(market=market, coin_symbol=coin_symbol, time=time, data=price_data)
