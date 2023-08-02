@@ -8,7 +8,7 @@ import numpy as np
 
 
 def get_utc_time() -> int:
-    utc_now = datetime.datetime.utcnow()
+    utc_now = datetime.datetime.now(datetime.timezone.utc)
     return int(utc_now.timestamp())
 
 
@@ -34,18 +34,20 @@ def streaming_preprocessing(name: str, *data: tuple) -> str:
             }
 
     """
-    roww: list[tuple] = [d for d in data]
-    value = list(zip(*roww))
-    average: list = np.mean(value, axis=1).tolist()
+    try:
+        roww: list[tuple] = list(data)
+        value = [tuple(map(float, item)) for item in zip(*roww)]  # 문자열을 float로 변환
+        average: list = np.mean(value, axis=1).tolist()
+        data_dict = CoinPrice(
+            opening_price=average[0],
+            closing_price=average[1],
+            max_price=average[2],
+            min_price=average[3],
+            prev_closing_price=average[4],
+            acc_trade_volume_24h=average[5],
+        )
 
-    data_dict = CoinPrice(
-        opening_price=average[0],
-        closing_price=average[1],
-        max_price=average[2],
-        min_price=average[3],
-        prev_closing_price=average[4],
-        acc_trade_volume_24h=average[5],
-    )
-
-    streaming_data = StreamingData(name=name, time=get_utc_time(), data=data_dict)
-    return streaming_data.model_dump()
+        streaming_data = StreamingData(name=name, time=get_utc_time(), data=data_dict)
+        return streaming_data.model_dump(mode="json")
+    except Exception as error:
+        print(error)

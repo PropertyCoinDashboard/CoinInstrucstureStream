@@ -21,19 +21,18 @@ from pyspark.sql.types import (
     StructField,
     StructType,
     StringType,
-    DoubleType,
     LongType,
 )
 
 
 data_schema = StructType(
     [
-        StructField("opening_price", DoubleType(), True),
-        StructField("trade_price", DoubleType(), True),
-        StructField("max_price", DoubleType(), True),
-        StructField("min_price", DoubleType(), True),
-        StructField("prev_closing_price", DoubleType(), True),
-        StructField("acc_trade_volume_24h", DoubleType(), True),
+        StructField("opening_price", StringType(), True),
+        StructField("trade_price", StringType(), True),
+        StructField("max_price", StringType(), True),
+        StructField("min_price", StringType(), True),
+        StructField("prev_closing_price", StringType(), True),
+        StructField("acc_trade_volume_24h", StringType(), True),
     ]
 )
 
@@ -41,6 +40,7 @@ market_schema = StructType(
     [
         StructField("market", StringType(), True),
         StructField("time", LongType(), True),
+        StructField("coin_symbol", StringType(), True),
         StructField("data", data_schema),
     ]
 )

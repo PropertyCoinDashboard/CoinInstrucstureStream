@@ -1,20 +1,9 @@
 """
 Coin present data format architecture
 """
-from dataclasses import dataclass
 from typing import Mapping, Any
-from decimal import Decimal
-from pydantic import BaseModel
-
-
-@dataclass
-class PriceData:
-    opening_price: float
-    trade_price: float
-    max_price: float
-    min_price: float
-    prev_closing_price: float
-    acc_trade_volume_24h: float
+from decimal import Decimal, ROUND_HALF_UP
+from pydantic import BaseModel, validator, model_serializer
 
 
 class CoinSymbol(BaseModel):
@@ -69,6 +58,28 @@ class CoinMarket(BaseModel):
     korbit: dict[str, Any]
 
 
+class PriceData(BaseModel):
+    """코인 현재 가격가
+
+    Args:
+        BaseModel (_type_): pydantic
+
+    Returns:
+        _type_: _description_
+    """
+
+    opening_price: Decimal
+    trade_price: Decimal
+    max_price: Decimal
+    min_price: Decimal
+    prev_closing_price: Decimal
+    acc_trade_volume_24h: Decimal
+
+    @validator("*", pre=True)
+    def round_three_place_adjust(cls, value) -> Decimal:
+        return Decimal(value=value).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)
+
+
 class CoinMarketData(BaseModel):
     """Coin price data schema
     Args:
@@ -91,18 +102,19 @@ class CoinMarketData(BaseModel):
 
     market: str
     time: int
+    coin_symbol: str
     data: PriceData
 
     @classmethod
     def _create_price_data(cls, api: Mapping[str, str], data: list) -> "PriceData":
         try:
             return PriceData(
-                opening_price=float(api[data[0]]),
-                trade_price=float(api[data[1]]),
-                max_price=float(api[data[2]]),
-                min_price=float(api[data[3]]),
-                prev_closing_price=float(api[data[4]]),
-                acc_trade_volume_24h=float(api[data[5]]),
+                opening_price=Decimal(api[data[0]]),
+                trade_price=Decimal(api[data[1]]),
+                max_price=Decimal(api[data[2]]),
+                min_price=Decimal(api[data[3]]),
+                prev_closing_price=Decimal(api[data[4]]),
+                acc_trade_volume_24h=Decimal(api[data[5]]),
             )
         except KeyError as e:
             raise KeyError(f"Key {e} not found in API response") from e
@@ -140,4 +152,9 @@ class CoinMarketData(BaseModel):
             CoinMarketData: _description_
         """
         price_data = cls._create_price_data(api=api, data=data)
-        return cls(market=market, coin_symbol=coin_symbol, time=time, data=price_data)
+        return cls(
+            market=market,
+            time=time,
+            coin_symbol=coin_symbol,  # 여기에 coin_symbol을 추가
+            data=price_data,
+        )

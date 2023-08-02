@@ -1,7 +1,6 @@
 """
 유틸 함수
 """
-import sys
 import json
 import asyncio
 import configparser
@@ -11,7 +10,7 @@ from collections import defaultdict
 
 import requests
 import websockets
-from coin.core.settings.create_log import SocketLogCustomer
+from coin.core.settings.create_log import log, SocketLogCustomer
 from coin.core.data_mq.data_interaction import produce_sending
 
 
@@ -88,13 +87,38 @@ class MarketPresentPriceWebsocket:
     def __init__(self) -> None:
         from coin.core.settings.properties import market_setting
 
+        self.p = SocketLogCustomer()
+        self.conn_logger = self.p.create_logger(
+            log_name="price-data",
+            exchange_name="total",
+            log_type="price_data_counting",
+        )
+        self.error_logger = self.p.create_logger(
+            log_name="error-logger",
+            exchange_name="total",
+            log_type="error_data_counting",
+        )
         self.message_by_data = defaultdict(list)
         self.market = market_setting("socket")
         self.register_message = [
             "Filter Registered Successfully",
             "korbit:subscribe",
         ]
-        self.logger = SocketLogCustomer()
+
+    async def get_register_connection(self, message: bytes | str, uri: str):
+        """
+        market websocket register
+
+        Args:
+            message (_type_): register message
+        """
+        log_name = parse_uri(uri)
+        logger = self.p.create_logger(
+            log_name=f"{log_name}-register",
+            exchange_name=log_name,
+            log_type="register",
+        )
+        logger.info(message)
 
     async def put_message_to_logging(
         self, message: str, uri: str, symbol: str
@@ -117,7 +141,7 @@ class MarketPresentPriceWebsocket:
 
         if matches_all:
             # register log만
-            self.logger.register_connection(log_name=log_name, message=message)
+            self.get_register_connection(message, uri=uri)
         else:
             try:
                 # bithumb, korbit 특정 거래소에 대한 추가 처리
@@ -133,21 +157,21 @@ class MarketPresentPriceWebsocket:
                 }
 
                 # 스키마 통일화
-                market_schema = CoinMarketData.from_api(
+                market_schema: str = CoinMarketData.from_api(
                     market=f"{log_name}-{symbol.upper()}",
                     time=time,
-                    coin_symbol=symbol,
+                    coin_symbol=symbol.upper(),
                     api=schmea_key,
                     data=parameter,
-                ).model_dump()
-                print(market_schema)
+                ).model_dump(mode="json")
+
                 self.message_by_data[log_name].append(market_schema)
                 await self.message_kafka_sending(market_name=log_name, symbol=symbol)
 
-                self.logger.conn_logger(market=log_name, messgae=market_schema)
+                self.conn_logger.info(market_schema)
             except Exception as error:
-                self.logger.error_logger(
-                    message=f"Price Scoket Connection Error --> {error}",
+                self.error_logger.error(
+                    "Price Scoket Connection Error --> %s url --> %s", error, log_name
                 )
 
     async def message_kafka_sending(
@@ -171,13 +195,20 @@ class MarketPresentPriceWebsocket:
             uri (str): 웹소켓과 연관된 URI.
             queue (asyncio.Queue): 메시지를 넣을 큐.
         """
+        log_name = parse_uri(uri)
+        logger = self.p.create_logger(
+            log_name=f"{log_name}not",
+            exchange_name=log_name,
+            log_type="not_connection",
+        )
+
         while True:
             try:
                 message = await asyncio.wait_for(websocket.recv(), timeout=30.0)
                 asyncio.sleep(100.0)
                 await self.put_message_to_logging(message, uri, symbol=symbol)
             except asyncio.TimeoutError:
-                self.logger.not_connection(f"Timeout while receiving from {uri}")
+                logger.error(f"Timeout while receiving from {uri}")
 
     async def send_data(
         self, websocket: Any, subscribe_fmt: list[dict]
@@ -207,20 +238,21 @@ class MarketPresentPriceWebsocket:
             Coroutine[Any, Any, None]: None
         """
         message: str = await asyncio.wait_for(websocket.recv(), timeout=30.0)
-        log_name = parse_uri(uri)
         data = json.loads(message)
+        log_name = parse_uri(uri)
+        logger = self.p.create_logger(
+            log_name=f"{log_name}connect",
+            exchange_name=log_name,
+            log_type="connect",
+        )
 
         match data:
             case {"resmsg": "Connected Successfully"}:
-                self.logger.connection(
-                    log_name=log_name, messge=f"Connected to {uri}, {data}"
-                )
+                logger.info(f"Connected to {uri}, {data}")
             case {"event": "korbit:connected"}:
-                self.logger.connection(
-                    log_name=log_name, messge=f"Connected to {uri}, {data}"
-                )
+                logger.info(f"Connected to {uri}, {data}")
             case _:
-                self.logger.connection(log_name=uri, messge=f"Connected to {uri}")
+                logger.info(f"Connected to {uri}")
 
     async def websocket_to_json(
         self, uri: str, subscribe_fmt: list[dict], symbol: str
@@ -240,6 +272,6 @@ class MarketPresentPriceWebsocket:
                 await self.handle_connection(websocket, uri)
                 await self.handle_message(websocket, uri, symbol=symbol)
             except asyncio.TimeoutError as error:
-                self.logger.error_logger(
-                    message=f"Timeout while connecting to {uri}, Error: {error}"
+                self.error_logger.error(
+                    "Timeout while connecting to %s, Error: %s", uri, error
                 )

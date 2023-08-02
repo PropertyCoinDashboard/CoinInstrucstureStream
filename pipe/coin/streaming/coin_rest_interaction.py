@@ -55,6 +55,7 @@ class CoinPresentPriceReponseAPI(CoinPresentPriceMarketPlace):
             return CoinMarketData.from_api(
                 market=market,
                 time=market_time,
+                coin_symbol=coin_symbol,
                 api=api_response,
                 data=data,
             ).model_dump()
@@ -104,7 +105,7 @@ class CoinPresentPriceReponseAPI(CoinPresentPriceMarketPlace):
                 # 스키마 정의
                 schema: dict[str, dict[str, Any]] = CoinMarket(
                     **dict(zip(self.market_env.keys(), market_result))
-                ).model_dump()
+                ).model_dump(mode="json")
                 await produce_sending(topic_name, message=schema)
             except (TimeoutError, CancelledError, ValidationError) as error:
                 self.logger.error("Data transmission failed: %s", error)
