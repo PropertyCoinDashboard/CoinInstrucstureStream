@@ -79,6 +79,43 @@ def parse_uri(uri: str) -> str:
     return uri.split("//")[1].split(".")[1]
 
 
+"""
+리팩토링 준비 
+1. 기능 분리 
+2. 로깅 분리 
+3. 정형화 
+4. 단일 책임 원칙
+
+class LoggerManager:
+    def create_logger(self):
+        pass 
+    
+class MessageProcessor:
+    parse_url
+    get_register_connection
+    put_message_to_logging
+    
+class KafkaMessageSender:
+    message_kafka_sending
+    
+class WebSocketHandler:
+    handle_connection
+    handle_message
+    send_data
+    websocket_to_json
+    
+class MarketPresentPriceWebsocket:
+   def __init__(self):
+        from coin.core.settings.properties import market_setting
+
+        self.message_by_data = defaultdict(list)
+        self.register_message = ["Filter Registered Successfully", "korbit:subscribe"]
+        self.message_processor = MessageProcessor(market_setting, self.register_message)
+        self.kafka_sender = KafkaSender(self.message_by_data)
+        self.websocket_handler = WebSocketHandler(self.message_processor, self.kafka_sender)
+"""
+
+
 class MarketPresentPriceWebsocket:
     """
     Coin Stream
@@ -284,33 +321,3 @@ class MarketPresentPriceWebsocket:
                 self.error_logger.error(
                     "Timeout while connecting to %s, Error: %s", uri, error
                 )
-
-
-"""
-리팩토링 준비 
-1. 기능 분리 
-2. 로깅 분리 
-3. 정형화 
-
-class ConnectionManager:
-    async def send_data(self, websocket, subscribe_fmt):
-        # ...
-
-    async def handle_connection(self, websocket, uri):
-        # ...
-
-class MessageHandler:
-    async def handle_message(self, websocket, uri, symbol):
-        # ...
-
-    async def put_message_to_logging(self, message, uri, symbol):
-        # ...
-
-class MarketPresentPriceWebsocket:
-    # ...
-
-    def __init__(self):
-        self.connection_manager = ConnectionManager()
-        self.message_handler = MessageHandler()
-
-"""
