@@ -2,10 +2,10 @@ import logging
 from pathlib import Path
 
 
-def log(log_location: str, name: str):
+def log(name: str, log_location: str):
     logger = logging.getLogger(name=name)
     if logger.hasHandlers():
-        return logger  # Avoid duplicate handlers
+        return logger
 
     logger.propagate = False
     logger.setLevel(logging.INFO)
@@ -26,46 +26,32 @@ def log(log_location: str, name: str):
 
 
 class SocketLogCustomer:
-    path = Path(__file__)
+    path = Path(__file__).parent.parent.parent / "streaming" / "log"
 
-    def create_logger(self, log_name: str, exchange_name: str, log_type: str):
-        log_path = (
-            self.path.parent.parent.parent
-            / "streaming"
-            / "log"
-            / exchange_name
-            / f"{exchange_name}_{log_type}.log"
-        )
+    def create_logger(self, log_name: str, log_type: str):
+        log_path = self.path / log_type / log_name
         log_path.parent.mkdir(parents=True, exist_ok=True)
-        return log(str(log_path), log_name)
+        return log(log_name.split(".")[0], str(log_path))
 
     async def log_message(
-        self,
-        log_name: str,
-        exchange_name: str,
-        log_type: str,
-        message: str,
-        level: str = "info",
+        self, log_name: str, log_type: str, message: str, level: str = "info"
     ):
-        logger = self.create_logger(log_name, exchange_name, log_type)
+        logger = self.create_logger(log_name, log_type)
         log_func = getattr(logger, level, "info")
         log_func(message)
 
-    async def not_connection(self, log_name: str, message: str) -> None:
-        await self.log_message(
-            log_name, "error", "not_connection", message, level="error"
-        )
+    async def connection(self, exchange_name: str, message: str):
+        log_name = f"{exchange_name}_connection.log"
+        await self.log_message(log_name, "connection", message)
 
-    async def connection(self, log_name: str, message: str):
-        await self.log_message(log_name, log_name, "connect", message)
+    async def data_log(self, exchange_name: str, message: str):
+        log_name = f"{exchange_name}_data.log"
+        await self.log_message(log_name, "data", message)
 
-    async def register_connection(self, log_name: str, message: str) -> None:
-        await self.log_message(log_name, log_name, "register", message)
+    async def register_connection(self, message: str):
+        log_name = "market_register.log"
+        await self.log_message(log_name, "connection", message)
 
-    async def conn_logger(self, message: str) -> None:
-        await self.log_message("total", "total", "price_data_counting", str(message))
-
-    async def error_logger(self, message: str) -> None:
-        await self.log_message(
-            "error-logger", "total", "error_data_counting", message, level="error"
-        )
+    async def error_log(self, error_type: str, message: str):
+        log_name = f"{error_type}.log"
+        await self.log_message(log_name, "error", message, level="error")

@@ -86,15 +86,15 @@ class WebsocketConnectionManager(WebsocketConnectionAbstract):
         match data:
             case {"resmsg": "Connected Successfully"}:
                 await self.message_logger.p.connection(
-                    log_name=market, message=f"Connected to {uri}, {data}"
+                    exchange_name=market, message=f"Connected to {uri}, {data}"
                 )
             case {"event": "korbit:connected"}:
                 await self.message_logger.p.connection(
-                    log_name=market, message=f"Connected to {uri}, {data}"
+                    exchange_name=market, message=f"Connected to {uri}, {data}"
                 )
             case _:
                 await self.message_logger.p.connection(
-                    log_name=market, message=f"Connected to {uri}"
+                    exchange_name=market, message=f"Connected to {uri}"
                 )
 
     async def handle_message(self, websocket: Any, uri: str, symbol: str) -> None:
@@ -116,7 +116,7 @@ class WebsocketConnectionManager(WebsocketConnectionAbstract):
                     message, uri, symbol=symbol
                 )
             except asyncio.TimeoutError:
-                await self.message_logger.p.not_connection(
+                await self.message_logger.p.error_log(
                     log_name=parse_uri(uri),
                     message=f"Timeout not connection while receiving from {uri}",
                 )
@@ -198,7 +198,7 @@ class MessageDataPreprocessing(MessageDataPreprocessingAbstract):
         matches_all = any(ignore in message for ignore in self.register_message)
 
         if matches_all:
-            await self.p.register_connection(log_name=market, message=message)
+            await self.p.register_connection(message=message)
         else:
             try:
                 market_schema: dict[str, Any] = await self.process_message(
@@ -214,10 +214,13 @@ class MessageDataPreprocessing(MessageDataPreprocessingAbstract):
                     )
                     self.message_by_data[market]: list[market] = []
 
-                await self.p.conn_logger(message=market_schema)
+                await self.p.data_log(
+                    exchange_name=parse_uri(uri=uri), message=market_schema
+                )
             except Exception as error:
-                await self.p.error_logger(
-                    f"Price Socket Connection Error --> {error} url --> {market}"
+                await self.p.error_log(
+                    error_type="total_not_connection",
+                    message=f"Price Socket Connection Error --> {error} url --> {market}",
                 )
 
     async def process_message(
@@ -357,8 +360,9 @@ class KafkaMessageSender(KafkaMessageSenderAbstract):
                 )
 
         except KafkaConnectionError as error:
-            await self.p.error_logger(
-                message=f"broker 통신 불가로 임시 저장합니다 --> {error} data -> {len(self.except_list)}"
+            await self.p.error_log(
+                error_type="etc_error",
+                message=f"broker 통신 불가로 임시 저장합니다 --> {error} data -> {len(self.except_list)}",
             )
             self.except_list[market_name].append(data)
 

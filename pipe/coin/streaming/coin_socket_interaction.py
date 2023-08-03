@@ -23,7 +23,7 @@ class CoinPresentPriceWebsocket:
     def __init__(self, market_type: str = "socket") -> None:
         tracemalloc.start()
         self.market_env = market_setting(market_type)
-        self.logger = log(f"{present_path}/log/worker.log", "worker")
+        self.logger = log("worker", f"{present_path}/log/worker.log")
 
     async def coin_present_architecture(self, symbol: str) -> Coroutine[Any, Any, None]:
         try:
