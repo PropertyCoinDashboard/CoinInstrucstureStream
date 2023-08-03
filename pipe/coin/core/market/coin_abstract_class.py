@@ -2,13 +2,14 @@ import tracemalloc
 from typing import Any
 from pathlib import Path
 
-from abc import ABCMeta, abstractmethod
+
+from abc import ABC, abstractmethod
 from coin.core.market.util_func import get_symbol_collect_url
 
 present_path = Path(__file__).parent.parent
 
 
-class CoinSocketAndPullRequest(metaclass=ABCMeta):
+class CoinSocketAndPullRequest(ABC):
     """
     Subject:
         - 공통 목록 추상클래스 [개발 순서 및 혼동 방지]
@@ -72,7 +73,7 @@ class CoinSocketAndPullRequest(metaclass=ABCMeta):
         raise NotImplementedError()
 
 
-class CoinPresentPriceMarketPlace(metaclass=ABCMeta):
+class CoinPresentPriceMarketPlace(ABC):
     def __init__(self) -> None:
         tracemalloc.start()
 

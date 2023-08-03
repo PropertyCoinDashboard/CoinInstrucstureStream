@@ -9,7 +9,7 @@ import sys
 
 from coin.core.settings.create_log import log
 from aiokafka import AIOKafkaProducer
-from aiokafka.errors import NoBrokersAvailable, KafkaProtocolError
+from aiokafka.errors import NoBrokersAvailable, KafkaProtocolError, KafkaConnectionError
 
 present_path = Path(__file__).parent.parent
 logging = log(
@@ -51,8 +51,14 @@ async def produce_sending(topic: Any, message: Any):
             stored_message = except_list[topic].pop(0)
             await producer.send_and_wait(topic, stored_message)
 
-    except (NoBrokersAvailable, KafkaProtocolError) as error:
-        logging.error("Kafka error로 인해 임시 저장합니다 : %s, message: %s", error, message)
+    except (
+        NoBrokersAvailable,
+        KafkaProtocolError,
+        KafkaConnectionError,
+    ) as error:
+        logging.error(
+            "Kafka broker error로 인해 임시 저장합니다 : %s, message: %s", error, message
+        )
         except_list[topic].append(json.dumps(message).encode("utf-8"))
     finally:
         await producer.stop()

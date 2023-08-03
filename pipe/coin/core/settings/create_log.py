@@ -52,18 +52,20 @@ class SocketLogCustomer:
         log_func(message)
 
     async def not_connection(self, log_name: str, message: str) -> None:
-        self.log_message(log_name, log_name, "not_connection", message, level="error")
+        await self.log_message(
+            log_name, "error", "not_connection", message, level="error"
+        )
 
     async def connection(self, log_name: str, message: str):
-        self.log_message(log_name, log_name, "connect", message)
+        await self.log_message(log_name, log_name, "connect", message)
 
     async def register_connection(self, log_name: str, message: str) -> None:
-        self.log_message(log_name, log_name, "register", message)
+        await self.log_message(log_name, log_name, "register", message)
 
-    async def conn_logger(self, market: str, message: str) -> None:
-        self.log_message(market, "total", "price_data_counting", str(message))
+    async def conn_logger(self, message: str) -> None:
+        await self.log_message("total", "total", "price_data_counting", str(message))
 
     async def error_logger(self, message: str) -> None:
-        self.log_message(
+        await self.log_message(
             "error-logger", "total", "error_data_counting", message, level="error"
         )

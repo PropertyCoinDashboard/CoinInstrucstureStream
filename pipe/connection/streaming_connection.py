@@ -28,15 +28,19 @@ def stream_injection(topic: str) -> "DataFrame":
     Returns:
         - DataFrame: query
     """
-    average_udf = udf(streaming_preprocessing, average_schema)
 
-    stream_df = (
+    return (
         spark.readStream.format("kafka")
         .option("kafka.bootstrap.servers", "kafka1:19092,kafka2:29092,kafka3:39092")
-        .option("subscribe", topic)
+        .option("subscribe", "".join(topic))
         .option("startingOffsets", "earliest")
         .load()
     )
+
+
+def preprocessing(topic: str):
+    stream_df = stream_injection(topic=topic)
+    average_udf = udf(streaming_preprocessing, average_schema)
 
     return (
         stream_df.selectExpr("CAST(value AS STRING)")
@@ -70,7 +74,7 @@ def run_spark_streaming(name: str, topics: str, retrieve_topic: str) -> None:
         topics (str): topic
         retrieve_topic (str): retrieve_topic
     """
-    data_df = stream_injection(topic=topics)
+    data_df = preprocessing(topic=topics)
     query = (
         data_df.writeStream.format("kafka")
         .option("kafka.bootstrap.servers", "kafka1:19092,kafka2:29092,kafka3:39092")
