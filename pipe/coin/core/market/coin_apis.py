@@ -7,10 +7,8 @@ from typing import Any
 from collections import Counter
 from datetime import datetime, timezone
 
-from coin.core.market.util_func import (
-    header_to_json,
-    CoinStreamFacade,
-)
+from coin.streaming.stream_socket import CoinStreamFacade
+from coin.core.market.util_func import header_to_json
 from coin.core.market.coin_abstract_class import CoinSocketAndPullRequest
 from coin.core.market.data_format import CoinSymbol, CoinNameAndSymbol
 
