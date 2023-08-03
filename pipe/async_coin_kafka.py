@@ -5,12 +5,9 @@
 import asyncio
 
 from coin.streaming.coin_rest_interaction import CoinPresentPriceReponseAPI
-from coin.core.data_mq.data_admin import new_topic_initialization
 from connection.properties import (
     BTC_TOPIC_NAME,
     ETH_TOPIC_NAME,
-    BTC_AVERAGE_TOPIC_NAME,
-    ETH_AVERAGE_TOPIC_NAME,
 )
 
 
@@ -40,22 +37,6 @@ async def be_present_gether() -> None:
 
 
 async def data_sending_start() -> None:
-    """
-    Topic create
-    """
-    topic = [
-        BTC_TOPIC_NAME,
-        ETH_TOPIC_NAME,
-        ETH_AVERAGE_TOPIC_NAME,
-        BTC_AVERAGE_TOPIC_NAME,
-    ]
-    partition = [2, 2, 2, 2]
-    replication = [2, 2, 2, 2]
-
-    new_topic_initialization(
-        topic=topic, partition=partition, replication_factor=replication
-    )
-    await asyncio.sleep(1)
     await be_present_gether()
 
 
