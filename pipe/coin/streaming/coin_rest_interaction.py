@@ -11,7 +11,6 @@ from pydantic_core._pydantic_core import ValidationError
 
 
 from coin.core.market.data_format import CoinMarket, CoinMarketData
-from coin.core.market.coin_abstract_class import CoinPresentPriceMarketPlace
 from coin.core.settings.properties import market_setting
 from coin.core.settings.create_log import log
 from coin.core.data_mq.data_interaction import produce_sending
@@ -19,7 +18,7 @@ from coin.core.data_mq.data_interaction import produce_sending
 present_path = Path(__file__).parent
 
 
-class CoinPresentPriceReponseAPI(CoinPresentPriceMarketPlace):
+class CoinPresentPriceReponseAPI:
     """
     Coin present price market place
     """

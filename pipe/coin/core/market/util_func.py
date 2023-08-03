@@ -1,8 +1,6 @@
 """
 유틸 함수
 """
-from __future__ import annotations
-
 import requests
 import configparser
 from pathlib import Path
