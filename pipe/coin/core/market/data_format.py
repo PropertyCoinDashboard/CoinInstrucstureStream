@@ -3,7 +3,7 @@ Coin present data format architecture
 """
 from typing import Mapping, Any
 from decimal import Decimal, ROUND_HALF_UP
-from pydantic import BaseModel, validator, model_serializer
+from pydantic import BaseModel, validator
 
 
 class CoinSymbol(BaseModel):
@@ -76,7 +76,15 @@ class PriceData(BaseModel):
     acc_trade_volume_24h: Decimal
 
     @validator("*", pre=True)
-    def round_three_place_adjust(cls, value) -> Decimal:
+    def round_three_place_adjust(cls, value: Any) -> Decimal:
+        """반올림
+
+        Args:
+            value (_type_): 들어올 값 PriceData parameter
+
+        Returns:
+            Decimal: _description_
+        """
         return Decimal(value=value).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)
 
 
@@ -126,7 +134,7 @@ class CoinMarketData(BaseModel):
         time: int,
         coin_symbol: str,
         api: Mapping[str, Any],
-        data: list,
+        data: list[str, str, str, str, str, str],
     ) -> "CoinMarketData":
         """다음과 같은 dictionary를 만들기 위한 pydantic json model architecture
         >>>  {
@@ -147,7 +155,7 @@ class CoinMarketData(BaseModel):
             time (int): 거래 시간
             coin_symbol (str): 심볼
             api (Mapping[str, Any]): 거래소 API
-            data (tuple[str, str, str, str, str]): 사용할 파라미터 \n
+            data (list[str, str, str, str, str, str]): 사용할 파라미터 \n
         Returns:
             CoinMarketData: _description_
         """

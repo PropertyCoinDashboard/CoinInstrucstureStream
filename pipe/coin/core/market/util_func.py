@@ -5,7 +5,7 @@ import json
 import asyncio
 import configparser
 from pathlib import Path
-from typing import Any, Coroutine
+from typing import Any
 from collections import defaultdict
 
 import requests
@@ -86,6 +86,8 @@ def parse_uri(uri: str) -> str:
 3. 정형화 
 4. 단일 책임 원칙
 
+# 전략 패턴 1
+
 class LoggerManager:
     def create_logger(self):
         pass 
@@ -157,9 +159,7 @@ class MarketPresentPriceWebsocket:
         )
         logger.info(message)
 
-    async def put_message_to_logging(
-        self, message: str, uri: str, symbol: str
-    ) -> Coroutine[Any, Any, None]:
+    async def put_message_to_logging(self, message: Any, uri: str, symbol: str) -> None:
         """
         메시지를 로깅하고 큐에 넣는 함수.
 
@@ -178,7 +178,7 @@ class MarketPresentPriceWebsocket:
 
         if matches_all:
             # register log만
-            self.get_register_connection(message, uri=uri)
+            await self.get_register_connection(message, uri=uri)
         else:
             try:
                 # bithumb, korbit 특정 거래소에 대한 추가 처리
@@ -188,13 +188,13 @@ class MarketPresentPriceWebsocket:
                     message = message["data"]
 
                 time = message[self.market[log_name]["timestamp"]]
-                parameter: list[str * 6] = list(self.market[log_name]["parameter"])
+                parameter: list = list(self.market[log_name]["parameter"])
                 schmea_key: dict[str, Any] = {
                     key: message[key] for key in message if key in parameter
                 }
 
                 # 스키마 통일화
-                market_schema: str = CoinMarketData.from_api(
+                market_schema: dict[str, Any] = CoinMarketData.from_api(
                     market=f"{log_name}-{symbol.upper()}",
                     time=time,
                     coin_symbol=symbol.upper(),
@@ -211,9 +211,7 @@ class MarketPresentPriceWebsocket:
                     "Price Scoket Connection Error --> %s url --> %s", error, log_name
                 )
 
-    async def message_kafka_sending(
-        self, market_name: str, symbol: str
-    ) -> Coroutine[Any, Any, None]:
+    async def message_kafka_sending(self, market_name: str, symbol: str) -> None:
         """카프카 메시지 전송
 
         Args:
@@ -221,7 +219,7 @@ class MarketPresentPriceWebsocket:
             symbol (str): 심볼이름
 
         Returns:
-            Coroutine[Any, Any, None]: 코루틴으로 yield가 지속적으로 생성되니 어떠한 값이 들어올 줄 몰라 Any
+            None: 코루틴으로 yield가 지속적으로 생성되니 어떠한 값이 들어올 줄 몰라 Any
         """
 
         # MAXLISTSIZE = 10
@@ -232,9 +230,7 @@ class MarketPresentPriceWebsocket:
             )
             self.message_by_data[market_name]: list[market_name] = []
 
-    async def handle_message(
-        self, websocket: Any, uri: str, symbol: str
-    ) -> Coroutine[Any, Any, None]:
+    async def handle_message(self, websocket: Any, uri: str, symbol: str) -> None:
         """
         Args:
             websocket (Any): 메시지를 받을 웹소켓.
@@ -256,9 +252,7 @@ class MarketPresentPriceWebsocket:
             except asyncio.TimeoutError:
                 logger.error(f"Timeout while receiving from {uri}")
 
-    async def send_data(
-        self, websocket: Any, subscribe_fmt: list[dict]
-    ) -> Coroutine[Any, Any, None]:
+    async def send_data(self, websocket: Any, subscribe_fmt: list[dict]) -> None:
         """
         소켓 인증하기 위한 절차 보내기
 
@@ -270,9 +264,7 @@ class MarketPresentPriceWebsocket:
         await websocket.send(subscribe_data)
         await asyncio.sleep(2)
 
-    async def handle_connection(
-        self, websocket: Any, uri: str
-    ) -> Coroutine[Any, Any, None]:
+    async def handle_connection(self, websocket: Any, uri: str) -> None:
         """
         connection socket 마다 관리
 
@@ -281,7 +273,7 @@ class MarketPresentPriceWebsocket:
             uri (str): 소켓주소
 
         Returns:
-            Coroutine[Any, Any, None]: None
+            None: None
         """
         message: str = await asyncio.wait_for(websocket.recv(), timeout=30.0)
         data = json.loads(message)
@@ -302,7 +294,7 @@ class MarketPresentPriceWebsocket:
 
     async def websocket_to_json(
         self, uri: str, subscribe_fmt: list[dict], symbol: str
-    ) -> Coroutine[Any, Any, None]:
+    ) -> None:
         """
         웹소켓에 연결하고, 구독 데이터를 전송하고, 받은 메시지를 처리하는 함수.
 

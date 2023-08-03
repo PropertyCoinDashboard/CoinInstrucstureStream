@@ -20,7 +20,7 @@ logging = log(
 except_list = defaultdict(list)
 
 
-async def produce_sending(topic: Any, message: json):
+async def produce_sending(topic: Any, message: Any):
     config = {
         "bootstrap_servers": "kafka1:19092, kafka2:29092, kafka3:39092",
         "security_protocol": "PLAINTEXT",
