@@ -17,7 +17,7 @@
 - websocket[파사트 패턴, 추상화 패턴]
 - restapi[추상화 패턴]
 
-### 데이터 통일화 pydantic 사용
+### 데이터 정형화 pydantic 사용
 - opening_price 시가
 - closeing_price 종가
 - max_price 저가
@@ -40,3 +40,7 @@
 
 } 
 ```
+
+### 구현해볼만한것 
+- 호가 매수 매도 추가
+- API 모아서 ML
