@@ -29,9 +29,13 @@ class SocketLogCustomer:
     path = Path(__file__).parent.parent.parent / "streaming" / "log"
 
     def create_logger(self, log_name: str, log_type: str):
-        log_path = self.path / log_type / log_name
-        log_path.parent.mkdir(parents=True, exist_ok=True)
-        return log(log_name.split(".")[0], str(log_path))
+        try:
+            log_path = self.path / log_type / log_name
+            log_path.parent.mkdir(parents=True, exist_ok=True)
+            return log(log_name.split(".")[0], str(log_path))
+        except (FileNotFoundError, FileExistsError):
+            log_path = self.path / log_type / log_name
+            log_path.parent.mkdir(parents=True, exist_ok=True)
 
     async def log_message(
         self, log_name: str, log_type: str, message: str, level: str = "info"

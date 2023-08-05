@@ -9,13 +9,13 @@ services:
       volumes:
         - ./fluentd/fluentd.conf:/fluentd/etc/fluent.conf
         - ./logs:/fluentd/log
-        - LOG_DIR/
-        - LOG_DIR/
-        - LOG_DIR/
+        - /Users/imhaneul/Documents/project/CoinPresentStreaming/pipe/coin/streaming/log:/fluentd/etc/log
       ports:
         - "24225:24224"
       networks:
         - kafka-network
+      environment:
+        - LOG_DIR=/Users/imhaneul/Documents/project/CoinPresentStreaming/pipe/coin/streaming/log
 
   fluentd2:
     <<: *fluentd
@@ -24,31 +24,27 @@ services:
     networks:
       - kafka-network
 
-  fluentd3:
-    <<: *fluentd
-    ports:
-      - "24227:24224"
-    networks:
-      - kafka-network
+  # fluentd3:
+  #   <<: *fluentd
+  #   ports:
+  #     - "24227:24224"
+  #   networks:
+  #     - kafka-network
 
-  nginx:
-    image: nginx:latest
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-    ports:
-      - "24230:24230"
-    networks:
-      - kafka-network
-    depends_on:
-      - fluentd1
-      - fluentd2
-      - fluentd3
+  # nginx:
+  #   image: nginx:latest
+  #   volumes:
+  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+  #   ports:
+  #     - "24230:24230"
+  #   networks:
+  #     - kafka-network
+  #   depends_on:
+  #     - fluentd1
+  #     - fluentd2
+  #     - fluentd3
 
 
 networks:
   kafka-network:
     driver: bridge
-
-# 환경 변수 정의
-environment:
-  - LOG_DIR=/Users/imhaneul/Documents/project/CoinPresentStreaming/pipe/coin/streaming/log

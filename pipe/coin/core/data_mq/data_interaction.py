@@ -11,10 +11,15 @@ from coin.core.settings.create_log import log
 from aiokafka import AIOKafkaProducer
 from aiokafka.errors import NoBrokersAvailable, KafkaProtocolError, KafkaConnectionError
 
+
 present_path = Path(__file__).parent.parent
-logging = log(
-    log_location=f"{present_path}/log/kafka_message.log", name="messge_sending"
-)
+try:
+    logging = log(
+        log_location=f"{present_path}/log/kafka_message.log", name="messge_sending"
+    )
+except (FileNotFoundError, FileExistsError):
+    log_path = present_path / "log" / "kafka_message.log"
+    log_path.parent.mkdir(parents=True, exist_ok=True)
 
 
 except_list = defaultdict(list)
