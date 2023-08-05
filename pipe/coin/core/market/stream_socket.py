@@ -20,6 +20,7 @@ import websockets
 from aiokafka.errors import KafkaConnectionError
 from coin.core.settings.create_log import SocketLogCustomer
 from coin.core.data_mq.data_interaction import produce_sending
+from coin.core.market.data_format import CoinMarketData
 from coin.core.market.coin_abstract_class import (
     WebsocketConnectionAbstract,
     MessageDataPreprocessingAbstract,
@@ -307,15 +308,16 @@ class MessageDataPreprocessing(MessageDataPreprocessingAbstract):
                         'time': 1691060828128,
                         'coin_symbol': 'BTC',
                         'data': {
-                            'opening_price': '38358000.000', 'trade_price': '38477000.000',
-                            'max_price': '38510000.000', 'min_price': '38215000.000',
-                            'prev_closing_price': '38358000.000', 'acc_trade_volume_24h': '2297.878'
+                            'opening_price': '38358000.000',
+                            'trade_price': '38477000.000',
+                            'max_price': '38510000.000',
+                            'min_price': '38215000.000',
+                            'prev_closing_price': '38358000.000',
+                            'acc_trade_volume_24h': '2297.878'
                         }
                     }
 
         """
-        from coin.core.market.data_format import CoinMarketData
-
         return CoinMarketData.from_api(
             market=f"{market}-{symbol.upper()}",
             time=time,
