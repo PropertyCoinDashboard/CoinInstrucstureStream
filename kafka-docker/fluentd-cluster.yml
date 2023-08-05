@@ -14,8 +14,6 @@ services:
         - "24225:24224"
       networks:
         - kafka-network
-      environment:
-        - LOG_DIR=/Users/imhaneul/Documents/project/CoinPresentStreaming/pipe/coin/streaming/log
 
   fluentd2:
     <<: *fluentd
