@@ -55,7 +55,7 @@ class WebsocketConnectionManager(WebsocketConnectionAbstract):
 
         Args:
             message_logger (MessageDataPreprocessing):
-                -> 전처리 클래스
+                -> 전처리 클래스(로그 클래스 존재) [self.p = SocketLogCustomer()  # 로그 출력을 위한 객체]
         """
         self.message_logger = message_logger
 
@@ -141,8 +141,9 @@ class WebsocketConnectionManager(WebsocketConnectionAbstract):
                 await self.handle_connection(websocket, uri)
                 await self.handle_message(websocket, uri, symbol=symbol)
             except asyncio.TimeoutError as error:
-                self.message_logger.p.error_logger(
-                    f"Timeout while connecting to {uri}, Error: {error}"
+                self.message_logger.p.error_log(
+                    error_type="total_not_connection",
+                    message=f"Timeout while connecting to {uri}, Error: {error}",
                 )
 
 
