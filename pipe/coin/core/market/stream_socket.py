@@ -18,8 +18,9 @@ from collections import defaultdict
 
 import websockets
 from aiokafka.errors import KafkaConnectionError
-from coin.core.settings.create_log import SocketLogCustomer
+
 from coin.core.data_mq.data_interaction import produce_sending
+from coin.core.settings.create_log import SocketLogCustomer
 from coin.core.market.data_format import CoinMarketData
 from coin.core.market.coin_abstract_class import (
     WebsocketConnectionAbstract,
@@ -167,7 +168,7 @@ class MessageDataPreprocessing(MessageDataPreprocessingAbstract):
                 -> 설정값(from coin.core.settings.properties import market_setting)
 
             register_message
-                -> 빗썸과 코빗은 소켓에서 연결 확인 메시지가 출력되고 그다음 데이터가 출력되기 때문에 데이터 오염이 발생할 수 있어 필터링
+                -> 빗썸과 코빗은 소켓에서 연결 확인 메시지가 출력되고 그다음 데이터가 출력되기 때문에 출력 순서 필터링
         """
         from coin.core.settings.properties import market_setting
 
