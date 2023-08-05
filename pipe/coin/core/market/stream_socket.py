@@ -245,9 +245,12 @@ class MessageDataPreprocessing(MessageDataPreprocessingAbstract):
                     'time': 1691060828128,
                     'coin_symbol': 'BTC',
                     'data': {
-                           'opening_price': '38358000.000', 'trade_price': '38477000.000',
-                           'max_price': '38510000.000', 'min_price': '38215000.000',
-                           'prev_closing_price': '38358000.000', 'acc_trade_volume_24h': '2297.878'
+                           'opening_price': '38358000.000',
+                           'trade_price': '38477000.000',
+                           'max_price': '38510000.000',
+                           'min_price': '38215000.000',
+                           'prev_closing_price': '38358000.000',
+                           'acc_trade_volume_24h': '2297.878'
                         }
                     }
 
