@@ -118,7 +118,7 @@ class WebsocketConnectionManager(WebsocketConnectionAbstract):
                 )
             except asyncio.TimeoutError:
                 await self.message_logger.p.error_log(
-                    log_name=parse_uri(uri),
+                    error_type="total_not_connection",
                     message=f"Timeout not connection while receiving from {uri}",
                 )
 

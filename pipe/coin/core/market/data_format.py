@@ -163,6 +163,6 @@ class CoinMarketData(BaseModel):
         return cls(
             market=market,
             time=time,
-            coin_symbol=coin_symbol,  # 여기에 coin_symbol을 추가
+            coin_symbol=coin_symbol,
             data=price_data,
         )
