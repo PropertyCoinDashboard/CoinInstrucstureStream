@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 
-def log(name: str, log_location: str):
+def log(name: str, log_location: str) -> logging.Logger:
     logger = logging.getLogger(name=name)
     if logger.hasHandlers():
         return logger
@@ -18,24 +18,32 @@ def log(name: str, log_location: str):
     stream_handler.setFormatter(formatter)
     logger.addHandler(stream_handler)
 
-    file_handler = logging.FileHandler(filename=log_location)
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
+    try:
+        file_handler = logging.FileHandler(filename=log_location)
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+    except Exception as e:
+        logger.error(f"Failed to create file handler due to: {e}")
 
     return logger
 
 
 class SocketLogCustomer:
-    path = Path(__file__).parent.parent.parent / "streaming" / "log"
+    def __init__(self, base_path: Path = None):
+        if base_path:
+            self.base_path = base_path
+        else:
+            self.base_path = Path(__file__).parent.parent.parent / "streaming" / "log"
 
-    def create_logger(self, log_name: str, log_type: str):
+    def create_logger(self, log_name: str, log_type: str) -> logging.Logger:
         try:
-            log_path = self.path / log_type / log_name
+            log_path = self.base_path / log_type / log_name
             log_path.parent.mkdir(parents=True, exist_ok=True)
             return log(log_name.split(".")[0], str(log_path))
-        except (FileNotFoundError, FileExistsError):
-            log_path = self.path / log_type / log_name
-            log_path.parent.mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to create or access the log file: {e}")
+            return logger
 
     async def log_message(
         self, log_name: str, log_type: str, message: str, level: str = "info"

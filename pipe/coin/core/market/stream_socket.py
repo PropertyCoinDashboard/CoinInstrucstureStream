@@ -226,6 +226,25 @@ class MessageDataPreprocessing(MessageDataPreprocessingAbstract):
                     message=f"Price Socket Connection Error --> {error} url --> {market}",
                 )
 
+    async def process_exchange(self, market: str, message: dict) -> dict:
+        """
+        message 필터링
+
+        Args:
+            market (str):
+                -> 거래소
+            message (dict):
+                -> 데이터
+
+        Returns:
+            dict: 각 거래소당 dictionary가 달라 저렇게 항목으로 접근
+        """
+        if market == "bithumb":
+            return message["content"]
+        elif market == "korbit":
+            return message["data"]
+        return message
+
     async def process_message(
         self, market: str, message: dict, symbol: str
     ) -> dict[str, Any]:
@@ -264,25 +283,6 @@ class MessageDataPreprocessing(MessageDataPreprocessingAbstract):
         }
 
         return await self.unify_schema(market, symbol, time, schema_key, parameter)
-
-    async def process_exchange(self, market: str, message: dict) -> dict:
-        """
-        message 필터링
-
-        Args:
-            market (str):
-                -> 거래소
-            message (dict):
-                -> 데이터
-
-        Returns:
-            dict: 각 거래소당 dictionary가 달라 저렇게 항목으로 접근
-        """
-        if market == "bithumb":
-            return message["content"]
-        elif market == "korbit":
-            return message["data"]
-        return message
 
     async def unify_schema(
         self,

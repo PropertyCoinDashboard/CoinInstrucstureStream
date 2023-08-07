@@ -6,8 +6,8 @@ from typing import *
 from pyspark.sql import SparkSession
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import from_json, col, udf, to_json, struct
-from connection.schema.data_constructure import average_schema, final_schema
-from connection.schema.udf_util import streaming_preprocessing
+from spark_connection.schema.data_constructure import average_schema, final_schema
+from spark_connection.schema.udf_util import streaming_preprocessing
 
 
 # 환경 설정
