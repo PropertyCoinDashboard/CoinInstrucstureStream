@@ -1,12 +1,12 @@
 """
 KAFAK PRODUCE 
 """
-from collections import defaultdict
-from pathlib import Path
-from typing import Any
 import json
-import sys
+from typing import Any
+from pathlib import Path
+from collections import defaultdict
 
+from coin.core.market.util_func import deep_getsizeof
 from coin.core.settings.create_log import log
 from aiokafka import AIOKafkaProducer
 from aiokafka.errors import NoBrokersAvailable, KafkaProtocolError, KafkaConnectionError
@@ -37,13 +37,11 @@ async def produce_sending(topic: Any, message: Any):
     producer = AIOKafkaProducer(**config)
 
     await producer.start()
-    if isinstance(message, bytes):
-        message = message.decode("utf-8")
 
     try:
         encoded_message = json.dumps(message).encode("utf-8")
         await producer.send_and_wait(topic, encoded_message)
-        size: int = sys.getsizeof(encoded_message)
+        size: int = deep_getsizeof(encoded_message)
         logging.info(
             "Message delivered to: %s --> counting --> %s size --> %s",
             topic,

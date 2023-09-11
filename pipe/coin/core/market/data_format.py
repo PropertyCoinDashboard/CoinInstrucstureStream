@@ -114,7 +114,7 @@ class CoinMarketData(BaseModel):
     data: PriceData
 
     @classmethod
-    def _create_price_data(cls, api: Mapping[str, str], data: list) -> "PriceData":
+    def _create_price_data(cls, api: Mapping[str, str], data: list) -> PriceData:
         try:
             return PriceData(
                 opening_price=Decimal(api[data[0]]),
