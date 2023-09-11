@@ -5,7 +5,7 @@
 import asyncio
 
 from coin.streaming.coin_rest_interaction import CoinPresentPriceReponseAPI
-from spark_connection.properties import BTC_TOPIC_NAME, ETH_TOPIC_NAME
+from coin.core.config.properties import BTC_TOPIC_NAME, ETH_TOPIC_NAME
 
 
 async def btc_present_start() -> None:
