@@ -23,19 +23,6 @@ services:
     networks:
       - kafka-network
 
-  coin_fastapi:
-    image: fastapi
-    build: 
-      context: .
-      dockerfile: Dockerfile
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8084 --reload
-    ports:
-      - 8084:8084
-    volumes:
-      - ./apps:/code/app  
-    networks:
-      - kafka-network
-
 networks:
   kafka-network:
 
