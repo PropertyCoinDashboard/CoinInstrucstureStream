@@ -1,5 +1,5 @@
 from coin.core.data_mq.data_admin import new_topic_initialization
-from spark_connection.properties import (
+from coin.core.config.properties import (
     BTC_TOPIC_NAME,
     ETH_TOPIC_NAME,
     BTC_AVERAGE_TOPIC_NAME,
