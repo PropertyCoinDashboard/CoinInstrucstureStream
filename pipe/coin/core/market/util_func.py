@@ -3,20 +3,13 @@
 """
 import sys
 import requests
-import configparser
-from pathlib import Path
 from typing import Any
-
-
-path = Path(__file__).parent
-parser = configparser.ConfigParser()
-parser.read(f"{path.parent}/config/urls.conf")
-
-UPBIT_URL: str = parser.get("APIURL", "UPBIT")
-BITHUMB_URL: str = parser.get("APIURL", "BITHUMB")
-KORBIT_URL: str = parser.get("APIURL", "KORBIT")
-COINONE_URL: str = parser.get("APIURL", "COINONE")
-MAXLISTSIZE: int = 10
+from coin.core.config.properties import (
+    UPBIT_URL,
+    BITHUMB_URL,
+    KORBIT_URL,
+    COINONE_URL,
+)
 
 
 def header_to_json(url: str) -> Any:

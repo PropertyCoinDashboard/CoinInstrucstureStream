@@ -12,7 +12,7 @@ from pydantic_core._pydantic_core import ValidationError
 
 from coin.core.market.data_format import CoinMarket, CoinMarketData
 from coin.core.settings.properties import market_setting
-from coin.core.settings.create_log import log
+from coin.core.settings.create_log import SocketLogCustomer
 from coin.core.data_mq.data_interaction import produce_sending
 
 present_path = Path(__file__).parent
@@ -25,7 +25,7 @@ class CoinPresentPriceReponseAPI:
 
     def __init__(self) -> None:
         self.market_env = market_setting("rest")
-        self.logger = log(f"{present_path}/log/error.log", "error")
+        self.logging = SocketLogCustomer()
 
     async def coin_present_architecture(
         self,
@@ -59,7 +59,7 @@ class CoinPresentPriceReponseAPI:
                 data=data,
             ).model_dump()
         except (PydanticUserError, ValidationError) as error:
-            self.logger.error("Exception occurred: %s", error)
+            self.logging.error_log("Exception occurred: %s", error)
 
     async def __get_market_present_price(
         self, market: str, coin_symbol: str
@@ -107,4 +107,4 @@ class CoinPresentPriceReponseAPI:
                 ).model_dump(mode="json")
                 await produce_sending(topic_name, message=schema)
             except (TimeoutError, CancelledError, ValidationError) as error:
-                self.logger.error("Data transmission failed: %s", error)
+                self.logging.error_log("Data transmission failed: %s", error)
