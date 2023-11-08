@@ -92,7 +92,7 @@ class CoinPresentPriceReponseAPI:
             topic_name (str): topic name
         """
         while True:
-            await asyncio.sleep(1)
+            # await asyncio.sleep(1)
             try:
                 tasks: list[Coroutine[Any, Any, dict[str, Any]]] = [
                     self.__get_market_present_price(

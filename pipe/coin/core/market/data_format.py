@@ -1,6 +1,7 @@
 """
 Coin present data format architecture
 """
+from __future__ import annotations
 from typing import Mapping, Any
 from decimal import Decimal, ROUND_HALF_UP
 from pydantic import BaseModel, validator
@@ -135,7 +136,7 @@ class CoinMarketData(BaseModel):
         coin_symbol: str,
         api: Mapping[str, Any],
         data: list[str, str, str, str, str, str],
-    ) -> "CoinMarketData":
+    ) -> CoinMarketData:
         """다음과 같은 dictionary를 만들기 위한 pydantic json model architecture
         >>>  {
             "market": "upbit-BTC",

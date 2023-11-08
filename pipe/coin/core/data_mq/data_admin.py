@@ -7,8 +7,10 @@ from confluent_kafka.error import KafkaError, KafkaException, ProduceError
 from coin.core.settings.create_log import log
 
 present_path = Path(__file__).parent.parent
+print(present_path)
 logger = log(
-    log_location=f"{present_path}/log/kafka_topic_create.log", name="topic_create"
+    log_location=f"{present_path}/data_mq/log/kafka_topic_create.log",
+    name="topic_create",
 )
 
 

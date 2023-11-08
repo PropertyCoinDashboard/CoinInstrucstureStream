@@ -24,7 +24,7 @@ except (FileNotFoundError, FileExistsError):
     log_path.parent.mkdir(parents=True, exist_ok=True)
 
 
-except_list = defaultdict(list)
+except_list: defaultdict[Any, list] = defaultdict(list)
 
 
 async def produce_sending(topic: Any, message: Any):
