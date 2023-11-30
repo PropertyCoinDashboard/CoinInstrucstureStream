@@ -66,7 +66,7 @@ class PriceData(BaseModel):
         BaseModel (_type_): pydantic
 
     Returns:
-        _type_: _description_
+        _type_: Decimal type
     """
 
     opening_price: Decimal
