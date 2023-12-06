@@ -77,6 +77,7 @@ class PriceData(BaseModel):
     acc_trade_volume_24h: Decimal
 
     @validator("*", pre=True)
+    @classmethod
     def round_three_place_adjust(cls, value: Any) -> Decimal:
         """반올림
 

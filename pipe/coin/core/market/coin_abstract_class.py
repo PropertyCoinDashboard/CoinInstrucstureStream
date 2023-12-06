@@ -1,3 +1,14 @@
+"""
+기능 분할 완료 
+1. WebsocketConnectionManager
+    - 웹소켓 승인 및 전송 로직
+2. MessageDataPreprocessing
+    - 메시지 스키마 통일화 전처리 로직 
+3. KafkaMessageSender
+    - 카프카 전송 로직 
+    - 전송 실패 했을 시 우회 로직 완료 
+"""
+
 from __future__ import annotations
 from typing import Any
 from pathlib import Path
@@ -72,18 +83,6 @@ class CoinSocketAndPullRequest(ABC):
             >>> list[str]: ["BTC", "ETH" ....]
         """
         raise NotImplementedError()
-
-
-"""
-기능 분할 완료 
-1. WebsocketConnectionManager
-    - 웹소켓 승인 및 전송 로직
-2. MessageDataPreprocessing
-    - 메시지 스키마 통일화 전처리 로직 
-3. KafkaMessageSender
-    - 카프카 전송 로직 
-    - 전송 실패 했을 시 우회 로직 완료 
-"""
 
 
 class WebsocketConnectionAbstract:
