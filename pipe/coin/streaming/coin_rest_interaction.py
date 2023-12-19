@@ -14,6 +14,7 @@ from coin.core.market.data_format import CoinMarket, CoinMarketData
 from coin.core.settings.properties import market_setting
 from coin.core.settings.create_log import SocketLogCustomer
 from coin.core.data_mq.data_interaction import produce_sending
+from coin.streaming.java_code_intersection import kafka_sending
 
 present_path = Path(__file__).parent
 
@@ -105,6 +106,7 @@ class CoinPresentPriceReponseAPI:
                 schema: dict[str, dict[str, Any]] = CoinMarket(
                     **dict(zip(self.market_env.keys(), market_result))
                 ).model_dump(mode="json")
-                await produce_sending(topic_name, message=schema)
+                print(schema)
+                await kafka_sending(topic_name, message=schema)
             except (TimeoutError, CancelledError, ValidationError) as error:
                 self.logging.error_log("Data transmission failed: %s", error)
