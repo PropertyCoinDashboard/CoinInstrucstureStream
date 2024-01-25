@@ -16,7 +16,7 @@ present_path = Path(__file__).parent
 
 try:
     logging = log(
-        log_location=f"{present_path}/log/error/kafka_message.log",
+        log_location=f"{present_path}/log/success/kafka_message.log",
         name="messge_sending",
     )
 except (FileNotFoundError, FileExistsError):
