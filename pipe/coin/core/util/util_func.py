@@ -64,3 +64,7 @@ def get_symbol_collect_url(market: str) -> str:
             return COINONE_URL
         case _:
             raise ValueError("Not Found market")
+
+
+def market_name_extract(market: str) -> str:
+    return market.replace(market[0], market[0].upper(), 1)

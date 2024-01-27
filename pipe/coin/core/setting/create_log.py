@@ -29,11 +29,13 @@ def log(name: str, log_location: str) -> logging.Logger:
 
 
 class SocketLogCustomer:
-    def __init__(self, base_path: Path = None):
+    def __init__(self, base_path: Path = None, file_name: str = None):
         if base_path:
             self.base_path = base_path
         else:
-            self.base_path = Path(__file__).parent.parent.parent / "streaming" / "log"
+            self.base_path = (
+                Path(__file__).parent.parent.parent / f"{file_name}" / "log"
+            )
 
     def create_logger(self, log_name: str, log_type: str) -> logging.Logger:
         try:

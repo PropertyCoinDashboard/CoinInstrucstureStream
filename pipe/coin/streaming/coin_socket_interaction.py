@@ -16,12 +16,12 @@ from collections import defaultdict
 import asyncio
 from asyncio.exceptions import TimeoutError, CancelledError
 
-from coin.core.util.util_func import parse_uri
-
-from coin.core.setting.factory_api import load_json
-from coin.core.data_mq.data_interaction import KafkaMessageSender
-from coin.core.setting.create_log import SocketLogCustomer
+from coin.core.util.util_func import parse_uri, market_name_extract
 from coin.core.util.data_format import CoinMarketData
+from coin.core.setting.factory_api import load_json
+from coin.core.setting.create_log import SocketLogCustomer
+
+from coin.core.data_mq.data_interaction import KafkaMessageSender
 from coin.core.abstract.stream_abstract import (
     MessageDataPreprocessingAbstract,
     WebsocketConnectionAbstract,
@@ -62,7 +62,7 @@ class WebsocketConnectionManager(WebsocketConnectionAbstract):
         """
         subscribe_data: str = json.dumps(subscribe_fmt)
         await websocket.send(subscribe_data)
-        await asyncio.sleep(1)
+        # await asyncio.sleep(1)
 
     async def handle_connection(self, websocket: Any, uri: str) -> None:
         """웹 소켓 커넥션 확인 함수
@@ -108,7 +108,7 @@ class WebsocketConnectionManager(WebsocketConnectionAbstract):
                 await self.message_preprocessing.put_message_to_logging(
                     message, uri, symbol
                 )
-                await asyncio.sleep(1.0)
+                # await asyncio.sleep(1.0)
 
             except asyncio.TimeoutError:
                 await self.message_logger.error_log(
@@ -161,7 +161,7 @@ class MessageDataPreprocessing(MessageDataPreprocessingAbstract):
                 -> 빗썸과 코빗은 소켓에서 연결 확인 메시지가 출력되고 그다음 데이터가 출력되기 때문에 출력 순서 필터링
         """
 
-        self.p = SocketLogCustomer()
+        self.p = SocketLogCustomer(file_name="streaming")
         self.message_by_data = defaultdict(list)
 
         self.market = load_json("socket")
@@ -301,16 +301,16 @@ class MessageDataPreprocessing(MessageDataPreprocessingAbstract):
         matches_all = any(ignore in message for ignore in self.register_message)
         if matches_all:
             await self.p.register_connection(message=message)
-
         try:
             market_schema: dict[str, Any] = await self.process_message(
                 market, message, symbol
             )
+
             self.message_by_data[market].append(market_schema)
             if len(self.message_by_data[market]) >= MAXLISTSIZE:
                 await KafkaMessageSender().message_kafka_sending(
                     data=self.message_by_data[market],
-                    market_name=market,
+                    market_name=market_name_extract(market),
                     symbol=symbol,
                     type_="SocketDataIn",
                 )

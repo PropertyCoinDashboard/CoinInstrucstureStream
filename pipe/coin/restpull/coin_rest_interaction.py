@@ -13,7 +13,7 @@ from pydantic_core._pydantic_core import ValidationError
 from coin.core.util.data_format import CoinMarket, CoinMarketData
 from coin.core.setting.factory_api import load_json
 from coin.core.setting.create_log import SocketLogCustomer
-from coin.core.data_mq.data_interaction import produce_sending
+from coin.core.data_mq.data_interaction import KafkaMessageSender
 
 
 present_path = Path(__file__).parent
@@ -26,7 +26,7 @@ class CoinPresentPriceReponseAPI:
 
     def __init__(self) -> None:
         self.market_env = load_json("rest")
-        self.logging = SocketLogCustomer()
+        self.logging = SocketLogCustomer(file_name="restpull")
 
     async def coin_present_architecture(
         self,
@@ -83,7 +83,7 @@ class CoinPresentPriceReponseAPI:
             data=market_info["parameter"],
         )
 
-    async def total_pull_request(self, coin_symbol: str, topic_name: str) -> None:
+    async def total_pull_request(self, coin_symbol: str) -> None:
         """
         Total Pull request
 
@@ -105,6 +105,13 @@ class CoinPresentPriceReponseAPI:
                 schema: dict[str, dict[str, Any]] = CoinMarket(
                     **dict(zip(self.market_env.keys(), market_result))
                 ).model_dump(mode="json")
-                await produce_sending(topic_name, message=schema)
+                await KafkaMessageSender().message_kafka_sending(
+                    data=schema,
+                    symbol=coin_symbol,
+                    market_name="Total",
+                    type_="RestDataIn",
+                )
+                await self.logging.data_log(exchange_name="Total", message=schema)
+
             except (TimeoutError, CancelledError, ValidationError) as error:
                 self.logging.error_log("Data transmission failed: %s", error)

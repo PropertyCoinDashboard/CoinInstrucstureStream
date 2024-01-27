@@ -4,21 +4,20 @@
 
 import asyncio
 from coin.restpull.coin_rest_interaction import CoinPresentPriceReponseAPI
-from coin.core.setting.properties import BTC_TOPIC_NAME, ETH_TOPIC_NAME
 
 
 async def btc_present_start() -> None:
     """
     bitcoin kafak stream
     """
-    await CoinPresentPriceReponseAPI().total_pull_request("BTC", BTC_TOPIC_NAME)
+    await CoinPresentPriceReponseAPI().total_pull_request("BTC")
 
 
 async def eth_present_start() -> None:
     """
     ethereum kafak stream
     """
-    await CoinPresentPriceReponseAPI().total_pull_request("ETH", ETH_TOPIC_NAME)
+    await CoinPresentPriceReponseAPI().total_pull_request("ETH")
 
 
 async def be_present_gether() -> None:
@@ -37,4 +36,4 @@ async def data_sending_start() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(data_sending_start())
+    asyncio.run(be_present_gether())
