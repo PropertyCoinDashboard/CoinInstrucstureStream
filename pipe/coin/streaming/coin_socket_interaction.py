@@ -45,7 +45,7 @@ class WebsocketConnectionManager(WebsocketConnectionAbstract):
                 -> 전처리 클래스(로그 클래스 존재) [self.p = SocketLogCustomer()  # 로그 출력을 위한 객체]
         """
         self.message_preprocessing = MessageDataPreprocessing()
-        self.message_logger = SocketLogCustomer()
+        self.message_logger = SocketLogCustomer(file_name="streaming")
         self.register_message = [
             "Filter Registered Successfully",
             "korbit:subscribe",
