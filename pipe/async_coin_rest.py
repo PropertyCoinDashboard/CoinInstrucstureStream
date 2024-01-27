@@ -3,9 +3,8 @@
 """
 
 import asyncio
-
-from coin.streaming.coin_rest_interaction import CoinPresentPriceReponseAPI
-from coin.core.config.properties import BTC_TOPIC_NAME, ETH_TOPIC_NAME
+from coin.restpull.coin_rest_interaction import CoinPresentPriceReponseAPI
+from coin.core.setting.properties import BTC_TOPIC_NAME, ETH_TOPIC_NAME
 
 
 async def btc_present_start() -> None:

@@ -10,9 +10,9 @@ from pydantic.errors import PydanticUserError
 from pydantic_core._pydantic_core import ValidationError
 
 
-from coin.core.market.data_format import CoinMarket, CoinMarketData
-from coin.core.settings.properties import market_setting
-from coin.core.settings.create_log import SocketLogCustomer
+from coin.core.util.data_format import CoinMarket, CoinMarketData
+from coin.core.setting.factory_api import load_json
+from coin.core.setting.create_log import SocketLogCustomer
 from coin.core.data_mq.data_interaction import produce_sending
 
 
@@ -25,7 +25,7 @@ class CoinPresentPriceReponseAPI:
     """
 
     def __init__(self) -> None:
-        self.market_env = market_setting("rest")
+        self.market_env = load_json("rest")
         self.logging = SocketLogCustomer()
 
     async def coin_present_architecture(
@@ -51,7 +51,6 @@ class CoinPresentPriceReponseAPI:
         try:
             api_response = api.get_coin_present_price(coin_name=coin_symbol.upper())
             market_time: int = api_response[time]
-
             return CoinMarketData.from_api(
                 market=market,
                 time=market_time,

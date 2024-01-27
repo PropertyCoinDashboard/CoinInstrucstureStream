@@ -1,13 +1,13 @@
 """
 KAFAK PRODUCE 
 """
+import sys
 import json
 from typing import Any
 from pathlib import Path
 from collections import defaultdict
 
-from coin.core.market.util_func import deep_getsizeof
-from coin.core.settings.create_log import log
+from coin.core.setting.create_log import log, SocketLogCustomer
 from aiokafka import AIOKafkaProducer
 from aiokafka.errors import NoBrokersAvailable, KafkaProtocolError, KafkaConnectionError
 
@@ -25,6 +25,47 @@ except (FileNotFoundError, FileExistsError):
 
 
 except_list: defaultdict[Any, list] = defaultdict(list)
+
+
+# 메모리 계산
+def deep_getsizeof(obj, seen=None) -> int:
+    """재귀적으로 객체의 메모리 사용량을 계산하는 함수"""
+    if seen is None:
+        seen = set()
+
+    obj_id = id(obj)
+    if obj_id in seen:
+        return 0
+
+    # 이미 본 객체는 저장
+    seen.add(obj_id)
+
+    size = sys.getsizeof(obj)
+
+    if isinstance(obj, dict):
+        size += sum(deep_getsizeof(v, seen) for v in obj.values())
+        size += sum(deep_getsizeof(k, seen) for k in obj.keys())
+    elif hasattr(obj, "__iter__") and not isinstance(obj, (str, bytes, bytearray)):
+        size += sum(deep_getsizeof(i, seen) for i in obj)
+
+    return size
+
+
+async def consume_messages(consumer, topic) -> None:
+    """
+    kafka messageing consumer
+
+    Args:
+        consumer (_type_): 컨슈머
+        topic (_type_): 받아오는 토픽
+    """
+    await consumer.start()
+    try:
+        async for msg in consumer:
+            # 메시지 처리 로직 작성
+            print(f"Topic: {topic}, Message: {msg.value}")
+    finally:
+        await consumer.stop()
 
 
 async def produce_sending(topic: Any, message: Any):
@@ -69,18 +110,43 @@ async def produce_sending(topic: Any, message: Any):
         await producer.stop()
 
 
-async def consume_messages(consumer, topic):
+class KafkaMessageSender:
     """
-    kafka messageing consumer
+    3. KafkaMessageSender
+        - 카프카 전송 로직
+        - 전송 실패 했을 시 우회 로직 완료
+    """
 
-    Args:
-        consumer (_type_): 컨슈머
-        topic (_type_): 받아오는 토픽
-    """
-    await consumer.start()
-    try:
-        async for msg in consumer:
-            # 메시지 처리 로직 작성
-            print(f"Topic: {topic}, Message: {msg.value}")
-    finally:
-        await consumer.stop()
+    def __init__(self) -> None:
+        self.p = SocketLogCustomer()  # 로그 출력을 위한 객체
+        self.except_list = defaultdict(list)
+
+    async def message_kafka_sending(
+        self, data: Any, market_name: str, type_: str, symbol: str
+    ) -> None:
+        """카프카 전송 우회 로직 작성
+
+        Args:
+            data (Any):  데이터
+            market_name (str): 마켓이름
+            symbol (str): 코인심볼
+        """
+        try:
+            await produce_sending(
+                topic=f"{symbol.lower()}{type_}{market_name.replace(market_name[0], market_name[0].upper(), 1)}",
+                message=data,
+            )
+            # 불능 상태에서 저장된 메시지가 있는 경우 함께 전송
+            while self.except_list[market_name]:
+                stored_message = self.except_list[market_name].pop(0)
+                await produce_sending(
+                    topic=f"{type_}{market_name.replace(market_name[0], market_name[0].upper(), 1)}",
+                    message=stored_message,
+                )
+
+        except KafkaConnectionError as error:
+            await self.p.error_log(
+                error_type="etc_error",
+                message=f"broker 통신 불가로 임시 저장합니다 --> {error} data -> {len(self.except_list)}",
+            )
+            self.except_list[market_name].append(data)

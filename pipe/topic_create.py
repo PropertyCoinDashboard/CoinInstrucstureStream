@@ -1,5 +1,5 @@
 from coin.core.data_mq.data_admin import new_topic_initialization
-from coin.core.config.properties import (
+from coin.core.setting.properties import (
     BTC_TOPIC_NAME,
     ETH_TOPIC_NAME,
     BTC_AVERAGE_TOPIC_NAME,

@@ -1,46 +1,26 @@
 """
 코인 정보 추상화
 """
-import uuid
 from typing import Any
 from collections import Counter
-from datetime import datetime, timezone
 
-from coin.core.market.util_func import header_to_json
-from coin.core.market.stream_socket import CoinStreamFacade
-from coin.core.market.coin_abstract_class import CoinSocketAndPullRequest
-from coin.core.market.data_format import CoinSymbol, CoinNameAndSymbol
+from coin.core.util.util_func import header_to_json
+
+from coin.core.abstract.api_abstract_rest import CoinAbstactRest
+from coin.core.util.data_format import CoinSymbol, CoinNameAndSymbol
 
 
-class UpbitSocketAndPullRequest(CoinSocketAndPullRequest):
+class UpbitRest(CoinAbstactRest):
     """UPBIT
 
     Args:
-        CoinSocketAndPullRequest (_type_): abstruct class
+        CoinRest (_type_): abstruct class
     """
 
     def __init__(self) -> None:
         super().__init__(market="upbit")
         self.upbit_coin_list: list[dict[str, str]] = header_to_json(
             url=f"{self.url}/market/all?isDetails=true"
-        )
-        self.__upbit_websocket = "wss://api.upbit.com/websocket/v1"
-
-    def get_socket_parameter(self, symbol: str) -> list[dict[str, Any]]:
-        return [
-            {"ticket": str(uuid.uuid4())},
-            {
-                "type": "ticker",
-                "codes": [f"KRW-{symbol.upper()}"],
-                "isOnlyRealtime": True,
-            },
-        ]
-
-    async def get_present_websocket(self, symbol: str) -> None:
-        return await CoinStreamFacade().websocket_to_json(
-            uri=self.__upbit_websocket,
-            subscribe_fmt=self.get_socket_parameter(symbol=symbol),
-            symbol=symbol,
         )
 
     def get_coin_present_price(self, coin_name: str) -> dict[str, Any]:
@@ -80,32 +60,17 @@ class UpbitSocketAndPullRequest(CoinSocketAndPullRequest):
         ]
 
 
-class BithumbSocketAndPullRequest(CoinSocketAndPullRequest):
+class BithumbRest(CoinAbstactRest):
     """Bithumb
 
     Args:
-        CoinSocketAndPullRequest (_type_): abstruct class
+        CoinRest (_type_): abstruct class
     """
 
     def __init__(self) -> None:
         super().__init__(market="bithum")
         self.__bithumb_coin_list: dict[str, Any] = header_to_json(
             url=f"{self.url}/ticker/ALL_KRW"
-        )
-        self.__bithumb_websocket = "wss://pubwss.bithumb.com/pub/ws"
-
-    def get_socket_parameter(self, symbol: str) -> dict[str, Any]:
-        return {
-            "type": "ticker",
-            "symbols": [f"{symbol.upper()}_KRW"],
-            "tickTypes": ["MID"],
-        }
-
-    async def get_present_websocket(self, symbol: str) -> None:
-        return await CoinStreamFacade().websocket_to_json(
-            uri=self.__bithumb_websocket,
-            subscribe_fmt=self.get_socket_parameter(symbol=symbol),
-            symbol=symbol,
         )
 
     def get_coin_present_price(self, coin_name: str) -> dict[str, Any]:
@@ -150,24 +115,16 @@ class BithumbSocketAndPullRequest(CoinSocketAndPullRequest):
         ][:-1]
 
 
-class CoinoneSocketAndPullRequest(CoinSocketAndPullRequest):
+class CoinoneRest(CoinAbstactRest):
     """Coinone
 
     Args:
-        CoinSocketAndPullRequest (_type_): abstruct class
+        CoinRest (_type_): abstruct class
     """
 
     def __init__(self) -> None:
         super().__init__(market="coinone")
         self.__coinone_coin_list = header_to_json(url=f"{self.url}/currencies")
-        self.__socket_parameter = None
-
-    def get_socket_parameter(self) -> list[dict[str, Any]]:
-        pass
-
-    async def get_present_websocket(self, uri: str, subscribe_fmt: list[dict]):
-        # 아직 미지원
-        pass
 
     def get_coin_present_price(self, coin_name: str) -> dict[str, Any]:
         """
@@ -210,33 +167,17 @@ class CoinoneSocketAndPullRequest(CoinSocketAndPullRequest):
         ]
 
 
-class KorbitSocketAndPullRequest(CoinSocketAndPullRequest):
+class KorbitRest(CoinAbstactRest):
     """Korbit
 
     Args:
-        CoinSocketAndPullRequest (_type_): abstruct class
+        CoinRest (_type_): abstruct class
     """
 
     def __init__(self) -> None:
         super().__init__(market="korbit")
         self.__korbit_coin_list: dict[str, dict[str, Any]] = header_to_json(
             url=f"{self.url}/ticker/detailed/all"
-        )
-        self.__korbit_websocket = "wss://ws.korbit.co.kr/v1/user/push"
-
-    def get_socket_parameter(self, symbol: str) -> dict[str, Any]:
-        return {
-            "accessToken": None,
-            "timestamp": int(datetime.now(timezone.utc).timestamp()),
-            "event": "korbit:subscribe",
-            "data": {"channels": [f"ticker:{symbol.lower()}_krw"]},
-        }
-
-    async def get_present_websocket(self, symbol: str) -> None:
-        return await CoinStreamFacade().websocket_to_json(
-            uri=self.__korbit_websocket,
-            subscribe_fmt=self.get_socket_parameter(symbol=symbol),
-            symbol=symbol,
         )
 
     def get_coin_present_price(self, coin_name: str) -> dict[str, Any]:
@@ -287,10 +228,10 @@ class CoinNameAndSymbolMatching:
     """
 
     def __init__(self) -> None:
-        self.upbit = UpbitSocketAndPullRequest()
-        self.bithumb = BithumbSocketAndPullRequest()
-        self.korbit = KorbitSocketAndPullRequest()
-        self.coinone = CoinoneSocketAndPullRequest()
+        self.upbit = UpbitRest()
+        self.bithumb = BithumbRest()
+        self.korbit = KorbitRest()
+        self.coinone = CoinoneRest()
 
     def __get_all_coin_symbols(self) -> list[str]:
         """

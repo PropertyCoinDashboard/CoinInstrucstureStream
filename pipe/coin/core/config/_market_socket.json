@@ -11,7 +11,7 @@
         ]
     },
     "bithumb": {
-        "timestamp": "date",
+        "timestamp": "time",
         "parameter": [
             "openPrice",
             "closePrice",
