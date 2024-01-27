@@ -19,7 +19,7 @@ from asyncio.exceptions import TimeoutError, CancelledError
 from coin.core.util.util_func import parse_uri, market_name_extract
 from coin.core.util.data_format import CoinMarketData
 from coin.core.setting.factory_api import load_json
-from coin.core.setting.create_log import SocketLogCustomer
+from coin.core.util.create_log import SocketLogCustomer
 
 from coin.core.data_mq.data_interaction import KafkaMessageSender
 from coin.core.abstract.stream_abstract import (

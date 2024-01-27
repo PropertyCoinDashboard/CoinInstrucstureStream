@@ -4,7 +4,7 @@ KAKFA NEW TOPIC CREATE
 from pathlib import Path
 from confluent_kafka.admin import AdminClient, NewTopic
 from confluent_kafka.error import KafkaError, KafkaException, ProduceError
-from coin.core.setting.create_log import log
+from coin.core.util.create_log import log
 
 present_path = Path(__file__).parent.parent
 logger = log(

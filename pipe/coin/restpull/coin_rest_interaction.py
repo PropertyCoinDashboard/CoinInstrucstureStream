@@ -12,7 +12,7 @@ from pydantic_core._pydantic_core import ValidationError
 
 from coin.core.util.data_format import CoinMarket, CoinMarketData
 from coin.core.setting.factory_api import load_json
-from coin.core.setting.create_log import SocketLogCustomer
+from coin.core.util.create_log import SocketLogCustomer
 from coin.core.data_mq.data_interaction import KafkaMessageSender
 
 

@@ -8,7 +8,7 @@ from asyncio.exceptions import TimeoutError, CancelledError
 
 
 from coin.core.setting.factory_api import load_json
-from coin.core.setting.create_log import SocketLogCustomer
+from coin.core.util.create_log import SocketLogCustomer
 
 
 class CoinPresentPriceWebsocket:
