@@ -26,7 +26,9 @@ class CoinPresentPriceReponseAPI:
 
     def __init__(self) -> None:
         self.market_env = load_json("rest")
-        self.logging = SocketLogCustomer(file_name="restpull")
+        self.logging = SocketLogCustomer(
+            base_path=Path(__file__).parent, file_name="data", object_name="rest"
+        )
 
     async def coin_present_architecture(
         self,

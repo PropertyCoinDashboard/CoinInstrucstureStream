@@ -7,12 +7,16 @@
 """
 from __future__ import annotations
 import json
+from pathlib import Path
 
 import websockets
-from typing import Any
+import tracemalloc
+from typing import Any, Coroutine
 from collections import defaultdict
 
 import asyncio
+from asyncio.exceptions import TimeoutError, CancelledError
+
 
 from coin.core.util.util_func import parse_uri, market_name_extract
 from coin.core.util.data_format import CoinMarketData
@@ -43,7 +47,9 @@ class WebsocketConnectionManager(WebsocketConnectionAbstract):
                 -> 전처리 클래스(로그 클래스 존재) [self.p = SocketLogCustomer()  # 로그 출력을 위한 객체]
         """
         self.message_preprocessing = MessageDataPreprocessing()
-        self.message_logger = SocketLogCustomer(file_name="streaming")
+        self.message_logger = SocketLogCustomer(
+            base_path=Path(__file__).parent, file_name="data", object_name="socket"
+        )
         self.register_message = [
             "Filter Registered Successfully",
             "korbit:subscribe",
@@ -159,7 +165,9 @@ class MessageDataPreprocessing(MessageDataPreprocessingAbstract):
                 -> 빗썸과 코빗은 소켓에서 연결 확인 메시지가 출력되고 그다음 데이터가 출력되기 때문에 출력 순서 필터링
         """
 
-        self.p = SocketLogCustomer(file_name="streaming")
+        self.p = SocketLogCustomer(
+            base_path=Path(__file__).parent, file_name="data", object_name="socket"
+        )
         self.message_by_data = defaultdict(list)
 
         self.market = load_json("socket")
@@ -321,4 +329,27 @@ class MessageDataPreprocessing(MessageDataPreprocessingAbstract):
             await self.p.error_log(
                 error_type="total_not_connection",
                 message=f"Price Socket Connection Error --> {error} url --> {market}",
+            )
+
+
+class CoinPresentPriceWebsocket:
+    """
+    Coin Stream
+    """
+
+    def __init__(self, market_type: str = "socket") -> None:
+        tracemalloc.start()
+        self.market_env = load_json(market_type)
+        self.logger = SocketLogCustomer()
+
+    async def coin_present_architecture(self, symbol: str) -> Coroutine[Any, Any, None]:
+        try:
+            coroutines: list[Any] = [
+                self.market_env[i]["api"].get_present_websocket(symbol)
+                for i in self.market_env
+            ]
+            await asyncio.gather(*coroutines, return_exceptions=True)
+        except (TimeoutError, CancelledError) as error:
+            self.logger.error_log(
+                error_type="worker", message=f"진행하지 못했습니다 --> {error}"
             )

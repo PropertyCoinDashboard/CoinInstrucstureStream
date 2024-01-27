@@ -13,17 +13,6 @@ from aiokafka.errors import NoBrokersAvailable, KafkaProtocolError, KafkaConnect
 
 
 present_path = Path(__file__).parent
-
-try:
-    logging = log(
-        log_location=f"{present_path}/log/success/kafka_message.log",
-        name="messge_sending",
-    )
-except (FileNotFoundError, FileExistsError):
-    log_path = present_path / "log" / "error" / "kafka_message.log"
-    log_path.parent.mkdir(parents=True, exist_ok=True)
-
-
 except_list: defaultdict[Any, list] = defaultdict(list)
 
 
@@ -77,7 +66,7 @@ class KafkaMessageSender:
 
     def __init__(self) -> None:
         self.p = SocketLogCustomer(
-            file_name="mq_log", base_path=Path(__file__).parent
+            base_path=Path(__file__).parent, file_name="mq_logging", object_name="kafka"
         )  # 로그 출력을 위한 객체
         self.except_list = defaultdict(list)
 
@@ -98,12 +87,8 @@ class KafkaMessageSender:
             encoded_message = json.dumps(message).encode("utf-8")
             await producer.send_and_wait(topic, encoded_message)
             size: int = deep_getsizeof(encoded_message)
-            logging.info(
-                "Message delivered to: %s --> counting --> %s size --> %s",
-                topic,
-                len(message),
-                size,
-            )
+            message: str = f"Message delivered to: {topic} --> counting --> {len(message)} size --> {size}"
+            self.p.data_log(exchange_name="success", message=message)
 
             # 불능 상태에서 저장된 메시지가 있는 경우 함께 전송
             while except_list[topic]:
@@ -115,9 +100,10 @@ class KafkaMessageSender:
             KafkaProtocolError,
             KafkaConnectionError,
         ) as error:
-            logging.error(
-                "Kafka broker error로 인해 임시 저장합니다 : %s, message: %s", error, message
+            error_message: str = (
+                f"Kafka broker error로 인해 임시 저장합니다 : {error}, message: {message}"
             )
+            self.p.error_log(error_type="error", message=error_message)
             except_list[topic].append(json.dumps(message).encode("utf-8"))
         finally:
             await producer.stop()
