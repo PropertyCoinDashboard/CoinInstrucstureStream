@@ -50,6 +50,7 @@ class CoinPresentPriceReponseAPI:
         """
         try:
             api_response = api.get_coin_present_price(coin_name=coin_symbol.upper())
+            print(market, api_response)
             market_time: int = api_response[time]
             return CoinMarketData.from_api(
                 market=market,
@@ -114,4 +115,4 @@ class CoinPresentPriceReponseAPI:
                 await self.logging.data_log(exchange_name="Total", message=schema)
 
             except (TimeoutError, CancelledError, ValidationError) as error:
-                self.logging.error_log("Data transmission failed: %s", error)
+                await self.logging.error_log("Data transmission failed: %s", error)

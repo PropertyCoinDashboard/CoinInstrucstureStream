@@ -76,7 +76,9 @@ class KafkaMessageSender:
     """
 
     def __init__(self) -> None:
-        self.p = SocketLogCustomer()  # 로그 출력을 위한 객체
+        self.p = SocketLogCustomer(
+            file_name="mq_log", base_path=Path(__file__).parent
+        )  # 로그 출력을 위한 객체
         self.except_list = defaultdict(list)
 
     async def produce_sending(self, topic: Any, message: Any):

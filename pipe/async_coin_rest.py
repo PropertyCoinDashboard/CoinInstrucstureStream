@@ -3,7 +3,7 @@
 """
 
 import asyncio
-from coin.restpull.coin_rest_interaction import CoinPresentPriceReponseAPI
+from coin.core.coin_rest_interaction import CoinPresentPriceReponseAPI
 
 
 async def btc_present_start() -> None:
