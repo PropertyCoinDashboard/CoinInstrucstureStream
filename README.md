@@ -2,8 +2,6 @@
 
 
 # architecture
-![streaming drawio](https://github.com/limhaneul12/CoinPresentStreaming/assets/52487610/dfd6edd4-e2ce-44b6-a390-33f1b05a12ba)
-
 ## 실시간 코인 현재가 계산 
 - REST API [upbit, bithumb, coinone, korbit] (BTC, ETH)
 - Websocket [upbit, bithumb, korbit, (coinone 미지원)] (BTC, ETH)
