@@ -88,7 +88,7 @@ class KafkaMessageSender:
             await producer.send_and_wait(topic, encoded_message)
             size: int = deep_getsizeof(encoded_message)
             message: str = f"Message delivered to: {topic} --> counting --> {len(message)} size --> {size}"
-            self.p.data_log(exchange_name="success", message=message)
+            await self.p.data_log(exchange_name="success", message=message)
 
             # 불능 상태에서 저장된 메시지가 있는 경우 함께 전송
             while except_list[topic]:

@@ -7,6 +7,7 @@ from coin.core.setting.properties import (
     UPBIT_BTC_REAL_TOPIC_NAME,
     BITHUMB_BTC_REAL_TOPIC_NAME,
     KORBIT_BTC_REAL_TOPIC_NAME,
+    COINONE_BTC_REAL_TOPIC_NAME,
 )
 
 
@@ -18,13 +19,14 @@ def data_sending_start() -> None:
         UPBIT_BTC_REAL_TOPIC_NAME,
         BITHUMB_BTC_REAL_TOPIC_NAME,
         KORBIT_BTC_REAL_TOPIC_NAME,
+        COINONE_BTC_REAL_TOPIC_NAME,
         BTC_TOPIC_NAME,
         ETH_TOPIC_NAME,
         ETH_AVERAGE_TOPIC_NAME,
         BTC_AVERAGE_TOPIC_NAME,
     ]
-    partition = [2, 2, 2, 2, 2, 2, 2, 2]
-    replication = [2, 2, 2, 2, 2, 2, 2, 2]
+    partition = [2] * 8
+    replication = [2] * 8
 
     return new_topic_initialization(
         topic=topic, partition=partition, replication_factor=replication
