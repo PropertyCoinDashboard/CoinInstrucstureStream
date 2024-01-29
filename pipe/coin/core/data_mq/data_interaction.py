@@ -7,7 +7,7 @@ from typing import Any
 from pathlib import Path
 from collections import defaultdict
 
-from coin.core.util.create_log import log, SocketLogCustomer
+from coin.core.util.create_log import SocketLogCustomer
 from aiokafka import AIOKafkaProducer
 from aiokafka.errors import NoBrokersAvailable, KafkaProtocolError, KafkaConnectionError
 

@@ -1,6 +1,6 @@
 # market JSON format 값
 # pipe -> ocin -> core -> config -> rest or socket.json 확인 가능
-from typing import Union, TypedDict
+from typing import Union, TypedDict, _TypedDict
 
 Timestamp = Union[str, int, float]
 

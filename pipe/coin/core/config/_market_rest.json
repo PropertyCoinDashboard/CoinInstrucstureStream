@@ -21,17 +21,6 @@
             "units_traded_24H"
         ]
     },
-    "coinone": {
-        "timestamp": "timestamp",
-        "parameter": [
-            "first",
-            "last",
-            "high",
-            "low",
-            "yesterday_last",
-            "target_volume"
-        ]
-    },
     "korbit": {
         "timestamp": "timestamp",
         "parameter": [
@@ -41,6 +30,17 @@
             "low",
             "last",
             "volume"
+        ]
+    },
+    "coinone": {
+        "timestamp": "timestamp",
+        "parameter": [
+            "first",
+            "last",
+            "high",
+            "low",
+            "yesterday_last",
+            "target_volume"
         ]
     }
 }

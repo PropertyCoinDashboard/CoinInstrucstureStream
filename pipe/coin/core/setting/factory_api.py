@@ -9,6 +9,10 @@ from coin.core.ubkc_market import (
     KorbitRestAndSocket,
     CoinoneRestAndSocket,
 )
+from coin.core.util._typing import (
+    ExchangeRestDataTypeHints,
+    ExchangeSocketDataTypeHints,
+)
 
 path = Path(__file__).parent.parent
 
@@ -35,18 +39,27 @@ class __MarketAPIFactory:
         return creator(*args, **kwargs)
 
 
-def load_json(conn_type: str):
+def load_json(
+    conn_type: str,
+) -> ExchangeSocketDataTypeHints | ExchangeRestDataTypeHints:
     """
     Open the file and load market information.
 
-    ExchangeDataTypeHints(Type): dict[str, ExchangeConfig]
-    - from coin.core.util._typing import ExchangeDataTypeHints
+    ExchangeRestDataTypeHints(Type): dict[str, ExchangeRestConfig]
+    - from coin.core.util._typing import ExchangeRestDataTypeHints
+
+    ExchangeSocketDataTypeHints(Type): dict[str, ExchangeSocketConfig]
+    - from coin.core.util._typing import ExchangeSocketDataTypeHints
+
+
     """
     with open(
         file=f"{path}/config/_market_{conn_type}.json", mode="r", encoding="utf-8"
     ) as file:
         market_info = json.load(file)
 
+    # ExchangeSocketDataTypeHints | ExchangeRestDataTypeHints
+    # JSON에 저장되어 있는 값 + API 클래스 주소
     market_info = {
         market: {**info, "api": __MarketAPIFactory.market_load(market)}
         for market, info in market_info.items()
