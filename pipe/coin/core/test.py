@@ -1,14 +1,8 @@
 import json
-from typing import Any
+from ubkc_market import CoinoneRestAndSocket
+from coin.core.coin_socket_interaction import MessageDataPreprocessing
+
 from pathlib import Path
-
-
-from coin.core.ubkc_market import (
-    UpbitRestAndSocket,
-    BithumbRestAndSocket,
-    KorbitRestAndSocket,
-    CoinoneRestAndSocket,
-)
 
 path = Path(__file__).parent.parent
 
@@ -16,10 +10,7 @@ path = Path(__file__).parent.parent
 class __MarketAPIFactory:
     """Factory for market APIs."""
 
-    _create: dict[str, dict[str, Any]] = {
-        "upbit": UpbitRestAndSocket,
-        "bithumb": BithumbRestAndSocket,
-        "korbit": KorbitRestAndSocket,
+    _create = {
         "coinone": CoinoneRestAndSocket,
     }
 
@@ -52,3 +43,21 @@ def load_json(conn_type: str):
         for market, info in market_info.items()
     }
     return market_info
+
+
+
+def get_socket_parameter(self, symbol: str) -> dict[str, str, dict[str, str]]:
+    return {
+        "request_type": "SUBSCRIBE",
+        "channel": "TICKER",
+        "topic": {"quote_currency": "KRW", "target_currency": f"{symbol}"},
+    }
+
+async def get_present_websocket(self, symbol: str) -> None:
+    from coin.core.coin_socket_interaction import WebsocketConnectionManager as WCM
+
+    return await WCM().websocket_to_json(
+        uri=self.__coin_websocket,
+        subscribe_fmt=self.get_socket_parameter(symbol=symbol),
+        symbol=symbol,
+    )

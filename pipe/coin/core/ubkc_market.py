@@ -164,12 +164,23 @@ class CoinoneRestAndSocket(CoinSocketAndRestAbstract):
     def __init__(self) -> None:
         super().__init__(market="coinone")
         self.__coinone_coin_list = header_to_json(url=f"{self.url}/currencies")
+        self.__coin_websocket = "wss://stream.coinone.co.kr"
 
-    def get_socket_parameter(self, symbol: str) -> list[dict[str, Any]]:
-        pass
+    def get_socket_parameter(self, symbol: str) -> dict[str, str, dict[str, str]]:
+        return {
+            "request_type": "SUBSCRIBE",
+            "channel": "TICKER",
+            "topic": {"quote_currency": "KRW", "target_currency": f"{symbol}"},
+        }
 
     async def get_present_websocket(self, symbol: str) -> None:
-        pass
+        from coin.core.coin_socket_interaction import WebsocketConnectionManager as WCM
+
+        return await WCM().websocket_to_json(
+            uri=self.__coin_websocket,
+            subscribe_fmt=self.get_socket_parameter(symbol=symbol),
+            symbol=symbol,
+        )
 
     def get_coin_present_price(self, coin_name: str) -> dict[str, Any]:
         """

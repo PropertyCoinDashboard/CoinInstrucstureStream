@@ -31,5 +31,16 @@
             "ask",
             "volume"
         ]
+    },
+    "coinone": {
+        "timestamp": "timestamp",
+        "parameter": [
+            "first",
+            "last",
+            "high",
+            "low",
+            "yesterday_last",
+            "target_volume"
+        ]
     }
 }

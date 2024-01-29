@@ -10,8 +10,8 @@ from pydantic.errors import PydanticUserError
 from pydantic_core._pydantic_core import ValidationError
 
 
-from coin.core.util.data_format import CoinMarket, CoinMarketData
 from coin.core.setting.factory_api import load_json
+from coin.core.util.data_format import CoinMarket, CoinMarketData
 from coin.core.util.create_log import SocketLogCustomer
 from coin.core.data_mq.data_interaction import KafkaMessageSender
 
@@ -52,7 +52,6 @@ class CoinPresentPriceReponseAPI:
         """
         try:
             api_response = api.get_coin_present_price(coin_name=coin_symbol.upper())
-            print(market, api_response)
             market_time: int = api_response[time]
             return CoinMarketData.from_api(
                 market=market,
@@ -108,13 +107,14 @@ class CoinPresentPriceReponseAPI:
                 schema: dict[str, dict[str, Any]] = CoinMarket(
                     **dict(zip(self.market_env.keys(), market_result))
                 ).model_dump(mode="json")
+
                 await KafkaMessageSender().message_kafka_sending(
                     data=schema,
                     symbol=coin_symbol,
                     market_name="Total",
                     type_="RestDataIn",
                 )
-                await self.logging.data_log(exchange_name="Total", message=schema)
 
+                await self.logging.data_log(exchange_name="Total", message=schema)
             except (TimeoutError, CancelledError, ValidationError) as error:
                 await self.logging.error_log("Data transmission failed: %s", error)

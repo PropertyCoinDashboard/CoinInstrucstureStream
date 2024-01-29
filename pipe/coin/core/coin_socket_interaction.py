@@ -55,7 +55,9 @@ class WebsocketConnectionManager(WebsocketConnectionAbstract):
             "korbit:subscribe",
         ]
 
-    async def send_data(self, websocket: Any, subscribe_fmt: list[dict]) -> None:
+    async def send_data(
+        self, websocket: Any, subscribe_fmt: list[dict] | dict[str]
+    ) -> None:
         """웹소켓 승인 함수
 
         Args:
@@ -201,6 +203,12 @@ class MessageDataPreprocessing(MessageDataPreprocessingAbstract):
                 pass
             else:
                 return message["data"]
+
+        if market == "coinone":
+            if message.get("response_type") == "SUBSCRIBED":
+                pass
+            else:
+                return message["data"]
         return message
 
     async def process_message(
@@ -313,6 +321,7 @@ class MessageDataPreprocessing(MessageDataPreprocessingAbstract):
             )
 
             self.message_by_data[market].append(market_schema)
+            print(self.message_by_data)
             if len(self.message_by_data[market]) >= MAXLISTSIZE:
                 await KafkaMessageSender().message_kafka_sending(
                     data=self.message_by_data[market],
