@@ -1,7 +1,7 @@
 import asyncio
 from aiokafka import AIOKafkaConsumer
-from coin.core.data_mq.data_interaction import consume_messages
-from coin.core.setting.properties import (
+from pipe.coin.core.data_mq.data_interaction import consume_messages
+from pipe.coin.core.setting.properties import (
     BTC_AVERAGE_TOPIC_NAME,
     ETH_AVERAGE_TOPIC_NAME,
     UPBIT_BTC_REAL_TOPIC_NAME,
@@ -10,7 +10,7 @@ from coin.core.setting.properties import (
 )
 
 
-async def kafka_consumer_concurrency():
+async def kafka_consumer_concurrency() -> None:
     consumers = []
     for topic in [
         UPBIT_BTC_REAL_TOPIC_NAME,
