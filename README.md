@@ -29,7 +29,7 @@
     "coin_symbol": "BTC",
     "data": {
         "opening_price": 38761000.0,
-				   "closeing_price": 38761000.0
+	"closeing_price": 38761000.0,
         "high_price": 38828000.0,
         "low_price": 38470000.0,
         "prev_closing_price": 38742000.0,
