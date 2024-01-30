@@ -30,7 +30,19 @@ class CoinSocketAndRestAbstract(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def get_coin_present_price(self, coin_name: str) -> dict[str, Any]:
+    def get_coin_all_info_price(self, coin_name: str) -> dict[str, Any]:
+        """
+        Subject:
+            - 코인 인덱스 가격 정보 \n
+        Parameter:
+            - coin_name (str) : 코인이름\n
+        Returns:
+            - market 형식
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def get_coin_present_opening_price(self, coin_name: str) -> dict[str, Any]:
         """
         Subject:
             - 코인 인덱스 가격 정보 \n

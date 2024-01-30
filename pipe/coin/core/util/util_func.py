@@ -3,6 +3,7 @@
 """
 
 import requests
+from datetime import datetime
 from typing import Any
 from coin.core.setting.properties import (
     UPBIT_URL,
@@ -10,6 +11,25 @@ from coin.core.setting.properties import (
     KORBIT_URL,
     COINONE_URL,
 )
+
+
+# UTC 시간을 Unix 시간 (ms)으로 변환하는 함수
+def utc_to_unix_ms(utc_datetime: str) -> int:
+    return int(utc_datetime.timestamp() * 1000)
+
+
+def making_time() -> list:
+    # 현재 시간 구하기
+    now = datetime.datetime.now()
+
+    # 목표 날짜 구하기
+    # 현재 시간으로부터 200일씩 뒤로 가면서 datetime 객체 생성하기
+    target_date = datetime.datetime(2013, 12, 27, 0, 0, 0)
+    result = []
+    while now >= target_date:
+        result.append(now)
+        now -= datetime.timedelta(days=200)
+    return result
 
 
 def parse_uri(uri: str) -> str:

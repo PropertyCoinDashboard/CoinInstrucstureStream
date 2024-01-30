@@ -45,7 +45,7 @@ class UpbitRestAndSocket(CoinSocketAndRestAbstract):
             symbol=symbol,
         )
 
-    def get_coin_present_price(self, coin_name: str) -> dict[str, Any]:
+    def get_coin_all_info_price(self, coin_name: str) -> dict[str, Any]:
         """
         Subject:
             - upbit 코인 현재가\n
@@ -60,6 +60,24 @@ class UpbitRestAndSocket(CoinSocketAndRestAbstract):
             }
         """
         return header_to_json(f"{self.url}/ticker?markets=KRW-{coin_name.upper()}")[0]
+
+    def get_coin_present_opening_price(self, coin_name: str) -> dict[str, Any]:
+        """
+        Subject:
+            - upbit 코인 현재가\n
+        Parameter:
+            - coin_name (str) : 코인이름\n
+        Returns:
+            >>>  {
+                'market': 'KRW-BTC',
+                'trade_date': '20230717',
+                'trade_time': '090305',
+                ...
+            }
+        """
+        return header_to_json(f"{self.url}/ticker?markets=KRW-{coin_name.upper()}")[0][
+            "opening_price"
+        ]
 
     def get_coinsymbol_extraction(self) -> list[str]:
         """
@@ -112,7 +130,7 @@ class BithumbRestAndSocket(CoinSocketAndRestAbstract):
             symbol=symbol,
         )
 
-    def get_coin_present_price(self, coin_name: str) -> dict[str, Any]:
+    def get_coin_all_info_price(self, coin_name: str) -> dict[str, Any]:
         """
         Subject:
             - bithum 코인 현재가\n
@@ -128,6 +146,24 @@ class BithumbRestAndSocket(CoinSocketAndRestAbstract):
             }
         """
         return header_to_json(f"{self.url}/ticker/{coin_name.upper()}_KRW")["data"]
+
+    def get_coin_present_opening_price(self, coin_name: str) -> dict[str, Any]:
+        """
+        Subject:
+            - upbit 코인 현재가\n
+        Parameter:
+            - coin_name (str) : 코인이름\n
+        Returns:
+            >>>  {
+                'market': 'KRW-BTC',
+                'trade_date': '20230717',
+                'trade_time': '090305',
+                ...
+            }
+        """
+        return header_to_json(f"{self.url}/ticker?markets=KRW-{coin_name}")["data"][
+            "opening_price"
+        ]
 
     def get_coinsymbol_extraction(self) -> list[str]:
         """
@@ -182,7 +218,7 @@ class CoinoneRestAndSocket(CoinSocketAndRestAbstract):
             symbol=symbol,
         )
 
-    def get_coin_present_price(self, coin_name: str) -> dict[str, Any]:
+    def get_coin_all_info_price(self, coin_name: str) -> dict[str, Any]:
         """
         Subject:
             - coinone 코인 현재가 추출\n
@@ -201,6 +237,24 @@ class CoinoneRestAndSocket(CoinSocketAndRestAbstract):
         return header_to_json(
             f"{self.url}/ticker_new/KRW/{coin_name.upper()}?additional_data=true"
         )["tickers"][0]
+
+    def get_coin_present_opening_price(self, coin_name: str) -> dict[str, Any]:
+        """
+        Subject:
+            - upbit 코인 현재가\n
+        Parameter:
+            - coin_name (str) : 코인이름\n
+        Returns:
+            >>>  {
+                'market': 'KRW-BTC',
+                'trade_date': '20230717',
+                'trade_time': '090305',
+                ...
+            }
+        """
+        return header_to_json(
+            f"{self.url}/ticker_new/KRW/{coin_name.upper()}?additional_data=false"
+        )["tickers"][0]["first"]
 
     def get_coinsymbol_extraction(self) -> list[str]:
         """
@@ -254,7 +308,7 @@ class KorbitRestAndSocket(CoinSocketAndRestAbstract):
             symbol=symbol,
         )
 
-    def get_coin_present_price(self, coin_name: str) -> dict[str, Any]:
+    def get_coin_all_info_price(self, coin_name: str) -> dict[str, Any]:
         """
         Subject:
             - korbit 코인 현재가 추출\n
@@ -272,6 +326,24 @@ class KorbitRestAndSocket(CoinSocketAndRestAbstract):
         return header_to_json(
             f"{self.url}/ticker/detailed?currency_pair={coin_name.lower()}_krw"
         )
+
+    def get_coin_present_opening_price(self, coin_name: str) -> dict[str, Any]:
+        """
+        Subject:
+            - upbit 코인 현재가\n
+        Parameter:
+            - coin_name (str) : 코인이름\n
+        Returns:
+            >>>  {
+                'market': 'KRW-BTC',
+                'trade_date': '20230717',
+                'trade_time': '090305',
+                ...
+            }
+        """
+        return header_to_json(
+            f"{self.url}/ticker/detailed?currency_pair={coin_name.lower()}_krw"
+        )[coin_name]["open"]
 
     def get_coinsymbol_extraction(self) -> list[str]:
         """
@@ -321,7 +393,7 @@ class CoinNameAndSymbolMatching:
 
         return data
 
-    def get_duplication_coinsymbols(self) -> list[str]:
+    def __get_duplication_coinsymbols(self) -> list[str]:
         """
         Subject:
             - 중복 코인 추출\n
@@ -349,5 +421,6 @@ class CoinNameAndSymbolMatching:
                 korean_name=upbit_s["korean_name"],
             ).model_dump()
             for upbit_s in upbit_symbol
-            if upbit_s["market"].split("KRW-")[-1] in self.get_duplication_coinsymbols()
+            if upbit_s["market"].split("KRW-")[-1]
+            in self.__get_duplication_coinsymbols()
         ]
