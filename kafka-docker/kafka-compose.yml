@@ -3,7 +3,7 @@ version: '3'
 services:
   zookeeper-1:
     hostname: zookeeper1
-    image: confluentinc/cp-zookeeper:6.2.0
+    image: confluentinc/cp-zookeeper:latest
     environment:
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_CLIENT_PORT: 12181
@@ -20,7 +20,7 @@ services:
 
   zookeeper-2:
     hostname: zookeeper2
-    image: confluentinc/cp-zookeeper:6.2.0
+    image: confluentinc/cp-zookeeper:latest
     environment:
       ZOOKEEPER_SERVER_ID: 2
       ZOOKEEPER_CLIENT_PORT: 22181
@@ -37,7 +37,7 @@ services:
 
   zookeeper-3:
     hostname: zookeeper3
-    image: confluentinc/cp-zookeeper:6.2.0
+    image: confluentinc/cp-zookeeper:latest
     environment:
       ZOOKEEPER_SERVER_ID: 3
       ZOOKEEPER_CLIENT_PORT: 32181
@@ -53,7 +53,7 @@ services:
       - kafka-network
 
   kafka-1:
-    image: confluentinc/cp-kafka:6.2.0
+    image: confluentinc/cp-kafka:latest
     hostname: kafka1
     depends_on:
       - zookeeper-1
@@ -72,7 +72,7 @@ services:
       - kafka-network
 
   kafka-2:
-    image: confluentinc/cp-kafka:6.2.0
+    image: confluentinc/cp-kafka:latest
     hostname: kafka2
     depends_on:
       - zookeeper-1
@@ -91,7 +91,7 @@ services:
       - kafka-network
 
   kafka-3:
-    image: confluentinc/cp-kafka:6.2.0
+    image: confluentinc/cp-kafka:latest
     hostname: kafka3
     depends_on:
       - zookeeper-1

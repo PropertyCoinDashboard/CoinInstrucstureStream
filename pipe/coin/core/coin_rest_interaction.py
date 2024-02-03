@@ -1,6 +1,7 @@
 """
 Coin async present price kafka data streaming 
 """
+
 import asyncio
 from pathlib import Path
 from asyncio.exceptions import CancelledError
@@ -94,7 +95,7 @@ class CoinPresentPriceReponseAPI:
             topic_name (str): topic name
         """
         while True:
-            # await asyncio.sleep(1)
+            await asyncio.sleep(1)
             try:
                 tasks: list[Coroutine[Any, Any, dict[str, Any]]] = [
                     self.__get_market_present_price(
