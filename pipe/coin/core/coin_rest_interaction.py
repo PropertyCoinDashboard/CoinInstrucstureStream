@@ -3,8 +3,9 @@ Coin async present price kafka data streaming
 """
 
 import asyncio
-from pathlib import Path
 from asyncio.exceptions import CancelledError
+
+from pathlib import Path
 from typing import Any, Coroutine
 
 from pydantic.errors import PydanticUserError
@@ -31,7 +32,7 @@ class CoinPresentPriceReponseAPI:
             base_path=Path(__file__).parent, file_name="data", object_name="rest"
         )
 
-    async def coin_present_architecture(
+    async def __coin_present_architecture(
         self,
         market: str,
         time: str,
@@ -78,7 +79,7 @@ class CoinPresentPriceReponseAPI:
             str: market data as a string
         """
         market_info = self.market_env[market]
-        return await self.coin_present_architecture(
+        return await self.__coin_present_architecture(
             market=f"{market}-{coin_symbol.upper()}",
             coin_symbol=coin_symbol,
             time=market_info["timestamp"],
