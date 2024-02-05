@@ -2,6 +2,8 @@
 
 
 # architecture
+![스크린샷 2024-01-29 오후 8 20 11](https://github.com/PropertyCoinDashboard/CoinInstrucstureStream/assets/52487610/477ae8aa-de42-4cd3-8a0b-e48452329cfd)
+
 ## 실시간 코인 현재가 계산 
 - REST API [upbit, bithumb, coinone, korbit] (BTC, ETH)
 - Websocket [upbit, bithumb, korbit, (coinone 미지원)] (BTC, ETH)
