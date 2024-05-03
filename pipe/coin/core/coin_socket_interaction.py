@@ -5,6 +5,7 @@
 2. MessageDataPreprocessing
     - 메시지 스키마 통일화 전처리 로직 
 """
+
 from __future__ import annotations
 import json
 from pathlib import Path
@@ -322,13 +323,13 @@ class MessageDataPreprocessing(MessageDataPreprocessingAbstract):
 
             self.message_by_data[market].append(market_schema)
             if len(self.message_by_data[market]) >= MAXLISTSIZE:
-                await KafkaMessageSender().message_kafka_sending(
+                await KafkaMessageSender().produce_sending(
                     data=self.message_by_data[market],
                     market_name=market_name_extract(market),
                     symbol=symbol,
                     type_="SocketDataIn",
                 )
-                self.message_by_data[market]: list[market] = []
+                self.message_by_data[market] = []
 
             await self.p.data_log(
                 exchange_name=parse_uri(uri=uri), message=market_schema

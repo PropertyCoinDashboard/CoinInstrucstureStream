@@ -1,4 +1,4 @@
-from coin.core.data_mq.data_admin import new_topic_initialization
+from coin.core.data_mq.data_admin import new_topic_initialization, delete_all_topics
 from coin.core.setting.properties import (
     BTC_TOPIC_NAME,
     ETH_TOPIC_NAME,
@@ -25,8 +25,8 @@ def data_sending_start() -> None:
         ETH_AVERAGE_TOPIC_NAME,
         BTC_AVERAGE_TOPIC_NAME,
     ]
-    partition = [2] * 8
-    replication = [2] * 8
+    partition = [3] * 8
+    replication = [3] * 8
 
     return new_topic_initialization(
         topic=topic, partition=partition, replication_factor=replication
@@ -34,4 +34,7 @@ def data_sending_start() -> None:
 
 
 if __name__ == "__main__":
-    data_sending_start()
+    try:
+        delete_all_topics()
+    except ValueError:
+        data_sending_start()

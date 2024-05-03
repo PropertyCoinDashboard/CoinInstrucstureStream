@@ -1,33 +1,11 @@
 """
 Coin present data format architecture
 """
+
 from __future__ import annotations
-from typing import Mapping, Any
+from typing import Any
 from decimal import Decimal, ROUND_HALF_UP
 from pydantic import BaseModel, validator
-
-
-class CoinSymbol(BaseModel):
-    """
-    Subject:
-        - simpleist coin symbol\n
-    Returns:
-        - "BTC"
-    """
-
-    coin_symbol: str
-
-
-class CoinNameAndSymbol(CoinSymbol):
-    """
-    Subject:
-        - coin_symbol and Name
-    Returns:
-        - {"BTC": "비트코인"}
-
-    """
-
-    korean_name: str
 
 
 class CoinMarket(BaseModel):
@@ -35,7 +13,7 @@ class CoinMarket(BaseModel):
     Subject:
         - coin_preset_price_total_schema \n
     Returns:
-        - pydantic in JSON transformation\n
+        - pydantic in JSON transformation \n
         >>> {
                 "upbit": {
                     "name": "upbit-ETH",
@@ -57,6 +35,7 @@ class CoinMarket(BaseModel):
     bithumb: dict[str, Any]
     coinone: dict[str, Any]
     korbit: dict[str, Any]
+    gopax: dict[str, Any]
 
 
 class PriceData(BaseModel):
@@ -116,7 +95,7 @@ class CoinMarketData(BaseModel):
     data: PriceData
 
     @classmethod
-    def _create_price_data(cls, api: Mapping[str, str], data: list) -> PriceData:
+    def _create_price_data(cls, api: dict[str, str], data: list[str]) -> PriceData:
         try:
             return PriceData(
                 opening_price=Decimal(api[data[0]]),
@@ -135,8 +114,8 @@ class CoinMarketData(BaseModel):
         market: str,
         time: int,
         coin_symbol: str,
-        api: Mapping[str, Any],
-        data: list[str, str, str, str, str, str],
+        api: dict[str, Any],
+        data: list[str],
     ) -> CoinMarketData:
         """다음과 같은 dictionary를 만들기 위한 pydantic json model architecture
         >>>  {
@@ -161,7 +140,7 @@ class CoinMarketData(BaseModel):
         Returns:
             CoinMarketData: _description_
         """
-        price_data = cls._create_price_data(api=api, data=data)
+        price_data: PriceData = cls._create_price_data(api=api, data=data)
         return cls(
             market=market,
             time=time,

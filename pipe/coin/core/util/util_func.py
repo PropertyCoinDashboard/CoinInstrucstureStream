@@ -3,33 +3,21 @@
 """
 
 import requests
-from datetime import datetime
 from typing import Any
 from coin.core.setting.properties import (
     UPBIT_URL,
     BITHUMB_URL,
     KORBIT_URL,
     COINONE_URL,
+    GOPAX_URL,
 )
-
-
-# UTC 시간을 Unix 시간 (ms)으로 변환하는 함수
-def utc_to_unix_ms(utc_datetime: str) -> int:
-    return int(utc_datetime.timestamp() * 1000)
-
-
-def making_time() -> list:
-    # 현재 시간 구하기
-    now = datetime.datetime.now()
-
-    # 목표 날짜 구하기
-    # 현재 시간으로부터 200일씩 뒤로 가면서 datetime 객체 생성하기
-    target_date = datetime.datetime(2013, 12, 27, 0, 0, 0)
-    result = []
-    while now >= target_date:
-        result.append(now)
-        now -= datetime.timedelta(days=200)
-    return result
+from coin.core.setting.properties import (
+    SOCKET_UPBIT_URL,
+    SOCKET_BITHUMB_URL,
+    SOCKET_KORBIT_URL,
+    SOCKET_COINONE_URL,
+    SOCKET_GOPAX_URL,
+)
 
 
 def parse_uri(uri: str) -> str:
@@ -61,29 +49,34 @@ def header_to_json(url: str) -> Any:
             )
 
 
-def get_symbol_collect_url(market: str) -> str:
+def get_symbol_collect_url(market: str, type_: str) -> str:
     """URL matting
 
-    Depandancy:
-        -  possible python 3.10 \n
     Args:
         -  market (str): market name \n
+        -  type_ (str): U Type \n
     Raises:
         - ValueError: Not Fount market is ValueError string \n
     Returns:
         str: market url
     """
-    match market:
-        case "upbit":
-            return UPBIT_URL
-        case "bithum":
-            return BITHUMB_URL
-        case "korbit":
-            return KORBIT_URL
-        case "coinone":
-            return COINONE_URL
-        case _:
-            raise ValueError("Not Found market")
+    urls = {
+        ("upbit", "socket"): SOCKET_UPBIT_URL,
+        ("upbit", "rest"): UPBIT_URL,
+        ("bithumb", "socket"): SOCKET_BITHUMB_URL,
+        ("bithumb", "rest"): BITHUMB_URL,
+        ("korbit", "socket"): SOCKET_KORBIT_URL,
+        ("korbit", "rest"): KORBIT_URL,
+        ("coinone", "socket"): SOCKET_COINONE_URL,
+        ("coinone", "rest"): COINONE_URL,
+        ("gopax", "socket"): SOCKET_GOPAX_URL,
+        ("gopax", "rest"): GOPAX_URL,
+    }
+
+    url = urls.get((market, type_))
+    if url is None:
+        raise ValueError("등록되지 않은 거래소입니다.")
+    return url
 
 
 def market_name_extract(market: str) -> str:

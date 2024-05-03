@@ -31,7 +31,7 @@ class WebsocketConnectionAbstract(ABC):
             message_logger (MessageDataPreprocessing):
                 -> 전처리 클래스
         """
-        pass
+        raise NotImplementedError()
 
     @abstractmethod
     async def send_data(self, websocket: Any, subscribe_fmt: list[dict]) -> None:
@@ -43,7 +43,7 @@ class WebsocketConnectionAbstract(ABC):
             subscribe_fmt (list[dict]):
                 -> 각 웹소켓당 승인 list[dictionary] 전송 로직
         """
-        pass
+        raise NotImplementedError()
 
     @abstractmethod
     async def handle_connection(self, websocket: Any, uri: str) -> None:
@@ -55,7 +55,7 @@ class WebsocketConnectionAbstract(ABC):
             uri (str):
                 ->각 uri들
         """
-        pass
+        raise NotImplementedError()
 
     @abstractmethod
     async def handle_message(self, websocket: Any, uri: str, symbol: str) -> None:
@@ -69,7 +69,7 @@ class WebsocketConnectionAbstract(ABC):
             symbol (emf):
                 -> 코인 심볼
         """
-        pass
+        raise NotImplementedError()
 
     @abstractmethod
     async def websocket_to_json(
@@ -85,7 +85,7 @@ class WebsocketConnectionAbstract(ABC):
             symbol (str):
                 -> 코인 심볼
         """
-        pass
+        raise NotImplementedError()
 
 
 class MessageDataPreprocessingAbstract(ABC):
@@ -111,7 +111,7 @@ class MessageDataPreprocessingAbstract(ABC):
             register_message
                 -> 빗썸과 코빗은 소켓에서 연결 확인 메시지가 출력되고 그다음 데이터가 출력되기 때문에 데이터 오염이 발생할 수 있어 필터링
         """
-        pass
+        raise NotImplementedError()
 
     @abstractmethod
     async def put_message_to_logging(self, message: Any, uri: str, symbol: str) -> None:
@@ -126,7 +126,7 @@ class MessageDataPreprocessingAbstract(ABC):
             symbol (str):
                 -> 코인 심볼
         """
-        pass
+        raise NotImplementedError()
 
     @abstractmethod
     async def process_message(
@@ -159,7 +159,7 @@ class MessageDataPreprocessingAbstract(ABC):
                     }
 
         """
-        pass
+        raise NotImplementedError()
 
     @abstractmethod
     async def process_exchange(self, market: str, message: dict) -> dict:
@@ -175,7 +175,7 @@ class MessageDataPreprocessingAbstract(ABC):
         Returns:
             dict: 각 거래소당 dictionary가 달라 저렇게 항목으로 접근
         """
-        pass
+        raise NotImplementedError()
 
     @abstractmethod
     async def unify_schema(
@@ -217,4 +217,4 @@ class MessageDataPreprocessingAbstract(ABC):
                     }
 
         """
-        pass
+        raise NotImplementedError()

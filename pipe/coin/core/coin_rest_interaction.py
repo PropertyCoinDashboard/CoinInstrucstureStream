@@ -5,6 +5,7 @@ Coin async present price kafka data streaming
 import asyncio
 from asyncio.exceptions import CancelledError
 
+import datetime
 from pathlib import Path
 from typing import Any, Coroutine
 
@@ -12,6 +13,7 @@ from pydantic.errors import PydanticUserError
 from pydantic_core._pydantic_core import ValidationError
 
 
+from coin.core.abstract.ubkc_market_abstract import CoinSocketAndRestAbstract
 from coin.core.setting.factory_api import load_json
 from coin.core.util.data_format import CoinMarket, CoinMarketData
 from coin.core.util.create_log import SocketLogCustomer
@@ -35,9 +37,8 @@ class CoinPresentPriceReponseAPI:
     async def __coin_present_architecture(
         self,
         market: str,
-        time: str,
         coin_symbol: str,
-        api: Any,
+        api: CoinSocketAndRestAbstract,
         data: tuple[str, str, str, str, str, str],
     ) -> Coroutine[Any, Any, dict[str, Any] | None]:
         """
@@ -54,7 +55,7 @@ class CoinPresentPriceReponseAPI:
         """
         try:
             api_response = api.get_coin_all_info_price(coin_name=coin_symbol.upper())
-            market_time: int = api_response[time]
+            market_time = int(datetime.datetime.now().timestamp())
             return CoinMarketData.from_api(
                 market=market,
                 time=market_time,
@@ -63,7 +64,7 @@ class CoinPresentPriceReponseAPI:
                 data=data,
             ).model_dump()
         except (PydanticUserError, ValidationError) as error:
-            self.logging.error_log("Exception occurred: %s", error)
+            self.logging.error_log("error", "Exception occurred: %s", error)
 
     async def __get_market_present_price(
         self, market: str, coin_symbol: str
@@ -73,7 +74,7 @@ class CoinPresentPriceReponseAPI:
 
         Args:
             market (str): market name
-            coin_symbol (str): coin symbol
+            coin_symbol (str): coin
 
         Returns:
             str: market data as a string
@@ -82,7 +83,6 @@ class CoinPresentPriceReponseAPI:
         return await self.__coin_present_architecture(
             market=f"{market}-{coin_symbol.upper()}",
             coin_symbol=coin_symbol,
-            time=market_info["timestamp"],
             api=market_info["api"],
             data=market_info["parameter"],
         )
@@ -109,14 +109,15 @@ class CoinPresentPriceReponseAPI:
                 schema: dict[str, dict[str, Any]] = CoinMarket(
                     **dict(zip(self.market_env.keys(), market_result))
                 ).model_dump(mode="json")
-
-                await KafkaMessageSender().message_kafka_sending(
-                    data=schema,
-                    symbol=coin_symbol,
-                    market_name="Total",
-                    type_="RestDataIn",
-                )
+                # await KafkaMessageSender().produce_sending(
+                #     message=schema,
+                #     market_name="Total",
+                #     symbol=coin_symbol,
+                #     type_="RestDataIn",
+                # )
 
                 await self.logging.data_log(exchange_name="Total", message=schema)
             except (TimeoutError, CancelledError, ValidationError) as error:
-                await self.logging.error_log("Data transmission failed: %s", error)
+                await self.logging.error_log(
+                    "error", "Data transmission failed: %s", error
+                )

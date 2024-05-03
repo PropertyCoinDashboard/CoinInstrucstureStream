@@ -8,6 +8,7 @@ from coin.core.ubkc_market import (
     BithumbRestAndSocket,
     KorbitRestAndSocket,
     CoinoneRestAndSocket,
+    GoPaxRestAndSocket,
 )
 from coin.core.util._typing import (
     ExchangeRestDataTypeHints,
@@ -25,6 +26,7 @@ class __MarketAPIFactory:
         "bithumb": BithumbRestAndSocket,
         "korbit": KorbitRestAndSocket,
         "coinone": CoinoneRestAndSocket,
+        "gopax": GoPaxRestAndSocket,
     }
 
     @classmethod
@@ -60,7 +62,7 @@ def load_json(
 
     # ExchangeSocketDataTypeHints | ExchangeRestDataTypeHints
     # JSON에 저장되어 있는 값 + API 클래스 주소
-    market_info = {
+    market_info: dict[str, Any] = {
         market: {**info, "api": __MarketAPIFactory.market_load(market)}
         for market, info in market_info.items()
     }

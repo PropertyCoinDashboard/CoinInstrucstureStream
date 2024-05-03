@@ -36,4 +36,4 @@ async def data_sending_start() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(be_present_gether())
+    asyncio.run(data_sending_start())

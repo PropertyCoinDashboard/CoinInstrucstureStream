@@ -42,5 +42,16 @@
             "yesterday_last",
             "target_volume"
         ]
+    },
+    "gopax": {
+        "timestamp": "time",
+        "parameter": [
+            "price",
+            "ask",
+            "bid",
+            "ask",
+            "quoteVolume",
+            "volume"
+        ]
     }
 }

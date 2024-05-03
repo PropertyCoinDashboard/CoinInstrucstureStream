@@ -1,15 +1,13 @@
 """
 코인 정보 추상화
 """
+
 import uuid
 from typing import Any
-from collections import Counter
 from datetime import datetime, timezone
 
-from coin.core.util.util_func import header_to_json
-
+from coin.core.util.util_func import header_to_json, get_symbol_collect_url
 from coin.core.abstract.ubkc_market_abstract import CoinSocketAndRestAbstract
-from coin.core.util.data_format import CoinSymbol, CoinNameAndSymbol
 
 
 class UpbitRestAndSocket(CoinSocketAndRestAbstract):
@@ -20,13 +18,10 @@ class UpbitRestAndSocket(CoinSocketAndRestAbstract):
     """
 
     def __init__(self) -> None:
-        super().__init__(market="upbit")
-        self.upbit_coin_list: list[dict[str, str]] = header_to_json(
-            url=f"{self.url}/market/all?isDetails=true"
-        )
-        self.__upbit_websocket = "wss://api.upbit.com/websocket/v1"
+        self.__websocket = get_symbol_collect_url("upbit", "socket")
+        self.__rest = get_symbol_collect_url("upbit", "rest")
 
-    def get_socket_parameter(self, symbol: str) -> list[dict[str, Any]]:
+    async def get_socket_parameter(self, symbol: str) -> list[dict[str, Any]]:
         return [
             {"ticket": str(uuid.uuid4())},
             {
@@ -40,8 +35,8 @@ class UpbitRestAndSocket(CoinSocketAndRestAbstract):
         from coin.core.coin_socket_interaction import WebsocketConnectionManager as WCM
 
         return await WCM().websocket_to_json(
-            uri=self.__upbit_websocket,
-            subscribe_fmt=self.get_socket_parameter(symbol=symbol),
+            uri=self.__websocket,
+            subscribe_fmt=await self.get_socket_parameter(symbol=symbol),
             symbol=symbol,
         )
 
@@ -59,44 +54,8 @@ class UpbitRestAndSocket(CoinSocketAndRestAbstract):
                 ...
             }
         """
-        return header_to_json(f"{self.url}/ticker?markets=KRW-{coin_name.upper()}")[0]
-
-    def get_coin_present_opening_price(self, coin_name: str) -> dict[str, Any]:
-        """
-        Subject:
-            - upbit 코인 현재가\n
-        Parameter:
-            - coin_name (str) : 코인이름\n
-        Returns:
-            >>>  {
-                'market': 'KRW-BTC',
-                'trade_date': '20230717',
-                'trade_time': '090305',
-                ...
-            }
-        """
-        return header_to_json(f"{self.url}/ticker?markets=KRW-{coin_name.upper()}")[0][
-            "opening_price"
-        ]
-
-    def get_coinsymbol_extraction(self) -> list[str]:
-        """
-        Subject:
-            - 코인 심볼 추출 \n
-        Input:
-            >>> {
-                'market_warning': 'NONE',
-                'market': 'KRW-BLUR',
-                'korean_name': '블러',
-                'english_name': 'Blur'
-            } \n
-        Returns:
-            >>> list[str]: ["BTC", "ETH" ....]
-        """
-        return [
-            CoinSymbol(coin_symbol=symbol["market"].split("-")[-1]).coin_symbol
-            for symbol in self.upbit_coin_list
-            if symbol["market"].startswith("KRW-")
+        return header_to_json(f"{self.__rest}/ticker?markets=KRW-{coin_name.upper()}")[
+            0
         ]
 
 
@@ -108,13 +67,10 @@ class BithumbRestAndSocket(CoinSocketAndRestAbstract):
     """
 
     def __init__(self) -> None:
-        super().__init__(market="bithum")
-        self.__bithumb_coin_list: dict[str, Any] = header_to_json(
-            url=f"{self.url}/ticker/ALL_KRW"
-        )
-        self.__bithumb_websocket = "wss://pubwss.bithumb.com/pub/ws"
+        self.__websocket = get_symbol_collect_url("bithumb", "socket")
+        self.__rest = get_symbol_collect_url("bithumb", "rest")
 
-    def get_socket_parameter(self, symbol: str) -> list[dict[str, Any]]:
+    async def get_socket_parameter(self, symbol: str) -> list[dict[str, Any]]:
         return {
             "type": "ticker",
             "symbols": [f"{symbol.upper()}_KRW"],
@@ -125,8 +81,8 @@ class BithumbRestAndSocket(CoinSocketAndRestAbstract):
         from coin.core.coin_socket_interaction import WebsocketConnectionManager as WCM
 
         return await WCM().websocket_to_json(
-            uri=self.__bithumb_websocket,
-            subscribe_fmt=self.get_socket_parameter(symbol=symbol),
+            uri=self.__websocket,
+            subscribe_fmt=await self.get_socket_parameter(symbol=symbol),
             symbol=symbol,
         )
 
@@ -145,49 +101,7 @@ class BithumbRestAndSocket(CoinSocketAndRestAbstract):
                 ...
             }
         """
-        return header_to_json(f"{self.url}/ticker/{coin_name.upper()}_KRW")["data"]
-
-    def get_coin_present_opening_price(self, coin_name: str) -> dict[str, Any]:
-        """
-        Subject:
-            - upbit 코인 현재가\n
-        Parameter:
-            - coin_name (str) : 코인이름\n
-        Returns:
-            >>>  {
-                'market': 'KRW-BTC',
-                'trade_date': '20230717',
-                'trade_time': '090305',
-                ...
-            }
-        """
-        return header_to_json(f"{self.url}/ticker?markets=KRW-{coin_name}")["data"][
-            "opening_price"
-        ]
-
-    def get_coinsymbol_extraction(self) -> list[str]:
-        """
-        Subject:
-            - 코인 심볼 추출 \n
-        Input:
-            >>> {
-                "status": "0000",
-                "data": {
-                    "BTC": {
-                        "opening_price": "54353000",
-                        "closing_price": "53768000",
-                        "min_price": "53000000"
-                        ...
-                    }
-                }
-            } \n
-        Returns:
-            >>> list[str]: ["BTC", "ETH" ....]
-        """
-        return [
-            CoinSymbol(coin_symbol=symbol).coin_symbol
-            for symbol in self.__bithumb_coin_list["data"]
-        ][:-1]
+        return header_to_json(f"{self.__rest}/ticker/{coin_name.upper()}_KRW")["data"]
 
 
 class CoinoneRestAndSocket(CoinSocketAndRestAbstract):
@@ -198,11 +112,10 @@ class CoinoneRestAndSocket(CoinSocketAndRestAbstract):
     """
 
     def __init__(self) -> None:
-        super().__init__(market="coinone")
-        self.__coinone_coin_list = header_to_json(url=f"{self.url}/currencies")
-        self.__coin_websocket = "wss://stream.coinone.co.kr"
+        self.__websocket = get_symbol_collect_url("coinone", "socket")
+        self.__rest = get_symbol_collect_url("coinone", "rest")
 
-    def get_socket_parameter(self, symbol: str) -> dict[str, str, dict[str, str]]:
+    async def get_socket_parameter(self, symbol: str) -> dict[str, str, dict[str, str]]:
         return {
             "request_type": "SUBSCRIBE",
             "channel": "TICKER",
@@ -213,8 +126,8 @@ class CoinoneRestAndSocket(CoinSocketAndRestAbstract):
         from coin.core.coin_socket_interaction import WebsocketConnectionManager as WCM
 
         return await WCM().websocket_to_json(
-            uri=self.__coin_websocket,
-            subscribe_fmt=self.get_socket_parameter(symbol=symbol),
+            uri=self.__websocket,
+            subscribe_fmt=await self.get_socket_parameter(symbol=symbol),
             symbol=symbol,
         )
 
@@ -235,46 +148,8 @@ class CoinoneRestAndSocket(CoinSocketAndRestAbstract):
             }
         """
         return header_to_json(
-            f"{self.url}/ticker_new/KRW/{coin_name.upper()}?additional_data=true"
+            f"{self.__rest}/ticker_new/KRW/{coin_name.upper()}?additional_data=true"
         )["tickers"][0]
-
-    def get_coin_present_opening_price(self, coin_name: str) -> dict[str, Any]:
-        """
-        Subject:
-            - upbit 코인 현재가\n
-        Parameter:
-            - coin_name (str) : 코인이름\n
-        Returns:
-            >>>  {
-                'market': 'KRW-BTC',
-                'trade_date': '20230717',
-                'trade_time': '090305',
-                ...
-            }
-        """
-        return header_to_json(
-            f"{self.url}/ticker_new/KRW/{coin_name.upper()}?additional_data=false"
-        )["tickers"][0]["first"]
-
-    def get_coinsymbol_extraction(self) -> list[str]:
-        """
-        Subject:
-            - 코인 심볼 추출 \n
-        Input:
-           >>> {
-                "name": "Bitcoin",
-                "symbol": "BTC",
-                "deposit_status": "normal",
-                "withdraw_status": "normal"
-                ...
-            }
-        Returns:
-            >>> list[str]: ["BTC", "ETH" ....]
-        """
-        return [
-            CoinSymbol(coin_symbol=symbol["symbol"]).coin_symbol
-            for symbol in self.__coinone_coin_list["currencies"][0]
-        ]
 
 
 class KorbitRestAndSocket(CoinSocketAndRestAbstract):
@@ -285,13 +160,10 @@ class KorbitRestAndSocket(CoinSocketAndRestAbstract):
     """
 
     def __init__(self) -> None:
-        super().__init__(market="korbit")
-        self.__korbit_coin_list: dict[str, dict[str, Any]] = header_to_json(
-            url=f"{self.url}/ticker/detailed/all"
-        )
-        self.__korbit_websocket = "wss://ws.korbit.co.kr/v1/user/push"
+        self.__websocket = get_symbol_collect_url("korbit", "socket")
+        self.__rest = get_symbol_collect_url("korbit", "rest")
 
-    def get_socket_parameter(self, symbol: str) -> list[dict[str, Any]]:
+    async def get_socket_parameter(self, symbol: str) -> list[dict[str, Any]]:
         return {
             "accessToken": None,
             "timestamp": int(datetime.now(timezone.utc).timestamp()),
@@ -303,8 +175,8 @@ class KorbitRestAndSocket(CoinSocketAndRestAbstract):
         from coin.core.coin_socket_interaction import WebsocketConnectionManager as WCM
 
         return await WCM().websocket_to_json(
-            uri=self.__korbit_websocket,
-            subscribe_fmt=self.get_socket_parameter(symbol=symbol),
+            uri=self.__websocket,
+            subscribe_fmt=await self.get_socket_parameter(symbol=symbol),
             symbol=symbol,
         )
 
@@ -324,103 +196,45 @@ class KorbitRestAndSocket(CoinSocketAndRestAbstract):
             }
         """
         return header_to_json(
-            f"{self.url}/ticker/detailed?currency_pair={coin_name.lower()}_krw"
+            f"{self.__rest}/ticker/detailed?currency_pair={coin_name.lower()}_krw"
         )
 
-    def get_coin_present_opening_price(self, coin_name: str) -> dict[str, Any]:
-        """
-        Subject:
-            - upbit 코인 현재가\n
-        Parameter:
-            - coin_name (str) : 코인이름\n
-        Returns:
-            >>>  {
-                'market': 'KRW-BTC',
-                'trade_date': '20230717',
-                'trade_time': '090305',
-                ...
-            }
-        """
-        return header_to_json(
-            f"{self.url}/ticker/detailed?currency_pair={coin_name.lower()}_krw"
-        )[coin_name]["open"]
 
-    def get_coinsymbol_extraction(self) -> list[str]:
-        """
-        Subject:
-            - 코인 심볼 추출 \n
-        Input:
-           >>> {
-                "bch_krw": {
-                    "timestamp": 1559285555322,
-                    "last": "513000",
-                    "open": "523900",
-                    ...
-                }
-            } \n
-        Returns:
-            >>> list[str]: ["BTC", "ETH" ....]
-        """
-        return [
-            CoinSymbol(coin_symbol=symbol.split("_")[0].upper()).coin_symbol
-            for symbol in self.__korbit_coin_list
-        ]
+class GoPaxRestAndSocket(CoinSocketAndRestAbstract):
+    """Gopax
 
-
-class CoinNameAndSymbolMatching:
-    """
-    coin_symbol: name extraction \n
-    upbit 기준으로 작성함 korbit, bithumb은 미지원
+    Args:
+        CoinRest (_type_): abstruct class
     """
 
     def __init__(self) -> None:
-        self.upbit = UpbitRestAndSocket()
-        self.bithumb = BithumbRestAndSocket()
-        self.korbit = KorbitRestAndSocket()
-        self.coinone = CoinoneRestAndSocket()
+        self.__websocket = get_symbol_collect_url("gopax", "socket")
+        self.__rest = get_symbol_collect_url("gopax", "rest")
 
-    def __get_all_coin_symbols(self) -> list[str]:
+    async def get_socket_parameter(self, symbol: str) -> list[dict[str, Any]]:
+        pass
+
+    async def get_present_websocket(self, symbol: str) -> None:
+        pass
+
+    def get_coin_all_info_price(self, coin_name: str) -> dict[str, Any]:
         """
         Subject:
-            - 코인 심볼 병합\n
+            - gopax 코인 현재가 추출\n
+        Parameter:
+            - coin_name (str) : 코인이름\n
         Returns:
-            >>> list[str]: ["BTC"...]
+            >>> {
+                    "price": 15393000,                   # 오더북 상의 현재 가격
+                    "ask": 15397000,                     # 오더북 상의 현재 가장 낮은 매도 가격
+                    "askVolume": 0.56,                   # 오더북 상의 현재 가장 낮은 매도 가격의 수량
+                    "bid": 15393000,                     # 오더북 상의 현재 가장 높은 매수 가격
+                    "bidVolume": 1.9513,                 # 오더북 상의 현재 가장 높은 매수 가격의 수량
+                    "volume": 487.43035427,              # 최근 24시간 누적 거래량 (base 자산 단위로 이 예시에서는 BTC)
+                    "quoteVolume": 7319576689.34135,     # 최근 24시간 누적 거래량 (quote 자산 단위로 이 예시에서는 KRW)
+                    "time": "2020-10-28T02:05:55.958Z"   # 티커 최근 갱신 시간
+                    }
         """
-        data = self.upbit.get_coinsymbol_extraction()
-        data.extend(self.bithumb.get_coinsymbol_extraction())
-        data.extend(self.korbit.get_coinsymbol_extraction())
-        data.extend(self.coinone.get_coinsymbol_extraction())
-
-        return data
-
-    def __get_duplication_coinsymbols(self) -> list[str]:
-        """
-        Subject:
-            - 중복 코인 추출\n
-        Returns:
-            >>> list[str]: ["BTC"...]
-        """
-        results: list[tuple[str, int]] = Counter(
-            self.__get_all_coin_symbols()
-        ).most_common()
-        symbol_count: list[str] = [index for index, data in results if data == 4]
-
-        return symbol_count
-
-    def coin_symbol_name_extaction(self) -> list[dict[str, str]]:
-        """
-        Subject:
-           - 중복 코인 추출 후 upbit coin_market_list 에서 정보 추출 \n
-        Returns:
-            >>> list[dict[str, str]]: [{"BTC": "비트코인"}]
-        """
-        upbit_symbol: list[dict[str, str]] = self.upbit.upbit_coin_list
-        return [
-            CoinNameAndSymbol(
-                coin_symbol=upbit_s["market"].split("KRW-")[-1],
-                korean_name=upbit_s["korean_name"],
-            ).model_dump()
-            for upbit_s in upbit_symbol
-            if upbit_s["market"].split("KRW-")[-1]
-            in self.__get_duplication_coinsymbols()
-        ]
+        return header_to_json(
+            f"{self.__rest}/trading-pairs/{coin_name.upper()}-KRW/ticker"
+        )
