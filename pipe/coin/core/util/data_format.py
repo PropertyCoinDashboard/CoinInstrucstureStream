@@ -3,7 +3,9 @@ Coin present data format architecture
 """
 
 from __future__ import annotations
-from typing import Any
+import datetime
+import pytz
+from typing import Any, Union
 from decimal import Decimal, ROUND_HALF_UP
 from pydantic import BaseModel, validator
 
@@ -17,7 +19,7 @@ class CoinMarket(BaseModel):
         >>> {
                 "upbit": {
                     "name": "upbit-ETH",
-                    "timestamp": 1689633864.89345,
+                    "timestamp": 1689633864,
                     "data": {
                         "opening_price": 2455000.0,
                         "trade_price": 38100000.0
@@ -31,11 +33,11 @@ class CoinMarket(BaseModel):
             }
     """
 
-    upbit: dict[str, Any]
-    bithumb: dict[str, Any]
-    coinone: dict[str, Any]
-    korbit: dict[str, Any]
-    gopax: dict[str, Any]
+    upbit: dict[str, Union[str, int, dict[str, Decimal]]]
+    bithumb: dict[str, Union[str, int, dict[str, Decimal]]]
+    coinone: dict[str, Union[str, int, dict[str, Decimal]]]
+    korbit: dict[str, Union[str, int, dict[str, Decimal]]]
+    gopax: dict[str, Union[str, int, dict[str, Decimal]]]
 
 
 class PriceData(BaseModel):
@@ -94,6 +96,31 @@ class CoinMarketData(BaseModel):
     coin_symbol: str
     data: PriceData
 
+    @staticmethod
+    def __utc_time_create(time: str, local_timezone_str: str) -> int:
+        """_주어진 시간 문자열을 지정된 지역 시간대의 타임스탬프로 변환.
+        Args:
+            time (str): "%Y-%m-%dT%H:%M:%S.%fZ" 형식의 시간 문자열.
+            local_timezone_str (str): 지역 시간대 문자열. 예: "Asia/Seoul".
+
+        Return:
+            int: 지정된 지역 시간대의 타임스탬프."
+        """
+        try:
+            date_object = datetime.datetime.strptime(time, "%Y-%m-%dT%H:%M:%S.%fZ")
+        except ValueError:
+            raise ValueError("타임포맷 타입 체크 부탁 '%Y-%m-%dT%H:%M:%S.%fZ'")
+
+        try:
+            local_timezone = pytz.timezone(local_timezone_str)
+        except pytz.UnknownTimeZoneError:
+            raise ValueError("Unknown timezone:", local_timezone_str)
+
+        date_object_local = date_object.astimezone(local_timezone)
+        timestamp = int(date_object_local.timestamp()) * 1000
+
+        return timestamp
+
     @classmethod
     def _create_price_data(cls, api: dict[str, str], data: list[str]) -> PriceData:
         try:
@@ -141,6 +168,14 @@ class CoinMarketData(BaseModel):
             CoinMarketData: _description_
         """
         price_data: PriceData = cls._create_price_data(api=api, data=data)
+        if isinstance(time, int):
+            time = time
+        elif isinstance(time, str):
+            try:
+                time = int(time)
+            except (TypeError, ValueError):
+                time = CoinMarketData.__utc_time_create(time, "Asia/Seoul")
+
         return cls(
             market=market,
             time=time,

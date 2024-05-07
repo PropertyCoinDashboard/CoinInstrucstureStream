@@ -30,7 +30,10 @@ def log(name: str, log_location: str) -> logging.Logger:
 
 class SocketLogCustomer:
     def __init__(
-        self, base_path: Path = None, file_name: str = None, object_name: str = None
+        self,
+        base_path: Path | None = None,
+        file_name: str | None = None,
+        object_name: str | None = None,
     ):
         if base_path:
             self.base_path = base_path / f"{file_name}" / f"{object_name}" / "log"

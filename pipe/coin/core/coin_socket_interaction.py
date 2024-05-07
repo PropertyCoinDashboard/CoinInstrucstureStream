@@ -320,7 +320,6 @@ class MessageDataPreprocessing(MessageDataPreprocessingAbstract):
             market_schema: dict[str, Any] = await self.process_message(
                 market, message, symbol
             )
-
             self.message_by_data[market].append(market_schema)
             if len(self.message_by_data[market]) >= MAXLISTSIZE:
                 await KafkaMessageSender().produce_sending(

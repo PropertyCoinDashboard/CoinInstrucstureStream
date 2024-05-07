@@ -3,7 +3,7 @@ from coin.core.coin_socket_interaction import CoinPresentPriceWebsocket
 
 
 async def coin_present_websocket_btc() -> None:
-    await CoinPresentPriceWebsocket().coin_present_architecture("BTC")
+    await CoinPresentPriceWebsocket().coin_present_architecture("SHIB")
 
 
 async def coin_present_websocket_eth() -> None:
@@ -19,4 +19,4 @@ async def coin_present_websocket() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(coin_present_websocket())
+    asyncio.run(coin_present_websocket_btc())

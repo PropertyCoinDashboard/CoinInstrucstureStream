@@ -5,9 +5,9 @@ Coin async present price kafka data streaming
 import asyncio
 from asyncio.exceptions import CancelledError
 
-import datetime
 from pathlib import Path
 from typing import Any, Coroutine
+from .util._typing import TotalCoinMarketData
 
 from pydantic.errors import PydanticUserError
 from pydantic_core._pydantic_core import ValidationError
@@ -38,8 +38,9 @@ class CoinPresentPriceReponseAPI:
         self,
         market: str,
         coin_symbol: str,
+        time: int,
         api: CoinSocketAndRestAbstract,
-        data: tuple[str, str, str, str, str, str],
+        data: tuple[str],
     ) -> Coroutine[Any, Any, dict[str, Any] | None]:
         """
         Coin present price architecture
@@ -55,7 +56,8 @@ class CoinPresentPriceReponseAPI:
         """
         try:
             api_response = api.get_coin_all_info_price(coin_name=coin_symbol.upper())
-            market_time = int(datetime.datetime.now().timestamp())
+            # market_time = int(datetime.datetime.now().timestamp())
+            market_time: int = api_response[time]
             return CoinMarketData.from_api(
                 market=market,
                 time=market_time,
@@ -82,6 +84,7 @@ class CoinPresentPriceReponseAPI:
         market_info = self.market_env[market]
         return await self.__coin_present_architecture(
             market=f"{market}-{coin_symbol.upper()}",
+            time=market_info["timestamp"],
             coin_symbol=coin_symbol,
             api=market_info["api"],
             data=market_info["parameter"],
@@ -98,7 +101,7 @@ class CoinPresentPriceReponseAPI:
         while True:
             await asyncio.sleep(1)
             try:
-                tasks: list[Coroutine[Any, Any, dict[str, Any]]] = [
+                tasks: list = [
                     self.__get_market_present_price(
                         market=market, coin_symbol=coin_symbol
                     )
@@ -106,15 +109,15 @@ class CoinPresentPriceReponseAPI:
                 ]
                 market_result = await asyncio.gather(*tasks, return_exceptions=True)
                 # 스키마 정의
-                schema: dict[str, dict[str, Any]] = CoinMarket(
+                schema: TotalCoinMarketData = CoinMarket(
                     **dict(zip(self.market_env.keys(), market_result))
                 ).model_dump(mode="json")
-                # await KafkaMessageSender().produce_sending(
-                #     message=schema,
-                #     market_name="Total",
-                #     symbol=coin_symbol,
-                #     type_="RestDataIn",
-                # )
+                await KafkaMessageSender().produce_sending(
+                    message=schema,
+                    market_name="Total",
+                    symbol=coin_symbol,
+                    type_="RestDataIn",
+                )
 
                 await self.logging.data_log(exchange_name="Total", message=schema)
             except (TimeoutError, CancelledError, ValidationError) as error:
