@@ -25,8 +25,8 @@ def data_sending_start() -> None:
         ETH_AVERAGE_TOPIC_NAME,
         BTC_AVERAGE_TOPIC_NAME,
     ]
-    partition = [3] * 8
-    replication = [3] * 8
+    partition = [3] * len(topic)
+    replication = [3] * len(topic)
 
     return new_topic_initialization(
         topic=topic, partition=partition, replication_factor=replication
