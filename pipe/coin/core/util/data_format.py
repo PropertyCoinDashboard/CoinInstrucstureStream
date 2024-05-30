@@ -7,7 +7,7 @@ import datetime
 import pytz
 from typing import Any, Union
 from decimal import Decimal, ROUND_HALF_UP
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, ValidationError
 
 
 class CoinMarket(BaseModel):
@@ -20,6 +20,7 @@ class CoinMarket(BaseModel):
                 "upbit": {
                     "name": "upbit-ETH",
                     "timestamp": 1689633864,
+                    "coin_symbol": "BTC",
                     "data": {
                         "opening_price": 2455000.0,
                         "trade_price": 38100000.0
@@ -33,11 +34,23 @@ class CoinMarket(BaseModel):
             }
     """
 
-    upbit: dict[str, Union[str, int, dict[str, Decimal]]]
-    bithumb: dict[str, Union[str, int, dict[str, Decimal]]]
-    coinone: dict[str, Union[str, int, dict[str, Decimal]]]
-    korbit: dict[str, Union[str, int, dict[str, Decimal]]]
-    gopax: dict[str, Union[str, int, dict[str, Decimal]]]
+    upbit: Union[CoinMarketData, bool]
+    bithumb: Union[CoinMarketData, bool]
+    coinone: Union[CoinMarketData, bool]
+    korbit: Union[CoinMarketData, bool]
+    gopax: Union[CoinMarketData, bool]
+
+    def __init__(self, **data: Any):
+        super().__init__(
+            **{key: self.validate_exchange_data(value) for key, value in data.items()}
+        )
+
+    @staticmethod
+    def validate_exchange_data(value: Any) -> Union[CoinMarketData, bool]:
+        try:
+            return CoinMarketData.model_validate(value)
+        except ValidationError:
+            return False
 
 
 class PriceData(BaseModel):

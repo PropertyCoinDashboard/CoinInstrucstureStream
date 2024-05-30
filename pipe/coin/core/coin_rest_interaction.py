@@ -41,7 +41,7 @@ class CoinPresentPriceReponseAPI:
         time: int,
         api: CoinSocketAndRestAbstract,
         data: tuple[str],
-    ) -> Coroutine[Any, Any, dict[str, Any] | None]:
+    ) -> dict[str, Any] | None:
         """
         Coin present price architecture
 
@@ -70,7 +70,7 @@ class CoinPresentPriceReponseAPI:
 
     async def __get_market_present_price(
         self, market: str, coin_symbol: str
-    ) -> Coroutine[Any, Any, dict[str, Any] | None]:
+    ) -> dict[str, Any] | None:
         """
         Get market present price
 
@@ -82,13 +82,14 @@ class CoinPresentPriceReponseAPI:
             str: market data as a string
         """
         market_info = self.market_env[market]
-        return await self.__coin_present_architecture(
+        market_data_architecture = await self.__coin_present_architecture(
             market=f"{market}-{coin_symbol.upper()}",
             time=market_info["timestamp"],
             coin_symbol=coin_symbol,
             api=market_info["api"],
             data=market_info["parameter"],
         )
+        return market_data_architecture
 
     async def total_pull_request(self, coin_symbol: str) -> None:
         """
@@ -111,7 +112,8 @@ class CoinPresentPriceReponseAPI:
                 # 스키마 정의
                 schema: TotalCoinMarketData = CoinMarket(
                     **dict(zip(self.market_env.keys(), market_result))
-                ).model_dump(mode="json")
+                ).model_dump()
+
                 await KafkaMessageSender().produce_sending(
                     message=schema,
                     market_name="Total",
@@ -124,3 +126,72 @@ class CoinPresentPriceReponseAPI:
                 await self.logging.error_log(
                     "error", "Data transmission failed: %s", error
                 )
+
+
+# [
+#     {
+#         "market": "upbit-BTC",
+#         "time": 1717056305638,
+#         "coin_symbol": "BTC",
+#         "data": {
+#             "opening_price": Decimal("93910000.000"),
+#             "trade_price": Decimal("94262000.000"),
+#             "max_price": Decimal("94750000.000"),
+#             "min_price": Decimal("93620000.000"),
+#             "prev_closing_price": Decimal("93910000.000"),
+#             "acc_trade_volume_24h": Decimal("2706.340"),
+#         },
+#     },
+#     {
+#         "market": "bithumb-BTC",
+#         "time": 1717056306709,
+#         "coin_symbol": "BTC",
+#         "data": {
+#             "opening_price": Decimal("93701000.000"),
+#             "trade_price": Decimal("94185000.000"),
+#             "max_price": Decimal("94724000.000"),
+#             "min_price": Decimal("93280000.000"),
+#             "prev_closing_price": Decimal("93701000.000"),
+#             "acc_trade_volume_24h": Decimal("792.273"),
+#         },
+#     },
+#     {
+#         "market": "korbit-BTC",
+#         "time": 1717056300875,
+#         "coin_symbol": "BTC",
+#         "data": {
+#             "opening_price": Decimal("93992000.000"),
+#             "trade_price": Decimal("94224000.000"),
+#             "max_price": Decimal("94651000.000"),
+#             "min_price": Decimal("93100000.000"),
+#             "prev_closing_price": Decimal("94224000.000"),
+#             "acc_trade_volume_24h": Decimal("35.386"),
+#         },
+#     },
+#     {
+#         "market": "coinone-BTC",
+#         "time": 1717056306185,
+#         "coin_symbol": "BTC",
+#         "data": {
+#             "opening_price": Decimal("93999000.000"),
+#             "trade_price": Decimal("94236000.000"),
+#             "max_price": Decimal("94696000.000"),
+#             "min_price": Decimal("93100000.000"),
+#             "prev_closing_price": Decimal("94000000.000"),
+#             "acc_trade_volume_24h": Decimal("144.816"),
+#         },
+#     },
+#     {
+#         "market": "gopax-BTC",
+#         "time": 1717022495000,
+#         "coin_symbol": "BTC",
+#         "data": {
+#             "opening_price": Decimal("94500000.000"),
+#             "trade_price": Decimal("94554000.000"),
+#             "max_price": Decimal("94396000.000"),
+#             "min_price": Decimal("94554000.000"),
+#             "prev_closing_price": Decimal("69642625.142"),
+#             "acc_trade_volume_24h": Decimal("0.753"),
+#         },
+#     },
+# ]

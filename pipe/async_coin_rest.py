@@ -28,7 +28,7 @@ async def be_present_gether() -> None:
         asyncio.create_task(btc_present_start()),
         asyncio.create_task(eth_present_start()),
     ]
-    await asyncio.gather(*tasks, return_exceptions=True)
+    await asyncio.gather(*tasks, return_exceptions=False)
 
 
 async def data_sending_start() -> None:

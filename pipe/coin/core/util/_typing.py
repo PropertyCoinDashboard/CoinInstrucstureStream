@@ -22,6 +22,14 @@ ExchangeSocketDataTypeHints = dict[str, ExchangeSocketConfig]
 
 
 @dataclass
+class ExchangeData:
+    name: str
+    timestamp: str
+    coin_symbol: str
+    data: dict[str, Decimal]
+
+
+@dataclass
 class TotalCoinMarketData:
     """
     모든 마켓 타입 스키마 제작
@@ -29,8 +37,8 @@ class TotalCoinMarketData:
     - dict[str, Union[str, int, dict[str, Decimal]]]
     """
 
-    upbit: dict[str, Union[str, int, dict[str, Decimal]]]
-    bithumb: dict[str, Union[str, int, dict[str, Decimal]]]
-    coinone: dict[str, Union[str, int, dict[str, Decimal]]]
-    korbit: dict[str, Union[str, int, dict[str, Decimal]]]
-    gopax: dict[str, Union[str, int, dict[str, Decimal]]]
+    upbit: Union[ExchangeData, bool]
+    bithumb: Union[ExchangeData, bool]
+    coinone: Union[ExchangeData, bool]
+    korbit: Union[ExchangeData, bool]
+    gopax: Union[ExchangeData, bool]
