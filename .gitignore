@@ -167,3 +167,8 @@ poetry.lock
 pyproject.toml
 kafka-docker/kafka/
 kafka-docker/zookeeper/
+
+.DS_Store
+pipe/.DS_Store
+pipe/coin/.DS_Store
+pipe/coin/core/.DS_Store

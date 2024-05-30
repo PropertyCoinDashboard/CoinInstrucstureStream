@@ -3,7 +3,7 @@
 """
 
 import uuid
-from typing import Any
+from typing import Any, Coroutine
 from datetime import datetime, timezone
 
 from coin.core.util.util_func import header_to_json, get_symbol_collect_url
@@ -21,7 +21,9 @@ class UpbitRestAndSocket(CoinSocketAndRestAbstract):
         self.__websocket = get_symbol_collect_url("upbit", "socket")
         self.__rest = get_symbol_collect_url("upbit", "rest")
 
-    async def get_socket_parameter(self, symbol: str) -> list[dict[str, Any]]:
+    async def get_socket_parameter(
+        self, symbol: str
+    ) -> Coroutine[Any, Any, Coroutine[Any, Any, list[dict[str, Any]]]]:
         return [
             {"ticket": str(uuid.uuid4())},
             {
@@ -31,7 +33,7 @@ class UpbitRestAndSocket(CoinSocketAndRestAbstract):
             },
         ]
 
-    async def get_present_websocket(self, symbol: str) -> None:
+    async def get_present_websocket(self, symbol: str) -> Coroutine[Any, Any, None]:
         from coin.core.coin_socket_interaction import WebsocketConnectionManager as WCM
 
         return await WCM().websocket_to_json(
@@ -70,14 +72,16 @@ class BithumbRestAndSocket(CoinSocketAndRestAbstract):
         self.__websocket = get_symbol_collect_url("bithumb", "socket")
         self.__rest = get_symbol_collect_url("bithumb", "rest")
 
-    async def get_socket_parameter(self, symbol: str) -> list[dict[str, Any]]:
+    async def get_socket_parameter(
+        self, symbol: str
+    ) -> Coroutine[Any, Any, list[dict[str, Any]]]:
         return {
             "type": "ticker",
             "symbols": [f"{symbol.upper()}_KRW"],
             "tickTypes": ["MID"],
         }
 
-    async def get_present_websocket(self, symbol: str) -> None:
+    async def get_present_websocket(self, symbol: str) -> Coroutine[Any, Any, None]:
         from coin.core.coin_socket_interaction import WebsocketConnectionManager as WCM
 
         return await WCM().websocket_to_json(
@@ -122,7 +126,7 @@ class CoinoneRestAndSocket(CoinSocketAndRestAbstract):
             "topic": {"quote_currency": "KRW", "target_currency": f"{symbol}"},
         }
 
-    async def get_present_websocket(self, symbol: str) -> None:
+    async def get_present_websocket(self, symbol: str) -> Coroutine[Any, Any, None]:
         from coin.core.coin_socket_interaction import WebsocketConnectionManager as WCM
 
         return await WCM().websocket_to_json(
@@ -163,7 +167,9 @@ class KorbitRestAndSocket(CoinSocketAndRestAbstract):
         self.__websocket = get_symbol_collect_url("korbit", "socket")
         self.__rest = get_symbol_collect_url("korbit", "rest")
 
-    async def get_socket_parameter(self, symbol: str) -> list[dict[str, Any]]:
+    async def get_socket_parameter(
+        self, symbol: str
+    ) -> Coroutine[Any, Any, list[dict[str, Any]]]:
         return {
             "accessToken": None,
             "timestamp": int(datetime.now(timezone.utc).timestamp()),
@@ -171,7 +177,7 @@ class KorbitRestAndSocket(CoinSocketAndRestAbstract):
             "data": {"channels": [f"ticker:{symbol.lower()}_krw"]},
         }
 
-    async def get_present_websocket(self, symbol: str) -> None:
+    async def get_present_websocket(self, symbol: str) -> Coroutine[Any, Any, None]:
         from coin.core.coin_socket_interaction import WebsocketConnectionManager as WCM
 
         return await WCM().websocket_to_json(
@@ -211,10 +217,12 @@ class GoPaxRestAndSocket(CoinSocketAndRestAbstract):
         self.__websocket = get_symbol_collect_url("gopax", "socket")
         self.__rest = get_symbol_collect_url("gopax", "rest")
 
-    async def get_socket_parameter(self, symbol: str) -> list[dict[str, Any]]:
+    async def get_socket_parameter(
+        self, symbol: str
+    ) -> Coroutine[Any, Any, list[dict[str, Any]]]:
         pass
 
-    async def get_present_websocket(self, symbol: str) -> None:
+    async def get_present_websocket(self, symbol: str) -> Coroutine[Any, Any, None]:
         pass
 
     def get_coin_all_info_price(self, coin_name: str) -> dict[str, Any]:

@@ -45,6 +45,6 @@ COINONE_BTC_REAL_TOPIC_NAME = parser.get(
 # KAFKA
 BOOTSTRAP_SERVER = parser.get("KAFKA", "bootstrap_servers")
 SECURITY_PROTOCOL = parser.get("KAFKA", "security_protocol")
-MAX_BATCH_SIZE: int = parser.get("KAFKA", "max_batch_size")
-MAX_REQUEST_SIZE: int = parser.get("KAFKA", "max_request_size")
+MAX_BATCH_SIZE = parser.get("KAFKA", "max_batch_size")
+MAX_REQUEST_SIZE = parser.get("KAFKA", "max_request_size")
 ARCKS = parser.get("KAFKA", "acks")

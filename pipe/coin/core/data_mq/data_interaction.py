@@ -66,7 +66,7 @@ class KafkaMessageSender:
         self.logger = SocketLogCustomer(
             base_path=present_path, file_name="k_log", object_name="kafka"
         )  # 로그 출력을 위한 객체
-        self.except_list = defaultdict(list)
+        self.except_list: defaultdict[Any, list] = defaultdict(list)
 
     async def produce_sending(
         self,

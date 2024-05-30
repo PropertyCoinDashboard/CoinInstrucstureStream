@@ -21,7 +21,7 @@ path = Path(__file__).parent.parent
 class __MarketAPIFactory:
     """Factory for market APIs."""
 
-    _create: dict[str, dict[str, Any]] = {
+    _create: dict[str, Any] = {
         "upbit": UpbitRestAndSocket,
         "bithumb": BithumbRestAndSocket,
         "korbit": KorbitRestAndSocket,
@@ -30,7 +30,7 @@ class __MarketAPIFactory:
     }
 
     @classmethod
-    def market_load(cls, conn_type: str, *args, **kwargs):
+    def market_load(cls, conn_type: str, *args, **kwargs) -> Any:
         """
         거래소 API의 인스턴스를 생성합니다.
         """
