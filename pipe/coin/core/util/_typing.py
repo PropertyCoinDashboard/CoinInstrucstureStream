@@ -8,12 +8,10 @@ Timestamp = Union[str, int, float]
 
 
 class ExchangeRestConfig(TypedDict):
-    timestamp: Timestamp
     parameter: list[str]
 
 
 class ExchangeSocketConfig(TypedDict):
-    timestamp: Union[str, int, float]
     parameter: list[Union[str, float]]
 
 
@@ -24,7 +22,6 @@ ExchangeSocketDataTypeHints = dict[str, ExchangeSocketConfig]
 @dataclass
 class ExchangeData:
     name: str
-    timestamp: str
     coin_symbol: str
     data: dict[str, Decimal]
 
@@ -37,6 +34,7 @@ class TotalCoinMarketData:
     - dict[str, Union[str, int, dict[str, Decimal]]]
     """
 
+    time: int
     upbit: Union[ExchangeData, bool]
     bithumb: Union[ExchangeData, bool]
     coinone: Union[ExchangeData, bool]

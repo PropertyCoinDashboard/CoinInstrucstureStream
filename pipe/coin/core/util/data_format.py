@@ -3,8 +3,6 @@ Coin present data format architecture
 """
 
 from __future__ import annotations
-import datetime
-import pytz
 from typing import Any, Union
 from decimal import Decimal, ROUND_HALF_UP
 from pydantic import BaseModel, validator, ValidationError
@@ -17,9 +15,9 @@ class CoinMarket(BaseModel):
     Returns:
         - pydantic in JSON transformation \n
         >>> {
+                "timestamp": 1689633864,
                 "upbit": {
                     "name": "upbit-ETH",
-                    "timestamp": 1689633864,
                     "coin_symbol": "BTC",
                     "data": {
                         "opening_price": 2455000.0,
@@ -34,6 +32,7 @@ class CoinMarket(BaseModel):
             }
     """
 
+    timestamp: int
     upbit: Union[CoinMarketData, bool]
     bithumb: Union[CoinMarketData, bool]
     coinone: Union[CoinMarketData, bool]
@@ -41,9 +40,16 @@ class CoinMarket(BaseModel):
     gopax: Union[CoinMarketData, bool]
 
     def __init__(self, **data: Any):
-        super().__init__(
-            **{key: self.validate_exchange_data(value) for key, value in data.items()}
-        )
+        # 우선 timestamp 추출
+        timestamp = data.pop("timestamp", None)
+
+        # 거래소 데이터 검증 및 할당
+        exchange_data = {
+            key: self.validate_exchange_data(value) for key, value in data.items()
+        }
+
+        # 합쳐진 데이터를 사용하여 부모 클래스 초기화
+        super().__init__(timestamp=timestamp, **exchange_data)
 
     @staticmethod
     def validate_exchange_data(value: Any) -> Union[CoinMarketData, bool]:
@@ -91,7 +97,6 @@ class CoinMarketData(BaseModel):
     Returns:
         >>>  {
                 "market": "upbit-BTC",
-                "time": 1689659170616,
                 "coin_symbol": "BTC",
                 "data": {
                     "opening_price": 38761000.0,
@@ -105,34 +110,8 @@ class CoinMarketData(BaseModel):
     """
 
     market: str
-    time: int
     coin_symbol: str
     data: PriceData
-
-    @staticmethod
-    def __utc_time_create(time: str, local_timezone_str: str) -> int:
-        """_주어진 시간 문자열을 지정된 지역 시간대의 타임스탬프로 변환.
-        Args:
-            time (str): "%Y-%m-%dT%H:%M:%S.%fZ" 형식의 시간 문자열.
-            local_timezone_str (str): 지역 시간대 문자열. 예: "Asia/Seoul".
-
-        Return:
-            int: 지정된 지역 시간대의 타임스탬프."
-        """
-        try:
-            date_object = datetime.datetime.strptime(time, "%Y-%m-%dT%H:%M:%S.%fZ")
-        except ValueError:
-            raise ValueError("타임포맷 타입 체크 부탁 '%Y-%m-%dT%H:%M:%S.%fZ'")
-
-        try:
-            local_timezone = pytz.timezone(local_timezone_str)
-        except pytz.UnknownTimeZoneError:
-            raise ValueError("Unknown timezone:", local_timezone_str)
-
-        date_object_local = date_object.astimezone(local_timezone)
-        timestamp = int(date_object_local.timestamp()) * 1000
-
-        return timestamp
 
     @classmethod
     def _create_price_data(cls, api: dict[str, str], data: list[str]) -> PriceData:
@@ -152,7 +131,6 @@ class CoinMarketData(BaseModel):
     def from_api(
         cls,
         market: str,
-        time: int,
         coin_symbol: str,
         api: dict[str, Any],
         data: list[str],
@@ -160,7 +138,6 @@ class CoinMarketData(BaseModel):
         """다음과 같은 dictionary를 만들기 위한 pydantic json model architecture
         >>>  {
             "market": "upbit-BTC",
-            "time": 1689659170616,
             "coin_symbol": "BTC",
             "data": {
                 "opening_price": 38761000.0,
@@ -173,7 +150,6 @@ class CoinMarketData(BaseModel):
         }
         Args:
             market (str): 거래소 이름
-            time (int): 거래 시간
             coin_symbol (str): 심볼
             api (Mapping[str, Any]): 거래소 API
             data (list[str, str, str, str, str, str]): 사용할 파라미터 \n
@@ -181,17 +157,8 @@ class CoinMarketData(BaseModel):
             CoinMarketData: _description_
         """
         price_data: PriceData = cls._create_price_data(api=api, data=data)
-        if isinstance(time, int):
-            time = time
-        elif isinstance(time, str):
-            try:
-                time = int(time)
-            except (TypeError, ValueError):
-                time = CoinMarketData.__utc_time_create(time, "Asia/Seoul")
-
         return cls(
             market=market,
-            time=time,
             coin_symbol=coin_symbol,
             data=price_data,
         )
