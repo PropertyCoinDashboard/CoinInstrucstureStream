@@ -114,12 +114,12 @@ class CoinPresentPriceReponseAPI:
                     timestamp=current_timestamp_int,
                     **dict(zip(self.market_env.keys(), market_result)),
                 ).model_dump()
-                # await KafkaMessageSender().produce_sending(
-                #     message=schema,
-                #     market_name="Total",
-                #     symbol=coin_symbol,
-                #     type_="RestDataIn",
-                # )
+                await KafkaMessageSender().produce_sending(
+                    message=schema,
+                    market_name="Total",
+                    symbol=coin_symbol,
+                    type_="RestDataIn",
+                )
 
                 await self.logging.data_log(exchange_name="Total", message=schema)
             except (TimeoutError, CancelledError, ValidationError) as error:
