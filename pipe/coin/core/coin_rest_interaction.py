@@ -22,9 +22,6 @@ from coin.core.data_mq.data_interaction import KafkaMessageSender
 
 
 present_path = Path(__file__).parent
-current_datetime = datetime.datetime.now()
-# timestamp를 int로 변환
-current_timestamp_int = int(current_datetime.timestamp())
 
 
 class CoinPresentPriceReponseAPI:
@@ -100,6 +97,10 @@ class CoinPresentPriceReponseAPI:
             topic_name (str): topic name
         """
         while True:
+            current_datetime = datetime.datetime.now()
+            # timestamp를 int로 변환
+            current_timestamp_int = int(current_datetime.timestamp())
+
             await asyncio.sleep(1)
             try:
                 tasks: list = [
