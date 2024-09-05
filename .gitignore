@@ -172,3 +172,7 @@ kafka-docker/zookeeper/
 pipe/.DS_Store
 pipe/coin/.DS_Store
 pipe/coin/core/.DS_Store
+
+kafka-docker/.kafkalogging
+kafka-docker/visualization/grafana/grafana.db/
+kafka-docker/visualization/prometheus/volume/data/
