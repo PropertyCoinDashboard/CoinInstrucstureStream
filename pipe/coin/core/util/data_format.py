@@ -5,7 +5,7 @@ Coin present data format architecture
 from __future__ import annotations
 from typing import Any, Union
 from decimal import Decimal, ROUND_HALF_UP
-from pydantic import BaseModel, validator, ValidationError
+from pydantic import BaseModel, field_validator, ValidationError
 
 
 class CoinMarket(BaseModel):
@@ -39,15 +39,14 @@ class CoinMarket(BaseModel):
     korbit: Union[CoinMarketData, bool]
     gopax: Union[CoinMarketData, bool]
 
-    def __init__(self, **data: Any):
+    def __init__(self, **data: CoinMarket) -> None:
         # 우선 timestamp 추출
         timestamp = data.pop("timestamp", None)
 
         # 거래소 데이터 검증 및 할당
-        exchange_data = {
+        exchange_data: dict[int, Union[CoinMarketData, bool]] = {
             key: self.validate_exchange_data(value) for key, value in data.items()
         }
-
         # 합쳐진 데이터를 사용하여 부모 클래스 초기화
         super().__init__(timestamp=timestamp, **exchange_data)
 
@@ -76,7 +75,7 @@ class PriceData(BaseModel):
     prev_closing_price: Decimal
     acc_trade_volume_24h: Decimal
 
-    @validator("*", pre=True)
+    @field_validator("*")
     @classmethod
     def round_three_place_adjust(cls, value: Any) -> Decimal:
         """반올림
@@ -118,9 +117,9 @@ class CoinMarketData(BaseModel):
         try:
             return PriceData(
                 opening_price=Decimal(api[data[0]]),
-                trade_price=Decimal(api[data[1]]),
                 max_price=Decimal(api[data[2]]),
                 min_price=Decimal(api[data[3]]),
+                trade_price=Decimal(api[data[1]]),
                 prev_closing_price=Decimal(api[data[4]]),
                 acc_trade_volume_24h=Decimal(api[data[5]]),
             )

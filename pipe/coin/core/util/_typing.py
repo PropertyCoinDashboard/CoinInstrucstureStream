@@ -17,6 +17,7 @@ class ExchangeSocketConfig(TypedDict):
 
 ExchangeRestDataTypeHints = dict[str, ExchangeRestConfig]
 ExchangeSocketDataTypeHints = dict[str, ExchangeSocketConfig]
+PriceData = dict[str, Decimal]
 
 
 @dataclass

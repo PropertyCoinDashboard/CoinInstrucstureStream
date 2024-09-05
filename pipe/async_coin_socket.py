@@ -3,11 +3,11 @@ from coin.core.coin_socket_interaction import CoinPresentPriceWebsocket
 
 
 async def coin_present_websocket_btc() -> None:
-    await CoinPresentPriceWebsocket().coin_present_architecture("BTC")
+    await CoinPresentPriceWebsocket("BTC").coin_present_architecture()
 
 
 async def coin_present_websocket_eth() -> None:
-    await CoinPresentPriceWebsocket().coin_present_architecture("ETH")
+    await CoinPresentPriceWebsocket("ETH").coin_present_architecture()
 
 
 async def coin_present_websocket() -> None:

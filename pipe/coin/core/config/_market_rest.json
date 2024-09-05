@@ -19,16 +19,6 @@
             "units_traded_24H"
         ]
     },
-    "korbit": {
-        "parameter": [
-            "open",
-            "last",
-            "high",
-            "low",
-            "last",
-            "volume"
-        ]
-    },
     "coinone": {
         "parameter": [
             "first",
@@ -41,11 +31,21 @@
     },
     "gopax": {
         "parameter": [
+            "close",
             "price",
-            "ask",
             "bid",
             "ask",
-            "quoteVolume",
+            "open",
+            "volume"
+        ]
+    },
+    "korbit": {
+        "parameter": [
+            "last",
+            "open",
+            "bid",
+            "ask",
+            "low",
             "volume"
         ]
     }

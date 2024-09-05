@@ -26,7 +26,7 @@ class CoinSocketAndRestAbstract(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def get_coin_all_info_price(self, coin_name: str) -> dict[str, Any]:
+    async def get_coin_all_info_price(self, coin_name: str) -> dict[str, Any]:
         """
         Subject:
             - 코인 인덱스 가격 정보 \n

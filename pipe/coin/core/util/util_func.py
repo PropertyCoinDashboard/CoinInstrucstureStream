@@ -2,7 +2,7 @@
 유틸 함수
 """
 
-import requests
+import aiohttp
 from typing import Any
 from coin.core.setting.properties import (
     UPBIT_URL,
@@ -33,20 +33,18 @@ def parse_uri(uri: str) -> str:
     return uri.split("//")[1].split(".")[1]
 
 
-def header_to_json(url: str) -> Any:
-    """
-    json
-    """
+async def async_source_request(url: str) -> dict:
+    """위에 쓰고 있는 함수 본체"""
     headers: dict[str, str] = {"accept": "application/json"}
-    response = requests.get(url, headers=headers, timeout=60)
 
-    match response.status_code:
-        case 200:
-            return response.json()
-        case _:
-            raise requests.exceptions.RequestException(
-                f"API Request에 실패하였습니다 status code --> {response.status_code}"
-            )
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url=url, headers=headers, timeout=60) as response:
+            match response.status:
+                case 200:
+                    return await response.json()
+                case _:
+                    print(f"API Request에 실패하였습니다 --> {response.status}")
+                    return None
 
 
 def get_symbol_collect_url(market: str, type_: str) -> str:

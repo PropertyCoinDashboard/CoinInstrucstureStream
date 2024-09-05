@@ -12,19 +12,19 @@ from pathlib import Path
 
 import websockets
 import tracemalloc
-from typing import Any, Coroutine
+from typing import Any
 from collections import defaultdict
 
 import asyncio
 from asyncio.exceptions import TimeoutError, CancelledError
 
-
+from coin.core.util._typing import PriceData, ExchangeData
 from coin.core.util.util_func import parse_uri, market_name_extract
 from coin.core.util.data_format import CoinMarketData
-from coin.core.setting.factory_api import load_json
 from coin.core.util.create_log import SocketLogCustomer
 
 from coin.core.data_mq.data_interaction import KafkaMessageSender
+from coin.core.setting.factory_api import load_json
 from coin.core.abstract.stream_abstract import (
     MessageDataPreprocessingAbstract,
     WebsocketConnectionAbstract,
@@ -115,7 +115,7 @@ class WebsocketConnectionManager(WebsocketConnectionAbstract):
                 await self.message_preprocessing.put_message_to_logging(
                     message, uri, symbol
                 )
-                # await asyncio.sleep(1.0)
+                await asyncio.sleep(1.0)
 
             except asyncio.TimeoutError:
                 await self.message_logger.error_log(
@@ -210,11 +210,12 @@ class MessageDataPreprocessing(MessageDataPreprocessingAbstract):
                 pass
             else:
                 return message["data"]
+
         return message
 
     async def process_message(
         self, market: str, message: dict, symbol: str
-    ) -> dict[str, Any]:
+    ) -> ExchangeData:
         """
         market_socket.json 에서 설정된 값 추출
                 Args:
@@ -226,11 +227,11 @@ class MessageDataPreprocessing(MessageDataPreprocessingAbstract):
                         -> 코인심볼
 
                 Returns:
-                    dict[str, Any]:
+                    ExchangeData:
                         >>> 2023-08-03 20:07:10,865 - total - INFO - {
                             'market': 'upbit-BTC',
-                            'time': 1691060828128,
                             'coin_symbol': 'BTC',
+                            'time': "~",
                             'data': {
                                 'opening_price': '38358000.000',
                                 'trade_price': '38477000.000',
@@ -242,19 +243,19 @@ class MessageDataPreprocessing(MessageDataPreprocessingAbstract):
                             }
         """
         processed_message: dict = await self.process_exchange(market, message)
-        time: str = processed_message[self.market[market]["timestamp"]]
         parameter: list = list(self.market[market]["parameter"])
-        schema_key: dict[str, Any] = {
+        time: str = processed_message[self.market[market]["timestamp"]]
+        schema_key: PriceData = {
             key: processed_message[key] for key in processed_message if key in parameter
         }
 
-        return await self.unify_schema(market, symbol, time, schema_key, parameter)
+        return await self.unify_schema(market, time, symbol, schema_key, parameter)
 
     async def unify_schema(
         self,
         market: str,
+        time: int,
         symbol: str,
-        time: str,
         schema_key: dict,
         parameter: list,
     ) -> dict[str, Any]:
@@ -265,8 +266,6 @@ class MessageDataPreprocessing(MessageDataPreprocessingAbstract):
                 -> 거래소 이름
             symbol (str):
                 -> 코인심볼
-            time (str):
-                -> 시간
             schema_key (dict):
                 -> 전처리할 스키마 대상
             parameter (list):
@@ -276,7 +275,6 @@ class MessageDataPreprocessing(MessageDataPreprocessingAbstract):
             dict[str, Any]:
                 >>> {
                         'market': 'upbit-BTC',
-                        'time': 1691060828128,
                         'coin_symbol': 'BTC',
                         'data': {
                             'opening_price': '38358000.000',
@@ -291,7 +289,6 @@ class MessageDataPreprocessing(MessageDataPreprocessingAbstract):
         """
         return CoinMarketData.from_api(
             market=f"{market}-{symbol.upper()}",
-            time=time,
             coin_symbol=symbol.upper(),
             api=schema_key,
             data=parameter,
@@ -309,13 +306,14 @@ class MessageDataPreprocessing(MessageDataPreprocessingAbstract):
             symbol (str):
                 -> 코인 심볼
         """
-        market = parse_uri(uri)
+        market: str = parse_uri(uri)
         message = json.loads(message)
 
         # filter
-        matches_all = any(ignore in message for ignore in self.register_message)
+        matches_all: bool = any(ignore in message for ignore in self.register_message)
         if matches_all:
             await self.p.register_connection(message=message)
+
         try:
             market_schema: dict[str, Any] = await self.process_message(
                 market, message, symbol
@@ -345,19 +343,42 @@ class CoinPresentPriceWebsocket:
     Coin Stream
     """
 
-    def __init__(self, market_type: str = "socket") -> None:
+    def __init__(
+        self, symbol: str, market: str = "all", market_type: str = "socket"
+    ) -> None:
+        """socket 시작
+
+        Args:
+            symbol (str): 긁어올 코인
+            market (str, optional): 활성화할 마켓 . Defaults to "all" 이면 모든 거래소 선택.
+            market_type (str, optional): Defaults to "socket".
+        """
         tracemalloc.start()
+        self.market = market
+        self.symbol = symbol
         self.market_env = load_json(market_type)
         self.logger = SocketLogCustomer()
 
-    async def coin_present_architecture(self, symbol: str) -> Coroutine[Any, Any, None]:
+    async def select_websocket(self) -> list:
+        """마켓 선택"""
+        parameter = self.market_env
+        match self.market:
+            case "all":
+                return [
+                    parameter[i]["api"].get_present_websocket(self.symbol)
+                    for i in parameter
+                ]
+            case _:
+                return [
+                    parameter[self.market]["api"].get_present_websocket(self.symbol)
+                ]
+
+    async def coin_present_architecture(self) -> None:
+        """실행 지점"""
         try:
-            coroutines: list[Any] = [
-                self.market_env[i]["api"].get_present_websocket(symbol)
-                for i in self.market_env
-            ]
+            coroutines: list[Any] = await self.select_websocket()
             await asyncio.gather(*coroutines, return_exceptions=True)
         except (TimeoutError, CancelledError) as error:
-            self.logger.error_log(
+            await self.logger.error_log(
                 error_type="worker", message=f"진행하지 못했습니다 --> {error}"
             )

@@ -2,11 +2,12 @@
 코인 정보 추상화
 """
 
+import asyncio
 import uuid
 from typing import Any, Coroutine
 from datetime import datetime, timezone
 
-from coin.core.util.util_func import header_to_json, get_symbol_collect_url
+from coin.core.util.util_func import async_source_request, get_symbol_collect_url
 from coin.core.abstract.ubkc_market_abstract import CoinSocketAndRestAbstract
 
 
@@ -18,8 +19,8 @@ class UpbitRestAndSocket(CoinSocketAndRestAbstract):
     """
 
     def __init__(self) -> None:
-        self.__websocket = get_symbol_collect_url("upbit", "socket")
-        self.__rest = get_symbol_collect_url("upbit", "rest")
+        self._websocket = get_symbol_collect_url("upbit", "socket")
+        self._rest = get_symbol_collect_url("upbit", "rest")
 
     async def get_socket_parameter(
         self, symbol: str
@@ -29,7 +30,7 @@ class UpbitRestAndSocket(CoinSocketAndRestAbstract):
             {
                 "type": "ticker",
                 "codes": [f"KRW-{symbol.upper()}"],
-                "isOnlyRealtime": True,
+                "isOnlySnapshot": True,
             },
         ]
 
@@ -37,12 +38,12 @@ class UpbitRestAndSocket(CoinSocketAndRestAbstract):
         from coin.core.coin_socket_interaction import WebsocketConnectionManager as WCM
 
         return await WCM().websocket_to_json(
-            uri=self.__websocket,
+            uri=self._websocket,
             subscribe_fmt=await self.get_socket_parameter(symbol=symbol),
             symbol=symbol,
         )
 
-    def get_coin_all_info_price(self, coin_name: str) -> dict[str, Any]:
+    async def get_coin_all_info_price(self, coin_name: str) -> dict[str, Any]:
         """
         Subject:
             - upbit 코인 현재가\n
@@ -56,9 +57,10 @@ class UpbitRestAndSocket(CoinSocketAndRestAbstract):
                 ...
             }
         """
-        return header_to_json(f"{self.__rest}/ticker?markets=KRW-{coin_name.upper()}")[
-            0
-        ]
+        data = await async_source_request(
+            f"{self._rest}/ticker?markets=KRW-{coin_name.upper()}"
+        )
+        return data[0]
 
 
 class BithumbRestAndSocket(CoinSocketAndRestAbstract):
@@ -69,8 +71,8 @@ class BithumbRestAndSocket(CoinSocketAndRestAbstract):
     """
 
     def __init__(self) -> None:
-        self.__websocket = get_symbol_collect_url("bithumb", "socket")
-        self.__rest = get_symbol_collect_url("bithumb", "rest")
+        self._websocket = get_symbol_collect_url("bithumb", "socket")
+        self._rest = get_symbol_collect_url("bithumb", "rest")
 
     async def get_socket_parameter(
         self, symbol: str
@@ -85,12 +87,12 @@ class BithumbRestAndSocket(CoinSocketAndRestAbstract):
         from coin.core.coin_socket_interaction import WebsocketConnectionManager as WCM
 
         return await WCM().websocket_to_json(
-            uri=self.__websocket,
+            uri=self._websocket,
             subscribe_fmt=await self.get_socket_parameter(symbol=symbol),
             symbol=symbol,
         )
 
-    def get_coin_all_info_price(self, coin_name: str) -> dict[str, Any]:
+    async def get_coin_all_info_price(self, coin_name: str) -> dict[str, Any]:
         """
         Subject:
             - bithum 코인 현재가\n
@@ -105,7 +107,10 @@ class BithumbRestAndSocket(CoinSocketAndRestAbstract):
                 ...
             }
         """
-        return header_to_json(f"{self.__rest}/ticker/{coin_name.upper()}_KRW")["data"]
+        data = await async_source_request(
+            f"{self._rest}/ticker/{coin_name.upper()}_KRW"
+        )
+        return data["data"]
 
 
 class CoinoneRestAndSocket(CoinSocketAndRestAbstract):
@@ -116,8 +121,8 @@ class CoinoneRestAndSocket(CoinSocketAndRestAbstract):
     """
 
     def __init__(self) -> None:
-        self.__websocket = get_symbol_collect_url("coinone", "socket")
-        self.__rest = get_symbol_collect_url("coinone", "rest")
+        self._websocket = get_symbol_collect_url("coinone", "socket")
+        self._rest = get_symbol_collect_url("coinone", "rest")
 
     async def get_socket_parameter(self, symbol: str) -> dict[str, str, dict[str, str]]:
         return {
@@ -126,16 +131,16 @@ class CoinoneRestAndSocket(CoinSocketAndRestAbstract):
             "topic": {"quote_currency": "KRW", "target_currency": f"{symbol}"},
         }
 
-    async def get_present_websocket(self, symbol: str) -> Coroutine[Any, Any, None]:
-        from coin.core.coin_socket_interaction import WebsocketConnectionManager as WCM
+    async def get_present_websocket(self, symbol: str) -> None:
+        from core.coin_socket_interaction import WebsocketConnectionManager as WCM
 
         return await WCM().websocket_to_json(
-            uri=self.__websocket,
+            uri=self._websocket,
             subscribe_fmt=await self.get_socket_parameter(symbol=symbol),
             symbol=symbol,
         )
 
-    def get_coin_all_info_price(self, coin_name: str) -> dict[str, Any]:
+    async def get_coin_all_info_price(self, coin_name: str) -> dict[str, Any]:
         """
         Subject:
             - coinone 코인 현재가 추출\n
@@ -151,9 +156,10 @@ class CoinoneRestAndSocket(CoinSocketAndRestAbstract):
                 ...
             }
         """
-        return header_to_json(
-            f"{self.__rest}/ticker_new/KRW/{coin_name.upper()}?additional_data=true"
-        )["tickers"][0]
+        data = await async_source_request(
+            f"{self._rest}/ticker_new/KRW/{coin_name.upper()}?additional_data=true"
+        )
+        return data["tickers"][0]
 
 
 class KorbitRestAndSocket(CoinSocketAndRestAbstract):
@@ -164,8 +170,8 @@ class KorbitRestAndSocket(CoinSocketAndRestAbstract):
     """
 
     def __init__(self) -> None:
-        self.__websocket = get_symbol_collect_url("korbit", "socket")
-        self.__rest = get_symbol_collect_url("korbit", "rest")
+        self._websocket = get_symbol_collect_url("korbit", "socket")
+        self._rest = get_symbol_collect_url("korbit", "rest")
 
     async def get_socket_parameter(
         self, symbol: str
@@ -177,16 +183,16 @@ class KorbitRestAndSocket(CoinSocketAndRestAbstract):
             "data": {"channels": [f"ticker:{symbol.lower()}_krw"]},
         }
 
-    async def get_present_websocket(self, symbol: str) -> Coroutine[Any, Any, None]:
-        from coin.core.coin_socket_interaction import WebsocketConnectionManager as WCM
+    async def get_present_websocket(self, symbol: str) -> None:
+        from core.coin_socket_interaction import WebsocketConnectionManager as WCM
 
         return await WCM().websocket_to_json(
-            uri=self.__websocket,
+            uri=self._websocket,
             subscribe_fmt=await self.get_socket_parameter(symbol=symbol),
             symbol=symbol,
         )
 
-    def get_coin_all_info_price(self, coin_name: str) -> dict[str, Any]:
+    async def get_coin_all_info_price(self, coin_name: str) -> dict[str, Any]:
         """
         Subject:
             - korbit 코인 현재가 추출\n
@@ -201,8 +207,8 @@ class KorbitRestAndSocket(CoinSocketAndRestAbstract):
                 ...
             }
         """
-        return header_to_json(
-            f"{self.__rest}/ticker/detailed?currency_pair={coin_name.lower()}_krw"
+        return await async_source_request(
+            f"{self._rest}/ticker/detailed?currency_pair={coin_name.lower()}_krw"
         )
 
 
@@ -214,8 +220,8 @@ class GoPaxRestAndSocket(CoinSocketAndRestAbstract):
     """
 
     def __init__(self) -> None:
-        self.__websocket = get_symbol_collect_url("gopax", "socket")
-        self.__rest = get_symbol_collect_url("gopax", "rest")
+        self._websocket = get_symbol_collect_url("gopax", "socket")
+        self._rest = get_symbol_collect_url("gopax", "rest")
 
     async def get_socket_parameter(
         self, symbol: str
@@ -225,24 +231,24 @@ class GoPaxRestAndSocket(CoinSocketAndRestAbstract):
     async def get_present_websocket(self, symbol: str) -> Coroutine[Any, Any, None]:
         pass
 
-    def get_coin_all_info_price(self, coin_name: str) -> dict[str, Any]:
-        """
-        Subject:
-            - gopax 코인 현재가 추출\n
-        Parameter:
-            - coin_name (str) : 코인이름\n
-        Returns:
-            >>> {
-                    "price": 15393000,                   # 오더북 상의 현재 가격
-                    "ask": 15397000,                     # 오더북 상의 현재 가장 낮은 매도 가격
-                    "askVolume": 0.56,                   # 오더북 상의 현재 가장 낮은 매도 가격의 수량
-                    "bid": 15393000,                     # 오더북 상의 현재 가장 높은 매수 가격
-                    "bidVolume": 1.9513,                 # 오더북 상의 현재 가장 높은 매수 가격의 수량
-                    "volume": 487.43035427,              # 최근 24시간 누적 거래량 (base 자산 단위로 이 예시에서는 BTC)
-                    "quoteVolume": 7319576689.34135,     # 최근 24시간 누적 거래량 (quote 자산 단위로 이 예시에서는 KRW)
-                    "time": "2020-10-28T02:05:55.958Z"   # 티커 최근 갱신 시간
-                    }
-        """
-        return header_to_json(
-            f"{self.__rest}/trading-pairs/{coin_name.upper()}-KRW/ticker"
+    async def get_coin_all_info_type(self, coin_name: str, endpoint: str) -> dict[str]:
+        return await async_source_request(
+            f"{self._rest}/trading-pairs/{coin_name.upper()}-KRW/{endpoint}"
         )
+
+    async def get_coin_all_info_price(self, coin_name: str) -> dict[str, int]:
+        # fmt: off
+        async def date_prepros(process: dict[str, int], element: set[str]) -> dict[str, int]:
+            return {key: value for key, value in process.items() if key in element}
+
+        price_data = self.get_coin_all_info_type(coin_name, "stats")
+        ticker_task = self.get_coin_all_info_type(coin_name, "ticker")
+        price, ticker = await asyncio.gather(price_data, ticker_task)
+
+        relevant_keys = {"open", "close", "price", "bid", "ask", "volume"}
+        stats = await date_prepros(price, relevant_keys)
+        present = await date_prepros(ticker, relevant_keys)
+        stats.update(present)
+
+        c = ["close", "price", "bid", "ask", "open", "volume"]
+        return dict(sorted(stats.items(), key=lambda n: c.index(n[0])))
