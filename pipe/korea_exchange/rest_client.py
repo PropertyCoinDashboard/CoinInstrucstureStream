@@ -2,25 +2,22 @@
 Coin async present price kafka data streaming 
 """
 
+import logging
 import datetime
 import asyncio
-from asyncio.exceptions import CancelledError
 
-from pathlib import Path
 from typing import Any
-from .util._typing import TotalCoinMarketData
+from common.core.types import KoreaCoinMarketData, ExchangeData
+from common.utils.logger import AsyncLogger
 
 from pydantic.errors import PydanticUserError
-from pydantic_core._pydantic_core import ValidationError
+from pydantic import ValidationError
 
-from coin.core.ubkc_market import UpbitRestAndSocket
-from coin.core.setting.factory_api import load_json
-from coin.core.util.data_format import CoinMarket, CoinMarketData
-from coin.core.util.create_log import SocketLogCustomer
-from coin.core.data_mq.data_interaction import KafkaMessageSender
+from korea_exchange.driver.rest_korea_exchange import UpbitRest
+from korea_exchange.config.json_param_load import load_json
+from korea_exchange.util.data_format import CoinMarket, CoinMarketData
 
-
-present_path = Path(__file__).parent
+# from coin.core.data_mq.data_interaction import KafkaMessageSender
 
 
 class CoinPresentPriceReponseAPI:
@@ -30,9 +27,7 @@ class CoinPresentPriceReponseAPI:
 
     def __init__(self) -> None:
         self.market_env = load_json("rest")
-        self.logging = SocketLogCustomer(
-            base_path=Path(__file__).parent, file_name="data", object_name="rest"
-        )
+        self.logging = AsyncLogger(target="rest", log_file="rest.log")
 
     async def _coin_present_architecture(
         self,
@@ -40,7 +35,7 @@ class CoinPresentPriceReponseAPI:
         coin_symbol: str,
         api: Any,
         data: tuple[str],
-    ) -> dict[str, Any] | None:
+    ) -> ExchangeData | None:
         """
         Coin present price architecture
 
@@ -64,7 +59,7 @@ class CoinPresentPriceReponseAPI:
                 data=data,
             ).model_dump()
         except (PydanticUserError, ValidationError) as error:
-            self.logging.error_log("error", "Exception occurred: %s", error)
+            self.logging.log_message_sync(logging.ERROR, error)
 
     async def _get_market_present_price(
         self, market: str, coin_symbol: str
@@ -97,7 +92,7 @@ class CoinPresentPriceReponseAPI:
             topic_name (str): topic name
         """
         while True:
-            api_response_time = await UpbitRestAndSocket().get_coin_all_info_price(
+            api_response_time = await UpbitRest().get_coin_all_info_price(
                 coin_name=coin_symbol.upper()
             )
             api_response_time = api_response_time["timestamp"]
@@ -122,22 +117,23 @@ class CoinPresentPriceReponseAPI:
                 market_result = await asyncio.gather(*tasks, return_exceptions=True)
 
                 # 스키마 정의
-                schema: TotalCoinMarketData = CoinMarket(
+                schema: KoreaCoinMarketData = CoinMarket(
                     timestamp=api_response_time,
                     **dict(zip(self.market_env.keys(), market_result)),
                 ).model_dump()
+                # user_ids = random.randint(1, 5)  # 1에서 100 사이의 랜덤 번호를 생성
 
                 # await KafkaMessageSender().produce_sending(
                 #     message=schema,
+                #     key=f"Total_{user_ids}",
                 #     market_name="Total",
                 #     symbol=coin_symbol,
                 #     type_="RestDataIn",
                 # )
 
-                await self.logging.data_log(exchange_name="Total", message=schema)
+                self.logging.log_message_sync(logging.INFO, message=schema)
             except Exception as error:
-                print(error)
-                await self.logging.error_log(
-                    "error", "Data transmission failed: %s", error
+                await self.logging.log_message_sync(
+                    logging.ERROR, f"Data transmission failed: {error}"
                 )
                 continue

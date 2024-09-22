@@ -11,25 +11,14 @@
         ]
     },
     "bithumb": {
-        "timestamp": "time",
+        "timestamp": "trade_timestamp",
         "parameter": [
-            "openPrice",
-            "closePrice",
-            "highPrice",
-            "lowPrice",
-            "prevClosePrice",
-            "volume"
-        ]
-    },
-    "korbit": {
-        "timestamp": "timestamp",
-        "parameter": [
-            "open",
-            "last",
-            "high",
-            "low",
-            "ask",
-            "volume"
+            "opening_price",
+            "trade_price",
+            "high_price",
+            "low_price",
+            "prev_closing_price",
+            "acc_trade_volume_24h"
         ]
     },
     "coinone": {

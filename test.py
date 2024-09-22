@@ -1,9 +1,29 @@
+# import asyncio
+# from korea_exchange.websocket_client import CoinPresentPriceWebsocket
+
+
+# async def coin_present_websocket_btc() -> None:
+#     await CoinPresentPriceWebsocket("BTC").coin_present_architecture()
+
+
+# async def coin_present_websocket() -> None:
+#     task = [
+#         asyncio.create_task(coin_present_websocket_btc()),
+#         # asyncio.create_task(coin_present_websocket_eth()),
+#     ]
+#     await asyncio.gather(*task, return_exceptions=False)
+
+
+# if __name__ == "__main__":
+#     asyncio.run(coin_present_websocket())
 """
 실시간 테스트 
 """
 
 import asyncio
-from coin.core.coin_rest_interaction import CoinPresentPriceReponseAPI
+from korea_exchange.rest_client import CoinPresentPriceReponseAPI
+
+# from .core.coin_rest_interaction import CoinPresentPriceReponseAPI
 
 
 async def btc_present_start() -> None:

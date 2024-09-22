@@ -9,7 +9,7 @@ from coin.core.setting.properties import (
     KORBIT_BTC_REAL_TOPIC_NAME,
     COINONE_BTC_REAL_TOPIC_NAME,
     SOCKET_BTC_AVERAGE_TOPIC_NAME,
-    SOCKET_ETH_AVERAGE_TOPIC_NAME
+    SOCKET_ETH_AVERAGE_TOPIC_NAME,
 )
 
 
@@ -27,9 +27,9 @@ def data_sending_start() -> None:
         REST_ETH_AVERAGE_TOPIC_NAME,
         REST_BTC_AVERAGE_TOPIC_NAME,
         SOCKET_BTC_AVERAGE_TOPIC_NAME,
-        SOCKET_ETH_AVERAGE_TOPIC_NAME
+        SOCKET_ETH_AVERAGE_TOPIC_NAME,
     ]
-    partition = [3] * len(topic)
+    partition = [4] * len(topic)
     replication = [3] * len(topic)
 
     return new_topic_initialization(
@@ -38,7 +38,4 @@ def data_sending_start() -> None:
 
 
 if __name__ == "__main__":
-    try:
-        delete_all_topics()
-    except ValueError:
-        data_sending_start()
+    data_sending_start()

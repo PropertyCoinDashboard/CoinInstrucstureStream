@@ -37,7 +37,6 @@ class CoinMarket(BaseModel):
     bithumb: Union[CoinMarketData, bool]
     coinone: Union[CoinMarketData, bool]
     korbit: Union[CoinMarketData, bool]
-    gopax: Union[CoinMarketData, bool]
 
     def __init__(self, **data: CoinMarket) -> None:
         # 우선 timestamp 추출

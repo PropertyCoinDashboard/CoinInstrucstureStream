@@ -1,14 +1,10 @@
 requests
 pandas
 numpy
-scikit-learn
-pyspark==3.3.0
 confluent-kafka
-uvicorn
-fastapi
 pydantic
 websocket
 websocket-client
 aiokafka
-jinja2
-uvicorn[standard]
+cctx
+

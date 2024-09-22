@@ -29,16 +29,6 @@
             "target_volume"
         ]
     },
-    "gopax": {
-        "parameter": [
-            "close",
-            "price",
-            "bid",
-            "ask",
-            "open",
-            "volume"
-        ]
-    },
     "korbit": {
         "parameter": [
             "last",
